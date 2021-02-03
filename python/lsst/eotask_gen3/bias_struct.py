@@ -14,7 +14,7 @@ from .utils import REGION_KEYS, REGION_NAMES, REGION_LABELS,\
     get_geom_regions, get_amp_list, get_image_frames_2d, array_struct, unbias_amp
 
 
-__all__ = ["BiasStructTask", "BiasStructTaskConfig"]
+__all__ = ["BiasStructTask", "BiasStructTaskConfig", "BiasStructStatsTask", "BiasStructStatsTaskConfig"]
 
 
 class BiasStructConnections(pipeBase.PipelineTaskConnections,
@@ -152,3 +152,162 @@ class BiasStructTask(pipeBase.PipelineTask,
                 data[framekey_col][key_str] = struct['cols']
 
 
+
+class BiasStructStatsConnections(pipeBase.PipelineTaskConnections,
+                                     dimensions=("instrument")):
+    """Parameters controlling the measurement of background statistics.
+    """
+    inputBiasStruct_s_row = cT.Input(
+        name="biasStruct_serial_row",
+        doc="Table of row-wise bias structure in serial overscan",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    inputBiasStruct_p_row = cT.Input(
+        name="biasStruct_parallel_row",
+        doc="Table of row-wise bias structure in parallel overscan",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    inputBiasStruct_i_row = cT.Input(
+        name="biasStruct_image_row",
+        doc="Table of row-wise bias structure in image region",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    inputBiasStruct_s_col = cT.Input(
+        name="biasStruct_serial_col",
+        doc="Table of col-wise bias structure in serial overscan",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    inputBiasStruct_p_col = cT.Input(
+        name="biasStruct_parallel_col",
+        doc="Table of col-wise bias structure in parallel overscan",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    inputBiasStruct_i_col = cT.Input(
+        name="biasStruct_image_col",
+        doc="Table of col-wise bias structure in image region",
+        storageClass="AstropyTable",
+        multiple=True,
+        deferLoad=True,
+        dimensions=("instrument", "exposure", "detector"),
+    )
+
+    outputBiasStructStats_s_row = cT.Output(
+        name="biasStructStats_serial_row",
+        doc="Table of row-wise bias structure in serial overscan",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+    outputBiasStructStats_p_row = cT.Output(
+        name="biasStructStats_parallel_row",
+        doc="Table of row-wise bias structure in parallel overscan",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+    outputBiasStructStats_i_row = cT.Output(
+        name="biasStructStats_image_row",
+        doc="Table of row-wise bias structure in image region",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+    outputBiasStructStats_s_col = cT.Output(
+        name="biasStructStats_serial_col",
+        doc="Table of col-wise bias structure in serial overscan",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+    outputBiasStructStats_p_col = cT.Output(
+        name="biasStructStats_parallel_col",
+        doc="Table of col-wise bias structure in parallel overscan",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+    outputBiasStructStats_i_col = cT.Output(
+        name="biasStructStats_image_col",
+        doc="Table of col-wise bias structure in image region",
+        storageClass="AstropyTable",
+        dimensions=("instrument"),
+    )
+
+
+
+class BiasStructStatsTaskConfig(pipeBase.PipelineTaskConfig, pipelineConnections=BiasStructStatsConnections):
+    pass
+
+
+
+class BiasStructStatsTask(pipeBase.PipelineTask,
+                          pipeBase.CmdLineTask):
+    """Analyze the structure of the bias frames"""
+
+    ConfigClass = BiasStructStarsTaskConfig
+    _DefaultName = "biasStructStats"
+
+    def run(self, **kwds):
+        """Plot the row-wise and col-wise struture
+        in a series of bias frames
+
+        Parameters
+        ----------
+
+
+        Returns
+        -------
+        """
+        keys = ['s_row', 'i_row', 'p_row', 's_col', 'i_col', 'p_col']
+
+        out_data = {}
+        for key in keys:
+            refs = kwds.get(key)
+            out_data["outputBiasStructStats_%s" % key] = self.stack_and_get_stats(refs)
+
+        return pipeBase.Struct(**out_data)
+
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        """
+        """
+        inputData = butlerQC.get(inputRefs)
+
+        import pdb
+        pdb.set_trace()
+        
+        results = self.run(**inputData)
+        butlerQC.put(results, outputRefs)
+    
+
+    def stack_and_get_stats(self, refs):
+        """Plot the row-wise and col-wise struture
+        in a series of bias frames
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        pass
+        
