@@ -43,7 +43,7 @@ class BiasFFTConnections(pipeBase.PipelineTaskConnections,
 
     outputBiasFFT_i_row = cT.Output(
         name="biasFFT_image_row",
-        doc="Table of row-wise FFT measurements in image overscan",
+        doc="Table of row-wise FFT measurements in image region",
         storageClass="AstropyTable",
         dimensions=("instrument", "exposure", "detector"),
     )
@@ -64,7 +64,7 @@ class BiasFFTConnections(pipeBase.PipelineTaskConnections,
 
     outputBiasFFT_i_col = cT.Output(
         name="biasFFT_image_col",
-        doc="Table of col-wise FFT measurements in image overscan",
+        doc="Table of col-wise FFT measurements in image region",
         storageClass="AstropyTable",
         dimensions=("instrument", "exposure", "detector"),
     )
@@ -92,7 +92,7 @@ class BiasFFTTask(pipeBase.PipelineTask,
         Parameters
         ----------
         inputExp : `lsst.afw.image.Exposure`
-            Pre-processed dark frame data to combine.
+            Raw exposure to analyze.
 
         Returns
         -------
