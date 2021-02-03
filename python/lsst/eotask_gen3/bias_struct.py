@@ -2,7 +2,14 @@
 
 import numpy as np
 
-from .image_utils import REGION_KEYS, REGION_NAMES, REGION_LABELS,\
+from astropy.table import Table
+
+import lsst.pex.config as pexConfig
+import lsst.pipe.base as pipeBase
+import lsst.pipe.base.connectionTypes as cT
+
+
+from .utils import REGION_KEYS, REGION_NAMES, REGION_LABELS,\
     get_dimension_arrays_from_ccd, get_raw_image, get_amp_offset,\
     get_geom_regions, get_amp_list, get_image_frames_2d, array_struct, unbias_amp
 
@@ -88,18 +95,21 @@ class BiasStructTask(pipeBase.PipelineTask,
         """
         ccd = inputExp
 
-        dim_array_dict = get_dimension_arrays_from_ccd(ccd)
-
-        biasstruct_data = dict(biasStruct_serial_row=dim_array_dict['row_s'],
-                               biasStruct_serial_col=dim_array_dict['col_s'],
+        dims = get_dimension_arrays_from_ccd(ccd)
+        biasstruct_data = dict(outputBiasStruct_s_col=dict(idx=dims['col_s']),
+                               outputBiasStruct_p_col=dict(idx=dims['col_p']),
+                               outputBiasStruct_i_col=dict(idx=dims['col_i']),
+                               outputBiasStruct_s_row=dict(idx=dims['row_s']),
+                               outputBiasStruct_p_row=dict(idx=dims['row_p']),
+                               outputBiasStruct_i_row=dict(idx=dims['row_i']))
                                
-                               
-        self.get_ccd_data(ccd, biasstruct_data, bias_type=None)
+        self.get_ccd_data(ccd, biasstruct_data, bias_type=None, bias_type_col=None)
 
         out_data = {}
         for key, val in biasstruct_data.items():
             out_data[key] = Table(val)
-        return dtables
+
+        return pipeBase.Struct(**out_data)
 
     
     def get_ccd_data(self, ccd, data, **kwargs):
@@ -120,6 +130,7 @@ class BiasStructTask(pipeBase.PipelineTask,
             Used standard deviation instead of mean
         """
         bias_type = kwargs.get('bias_type', None)
+        bias_type_col = kwargs.get('bias_type_col', None)
         amps = get_amp_list(ccd)
         for i, amp in enumerate(amps):
             regions = get_geom_regions(ccd, amp)
@@ -133,17 +144,11 @@ class BiasStructTask(pipeBase.PipelineTask,
             frames = get_image_frames_2d(image, regions)
 
             for key, region in zip(REGION_KEYS, REGION_NAMES):
-                framekey_row = "row_%s" % key
-                framekey_col = "col_%s" % key
-                struct = array_struct(frames[region], do_std=self.config.std)
+                framekey_row = "outputBiasStruct_%s_row" % key
+                framekey_col = "outputBiasStruct_%s_col" % key
+                struct = array_struct(frames[region], do_std=False)
                 key_str = "biasst_a%02i" % i
-                if key_str not in data[framekey_row]:
-                    data[framekey_row][key_str] = np.ndarray((len(struct['rows']),
-                                                              nfiles_used))
-                if key_str not in data[framekey_col]:
-                    data[framekey_col][key_str] = np.ndarray((len(struct['cols']),
-                                                              nfiles_used))
-                data[framekey_row][key_str][:, ifile] = struct['rows']
-                data[framekey_col][key_str][:, ifile] = struct['cols']
+                data[framekey_row][key_str] = struct['rows']
+                data[framekey_col][key_str] = struct['cols']
 
 
