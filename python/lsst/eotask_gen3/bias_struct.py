@@ -291,9 +291,6 @@ class BiasStructStatsTask(pipeBase.PipelineTask,
         """
         """
         inputData = butlerQC.get(inputRefs)
-
-        import pdb
-        pdb.set_trace()
         
         results = self.run(**inputData)
         butlerQC.put(results, outputRefs)
@@ -309,5 +306,16 @@ class BiasStructStatsTask(pipeBase.PipelineTask,
         Returns
         -------
         """
-        pass
+        det_dict = {}
+        for ref_ in refs:
+            det_id = ref.dataId['detector']
+            if det_id not in det_dict:
+                det_dict[det_id] = []
+            det_dect[det_id].append(ref)
+
+        import pdb
+        for det_id, reflist in det_dict.items():
+            tables = [ ref_.get() for ref in reflist ]
+            pdb.set_trace()
+            
         
