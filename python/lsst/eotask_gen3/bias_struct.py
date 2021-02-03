@@ -154,7 +154,7 @@ class BiasStructTask(pipeBase.PipelineTask,
 
 
 class BiasStructStatsConnections(pipeBase.PipelineTaskConnections,
-                                     dimensions=("instrument")):
+                                     dimensions=("instrument",)):
     """Parameters controlling the measurement of background statistics.
     """
     inputBiasStruct_s_row = cT.Input(
@@ -215,42 +215,42 @@ class BiasStructStatsConnections(pipeBase.PipelineTaskConnections,
         name="biasStructStats_serial_row",
         doc="Table of row-wise bias structure in serial overscan",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
     outputBiasStructStats_p_row = cT.Output(
         name="biasStructStats_parallel_row",
         doc="Table of row-wise bias structure in parallel overscan",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
     outputBiasStructStats_i_row = cT.Output(
         name="biasStructStats_image_row",
         doc="Table of row-wise bias structure in image region",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
     outputBiasStructStats_s_col = cT.Output(
         name="biasStructStats_serial_col",
         doc="Table of col-wise bias structure in serial overscan",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
     outputBiasStructStats_p_col = cT.Output(
         name="biasStructStats_parallel_col",
         doc="Table of col-wise bias structure in parallel overscan",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
     outputBiasStructStats_i_col = cT.Output(
         name="biasStructStats_image_col",
         doc="Table of col-wise bias structure in image region",
         storageClass="AstropyTable",
-        dimensions=("instrument"),
+        dimensions=("instrument",),
     )
 
 
@@ -264,7 +264,7 @@ class BiasStructStatsTask(pipeBase.PipelineTask,
                           pipeBase.CmdLineTask):
     """Analyze the structure of the bias frames"""
 
-    ConfigClass = BiasStructStarsTaskConfig
+    ConfigClass = BiasStructStatsTaskConfig
     _DefaultName = "biasStructStats"
 
     def run(self, **kwds):
