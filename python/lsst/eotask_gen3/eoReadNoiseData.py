@@ -1,11 +1,11 @@
 # from lsst.ip.isr import IsrCalib
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoReadNoiseAmpExpDataSchemaV0", "EoReadNoiseAmpExpData",
-           "EoReadNoiseAmpRunDataSchemaV0", "EoReadNoiseAmpRunData",
-           "EoReadNoiseDataSchemaV0", "EoReadNoiseData"]
+__all__ = ["EoReadNoiseAmpExpData",
+           "EoReadNoiseAmpRunData",
+           "EoReadNoiseData"]
 
 
 class EoReadNoiseAmpExpDataSchemaV0(EoCalibTableSchema):
@@ -49,7 +49,7 @@ class EoReadNoiseAmpRunData(EoCalibTable):
 class EoReadNoiseDataSchemaV0(EoCalibSchema):
 
     NAME, VERSION = 'EoReadNoiseData', 0
-    
+
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoReadNoiseAmpExpData,
                                      multiKey="amps")

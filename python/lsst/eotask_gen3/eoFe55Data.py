@@ -1,11 +1,11 @@
 # from lsst.ip.isr import IsrCalib
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoFe55AmpHitDataSchemaV0", "EoFe55AmpHitData",
-           "EoFe55AmpRunDataSchemaV0", "EoFe55AmpRunData",
-           "EoFe55DataSchemaV0", "EoFe55Data"]
+__all__ = ["EoFe55AmpHitData",
+           "EoFe55AmpRunData",
+           "EoFe55Data"]
 
 
 class EoFe55AmpHitDataSchemaV0(EoCalibTableSchema):
