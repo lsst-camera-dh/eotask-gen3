@@ -1,20 +1,20 @@
 # from lsst.ip.isr import IsrCalib
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-from eoReadNoiseData import EoReadNoiseAmpRunData
-from eoDarkCurrentData import EoDarkCurrentAmpRunData
-from eoCtiData import EoCtiAmpRunData
-from eoDefectData import EoDefectAmpRunData
-from eoPtcData import EoPtcAmpRunData
-from eoBrighterFatterData import EoBrighterFatterAmpRunData
-from eoFlatPairData import EoFlatPairAmpRunData
-from eoFe55Data import EoFe55AmpRunData
+from .eoReadNoiseData import EoReadNoiseAmpRunData
+from .eoDarkCurrentData import EoDarkCurrentAmpRunData
+from .eoCtiData import EoCtiAmpRunData
+from .eoDefectData import EoDefectAmpRunData
+from .eoPtcData import EoPtcAmpRunData
+from .eoBrighterFatterData import EoBrighterFatterAmpRunData
+from .eoFlatPairData import EoFlatPairAmpRunData
+from .eoFe55Data import EoFe55AmpRunData
 
-__all__ = ["EoSummaryAmpTableSchemaV0", "EoSummaryAmpTableData",
-           "EoSummaryDetTableSchemaV0", "EoSummaryDetTableData",
-           "EOSummaryDataSchemaV0", "EOSummaryData"]
+__all__ = ["EoSummaryAmpTableData",
+           "EoSummaryDetTableData",
+           "EOSummaryData"]
 
 
 def copyEoCalibField(eoCalibField, nameSuffix=""):

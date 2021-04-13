@@ -70,7 +70,7 @@ class EoCalibField:
         return Column(name=self._name, dtype=self._dtype,
                       shape=self._format_shape(self._shape, **kwargs),
                       length=kwargs.get('length', None),
-                      **self._kwds) 
+                      **self._kwds)
 
     def convertToValue(self, column, **kwargs):
         if kwargs.get('validate', False):
@@ -92,12 +92,12 @@ class EoCalibField:
         md_dict.update(self._kwds)
         tmpl = "| {varName} | {name} | {dtype} | {shape} | {unit} | {description} | \n".format(**md_dict)
         stream.write(tmpl)
-        
-    
+
+
 class EoCalibTableSchema:
 
     NAME = ""
-    VERSION = None
+    VERSION = 0
     TABLELENGTH = ""
 
     @classmethod
@@ -192,11 +192,11 @@ class EoCalibTableSchema:
         stream.write("|| Name || <td colspan=3>Class<\\td> || Version  || Length ||\n")
         stream.write("| %s | <td colspan=3>%s<\\td> | %i | %s |\n" %
                      (name, self.NAME, self.VERSION, self.TABLELENGTH))
-        stream.write("|| Name || Column || Datatype || Shape || Units || Description ||\n")        
+        stream.write("|| Name || Column || Datatype || Shape || Units || Description ||\n")
         for key, val in self._fieldDict.items():
             val.writeMarkdownLine(key, stream)
 
-        
+
 class EoCalibTable:
 
     SCHEMA_CLASS = EoCalibTableSchema

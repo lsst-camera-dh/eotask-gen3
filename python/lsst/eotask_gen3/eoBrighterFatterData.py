@@ -1,11 +1,11 @@
 # from lsst.ip.isr import IsrCalib
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoBrighterFatterAmpExpDataSchemaV0", "EoBrighterFatterAmpExpData",
-           "EoBrighterFatterAmpRunDataSchemaV0", "EoBrighterFatterAmpRunData",
-           "EoBrighterFatterDataSchemaV0", "EoBrighterFatterData"]
+__all__ = ["EoBrighterFatterAmpExpData",
+           "EoBrighterFatterAmpRunData",
+           "EoBrighterFatterData"]
 
 
 class EoBrighterFatterAmpExpDataSchemaV0(EoCalibTableSchema):
@@ -65,7 +65,7 @@ class EoBrighterFatterAmpRunData(EoCalibTable):
 class EoBrighterFatterDataSchemaV0(EoCalibSchema):
 
     NAME, VERSION = "EoBrighterFatterData", 0
-    
+
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoBrighterFatterAmpExpData,
                                      multiKey="amps")

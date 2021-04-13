@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoTestAmpExpDataSchemaV0", "EoTestAmpExpDataSchemaV1", "EoTestAmpExpData",
-           "EoTestAmpRunDataSchemaV0", "EoTestAmpRunData",
-           "EoTestDataSchemaV0", "EoTestDataSchemaV1", "EoTestData"]
+__all__ = ["EoTestAmpExpData",
+           "EoTestAmpRunData",
+           "EoTestData"]
 
 
 class EoTestAmpExpDataSchemaV0(EoCalibTableSchema):

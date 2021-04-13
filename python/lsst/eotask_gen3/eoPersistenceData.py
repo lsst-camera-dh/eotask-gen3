@@ -1,10 +1,10 @@
 # from lsst.ip.isr import IsrCalib
 
-from eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
+from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoPersistenceAmpExpDataSchemaV0", "EoPersistenceAmpExpData",
-           "EoPersistenceDataSchemaV0", "EoPersistenceData"]
+__all__ = ["EoPersistenceAmpExpData",
+           "EoPersistenceData"]
 
 
 class EoPersistenceAmpExpDataSchemaV0(EoCalibTableSchema):

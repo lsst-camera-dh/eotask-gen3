@@ -27,7 +27,7 @@ class EoCalibTableHandle:
     @property
     def schema(self):
         return self._schema
-            
+
     def validateTable(self, table):
         if self._schema is None:
             return
