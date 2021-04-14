@@ -103,7 +103,6 @@ class EoCalibSchema:
     def writeMarkdown(self, stream=sys.stdout):
         for key, val in self._allTableHandles.items():
             val.schema.writeMarkdown(key, stream)
-            stream.write("|-|-|-|-|-|-|\n")
 
 
 class EoCalib:

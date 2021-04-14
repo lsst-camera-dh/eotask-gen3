@@ -13,7 +13,6 @@
 | stdev | STDEV | float | [1] | adu |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | detExposure | EoBiasStabilityDetExpData | 0 | nExposure |
@@ -26,7 +25,6 @@
 | temp | TEMP | float | ['nTemp'] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoBrighterFatterData
@@ -45,7 +43,6 @@
 | covarienceError | COV_ERROR | float | ['nCov', 'nCov'] | electron**2 |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoBrighterFatterAmpRunData | 0 | nAmp |
@@ -64,7 +61,6 @@
 | bfYSlopeErr | BF_SLOPEY_ERR | float | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EOCtiData
@@ -84,7 +80,6 @@
 | ctiParallelError | CTI_PARALLEL_ERR | float | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoDarkCurrentData
@@ -102,7 +97,6 @@
 | darkCurrentMedian | DARK_CURRENT_MEDIAN | float | [1] | electron/s |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoDefectData
@@ -123,7 +117,6 @@
 | nTraps | NUM_TRAPS | int | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoFe55Data
@@ -154,7 +147,6 @@
 | pRectData | PRECT_DATA | float | [7, 7] | adu |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoFe55AmpRunData | 0 | nAmp |
@@ -167,7 +159,6 @@
 | psfSigma | PSF_SIGMA | float | [1] | pixel |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoFlatPairData
@@ -187,7 +178,6 @@
 | rowMeanVar | ROW_MEAN_VAR | float | [1] | electron**2 |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoFlatPairAmpRunData | 0 | nAmp |
@@ -202,7 +192,6 @@
 | linearityTurnoff | LINEARITY_TURNOFF | float | [1] | adu |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | detExposure | EoFlatPairDetExpData | 0 | nPair |
@@ -215,7 +204,6 @@
 | dayobs | DAYOBS | int | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoGainStabilityData
@@ -232,7 +220,6 @@
 | signal | SIGNAL | float | [1] | electron |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | detExposure | EoGainStabilityDetExpData | 0 | nExposure |
@@ -245,7 +232,6 @@
 | flux | FLUX | float | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoOverscanData
@@ -268,7 +254,6 @@
 | parallenOverscanNoise | PARALLEL_OVERSCAN_NOISE | float | [1] | electron |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoPersistenceData
@@ -286,7 +271,6 @@
 | stdev | STDEV | float | [1] | adu |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoPtcData
@@ -305,7 +289,6 @@
 | discard | DISCARD | int | [1] | pixel |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoPtcAmpRunData | 0 | nAmp |
@@ -322,7 +305,6 @@
 | ptcTurnoff | PTC_TURNOFF | float | [1] | adu |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | detExposure | EoPtcDetExpData | 0 | nExposure |
@@ -335,7 +317,6 @@
 | dayobs | DAYOBS | int | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoReadNoiseData
@@ -352,7 +333,6 @@
 | totalNoise | TOTAL_NOISE | float | ['nSample'] | electron |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoReadNoiseAmpRunData | 0 | nAmp |
@@ -365,7 +345,6 @@
 | systemNoise | SYSTEM_NOISE | float | [1] | electron |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EOSummaryData
@@ -426,7 +405,6 @@
 | nTraps | NUM_TRAPS | int | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | dets | EoSummaryDetTable | 0 | nDet |
@@ -436,7 +414,6 @@
 |-|-|-|-|-|-|
 
 
-|-|-|-|-|-|-|
 
 
 ## EoTearingData
@@ -453,7 +430,6 @@
 | nDetection | NDETECT | int | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
 ## EoTestData
@@ -471,7 +447,6 @@
 | varExp1 | VAR1 | float | [1] | s | A variables | 
 
 
-|-|-|-|-|-|-|
 | Name | Class | Version | Length |
 |-|-|-|-|
 | amps | EoTestAmpRunData | 0 | nAmp |
@@ -482,7 +457,6 @@
 | varAmp1 | VARAMP1 | float | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 #### Previous Schema
 ##### SchemaClass: EoTestDataSchemaV0
 | Name | Class | Version | Length |
@@ -495,6 +469,5 @@
 | varAmp1 | VARAMP1 | float | [1] |  |  | 
 
 
-|-|-|-|-|-|-|
 
 
