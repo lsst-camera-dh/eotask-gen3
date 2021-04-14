@@ -218,6 +218,7 @@ class EoCalibTableSchema:
                      (name, self.dataClassName(), self.version(), self.TABLELENGTH))
         stream.write("\n\n")
         stream.write("| Name | Column | Datatype | Shape | Units | Description |\n")
+        stream.write("|-|-|-|-|-|-|\n")
         for key, val in self._fieldDict.items():
             val.writeMarkdownLine(key, stream)
         stream.write("\n\n")

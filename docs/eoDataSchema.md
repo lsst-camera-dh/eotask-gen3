@@ -8,6 +8,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | mean | MEAN | float | [1] | adu |  | 
 | stdev | STDEV | float | [1] | adu |  | 
 
@@ -19,6 +20,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | seqnum | SEQNUM | int | [1] |  |  | 
 | mjd | MJD | float | [1] |  |  | 
 | temp | TEMP | float | ['nTemp'] |  |  | 
@@ -37,6 +39,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | mean | MEAN | float | [1] | electron |  | 
 | covarience | COV | float | ['nCov', 'nCov'] | electron**2 |  | 
 | covarienceError | COV_ERROR | float | ['nCov', 'nCov'] | electron**2 |  | 
@@ -49,6 +52,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | bfMean | BF_MEAN | float | [1] |  |  | 
 | bfXCorr | BF_XCORR | float | [1] |  |  | 
 | bfXCorrErr | BF_XCORR_ERR | float | [1] |  |  | 
@@ -73,6 +77,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | ctiSerial | CTI_SERIAL | float | [1] |  |  | 
 | ctiSerialError | CTI_SERIAL_ERR | float | [1] |  |  | 
 | ctiParallel | CTI_PARALLEL | float | [1] |  |  | 
@@ -92,6 +97,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | darkCurrent95 | DARK_CURRENT_95 | float | [1] | electron/s |  | 
 | darkCurrentMedian | DARK_CURRENT_MEDIAN | float | [1] | electron/s |  | 
 
@@ -109,6 +115,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | nBrightPixel | NUM_BRIGHT_PIXELS | int | [1] |  |  | 
 | nBrightColumn | NUM_BRIGHT_COLUMNS | int | [1] |  |  | 
 | nDarkPixel | NUM_DARK_PIXELS | int | [1] |  |  | 
@@ -129,6 +136,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | xPos | XPOS | float | [1] | pixel |  | 
 | yPos | YPOS | float | [1] | pixel |  | 
 | sigmaX | SIGMAX | float | [1] | pixel |  | 
@@ -153,6 +161,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | gain | GAIN | float | [1] |  |  | 
 | gainError | GAIN_ERROR | float | [1] |  |  | 
 | psfSigma | PSF_SIGMA | float | [1] | pixel |  | 
@@ -171,6 +180,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | signal | SIGNAL | float | [1] | electron |  | 
 | flat1Signal | FLAT1_SIGNAL | float | [1] | electron |  | 
 | flat2Signal | FLAT2_SIGNAL | float | [1] | electron |  | 
@@ -184,6 +194,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | fullWell | FULL_WELL | float | [1] | adu |  | 
 | maxFracDev | MAX_FRAC_DEV | float | [1] |  |  | 
 | rowMeanVarSlope | ROW_MEAN_VAR_SLOPE | float | [1] |  |  | 
@@ -198,6 +209,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | flux | FLUX | float | [1] |  |  | 
 | seqnum | SEQNUM | int | [1] |  |  | 
 | dayobs | DAYOBS | int | [1] |  |  | 
@@ -216,6 +228,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | signal | SIGNAL | float | [1] | electron |  | 
 
 
@@ -226,6 +239,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | mjd | MJD | float | [1] | electron |  | 
 | seqnum | SEQNUM | int | [1] |  |  | 
 | flux | FLUX | float | [1] |  |  | 
@@ -244,6 +258,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | columnMean | COLUMN_MEAN | float | ['nCol'] | electron |  | 
 | columnVariance | COLUMN_VARIANCE | float | ['nCol'] | electron |  | 
 | rowMean | ROW_MEAN | float | ['nRow'] | electron |  | 
@@ -266,6 +281,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | mean | MEAN | float | [1] | adu |  | 
 | stdev | STDEV | float | [1] | adu |  | 
 
@@ -283,6 +299,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | mean | MEAN | float | [1] | adu |  | 
 | var | VAR | float | [1] | adu**2 |  | 
 | discard | DISCARD | int | [1] | pixel |  | 
@@ -295,6 +312,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | ptcGain | PTC_GAIN | float | [1] | adu/electron |  | 
 | ptcGainError | PTC_GAIN_ERROR | float | [1] | adu/electron |  | 
 | ptcA00 | PTC_A00 | float | [1] |  |  | 
@@ -311,6 +329,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | exposure | EXPOSURE | float | [1] |  |  | 
 | seqnum | SEQNUM | int | [1] |  |  | 
 | dayobs | DAYOBS | int | [1] |  |  | 
@@ -329,6 +348,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | totalNoise | TOTAL_NOISE | float | ['nSample'] | electron |  | 
 
 
@@ -339,6 +359,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | readNoise | READ_NOISE | float | [1] | electron |  | 
 | totalNoise | TOTAL_NOISE | float | [1] | electron |  | 
 | systemNoise | SYSTEM_NOISE | float | [1] | electron |  | 
@@ -357,6 +378,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | amp | AMP | int | [1] |  |  | 
 | detector | DETECTOR | int | [1] |  |  | 
 | dc95ShotNoise | DC95_SHOT_NOISE | float | [1] |  |  | 
@@ -411,6 +433,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 
 
 |-|-|-|-|-|-|
@@ -426,6 +449,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | nDetection | NDETECT | int | [1] |  |  | 
 
 
@@ -442,6 +466,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | varExp2 | VAR2 | float | ['nSample'] |  |  | 
 | varExp1 | VAR1 | float | [1] | s | A variables | 
 
@@ -453,6 +478,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | varAmp1 | VARAMP1 | float | [1] |  |  | 
 
 
@@ -465,6 +491,7 @@
 
 
 | Name | Column | Datatype | Shape | Units | Description |
+|-|-|-|-|-|-|
 | varAmp1 | VARAMP1 | float | [1] |  |  | 
 
 
