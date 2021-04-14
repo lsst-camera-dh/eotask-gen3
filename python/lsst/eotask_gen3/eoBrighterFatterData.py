@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoBrighterFatterAmpExpData",
            "EoBrighterFatterAmpRunData",
@@ -10,12 +10,11 @@ __all__ = ["EoBrighterFatterAmpExpData",
 
 class EoBrighterFatterAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoBrighterFatterAmpExpData", 0
     TABLELENGTH = "nExposure"
 
-    mean = EoCalibField(name="MEAN", dtype=float, unit='e-')
-    covarience = EoCalibField(name="COV", dtype=float, unit='e-**2', shape=['nCov', 'nCov'])
-    covarienceError = EoCalibField(name="COV_ERROR", dtype=float, unit='e-**2', shape=['nCov', 'nCov'])
+    mean = EoCalibField(name="MEAN", dtype=float, unit='electron')
+    covarience = EoCalibField(name="COV", dtype=float, unit='electron**2', shape=['nCov', 'nCov'])
+    covarienceError = EoCalibField(name="COV_ERROR", dtype=float, unit='electron**2', shape=['nCov', 'nCov'])
 
 
 class EoBrighterFatterAmpExpData(EoCalibTable):
@@ -23,7 +22,7 @@ class EoBrighterFatterAmpExpData(EoCalibTable):
     SCHEMA_CLASS = EoBrighterFatterAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoBrighterFatterAmpExpData, self).__init__(data=None, **kwargs)
+        super(EoBrighterFatterAmpExpData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.covarience = self.table[self.SCHEMA_CLASS.covarience.name]
         self.covarienceError = self.table[self.SCHEMA_CLASS.covarienceError.name]
@@ -31,7 +30,6 @@ class EoBrighterFatterAmpExpData(EoCalibTable):
 
 class EoBrighterFatterAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoBrighterFatterAmpRunData", 0
     TABLELENGTH = "nAmp"
 
     bfMean = EoCalibField(name='BF_MEAN', dtype=float)
@@ -64,8 +62,6 @@ class EoBrighterFatterAmpRunData(EoCalibTable):
 
 class EoBrighterFatterDataSchemaV0(EoCalibSchema):
 
-    NAME, VERSION = "EoBrighterFatterData", 0
-
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoBrighterFatterAmpExpData,
                                      multiKey="amps")
@@ -80,21 +76,18 @@ class EoBrighterFatterData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoBrighterFatterData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.amps = self._tables['amps']
+        self.ampExposure = self['ampExposure']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoBrighterFatterAmpExpDataSchemaV0)
-RegisterEoCalibTableSchema(EoBrighterFatterAmpRunDataSchemaV0)
-RegisterEoCalibSchema(EoBrighterFatterDataSchemaV0)
+RegisterEoCalibSchema(EoBrighterFatterData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
-NCOV = 100
-
-testData = EoBrighterFatterData(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nCov=NCOV)
+NCOV = 3
+EoBrighterFatterData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nCov=NCOV))

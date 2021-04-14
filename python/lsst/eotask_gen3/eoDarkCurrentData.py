@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoDarkCurrentAmpRunData",
            "EoDarkCurrentData"]
@@ -9,11 +9,10 @@ __all__ = ["EoDarkCurrentAmpRunData",
 
 class EoDarkCurrentAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
-    TABLE_LENGTH = "nAmp"
+    TABLELENGTH = "nAmp"
 
-    darkCurrent95 = EoCalibField(name="DARK_CURRENT_95", dtype=float, unit='e-/s')
-    darkCurrentMedian = EoCalibField(name="DARK_CURRENT_MEDIAN", dtype=float, unit='e-/s')
+    darkCurrent95 = EoCalibField(name="DARK_CURRENT_95", dtype=float, unit='electron/s')
+    darkCurrentMedian = EoCalibField(name="DARK_CURRENT_MEDIAN", dtype=float, unit='electron/s')
 
 
 class EoDarkCurrentAmpRunData(EoCalibTable):
@@ -38,16 +37,15 @@ class EoDarkCurrentData(EoCalib):
 
     _OBSTYPE = 'dark'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoDarkCurrentData, self).__init__(**kwargs)
-        self.amps = self._tables['amps']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoDarkCurrentAmpRunData)
 RegisterEoCalibSchema(EoDarkCurrentData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
-testData = EoDarkCurrentData(amps=AMPS, nAmp=len(AMPS))
+EoDarkCurrentData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS)))

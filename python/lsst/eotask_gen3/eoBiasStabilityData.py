@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoBiasStabilityAmpExpData",
            "EoBiasStabilityDetExpData",
@@ -10,11 +10,10 @@ __all__ = ["EoBiasStabilityAmpExpData",
 
 class EoBiasStabilityAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoBiasStabilityAmpExpData", 0
     TABLELENGTH = "nExposure"
 
-    mean = EoCalibField(name="MEAN", dtype=float, unit='ADU')
-    stdev = EoCalibField(name="STDEV", dtype=float, unit='ADU')
+    mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
+    stdev = EoCalibField(name="STDEV", dtype=float, unit='adu')
 
 
 class EoBiasStabilityAmpExpData(EoCalibTable):
@@ -29,7 +28,6 @@ class EoBiasStabilityAmpExpData(EoCalibTable):
 
 class EoBiasStabilityDetExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoBiasStabilityDetExpData", 0
     TABLELENGTH = "nExposure"
 
     seqnum = EoCalibField(name="SEQNUM", dtype=int)
@@ -50,8 +48,6 @@ class EoBiasStabilityDetExpData(EoCalibTable):
 
 class EoBiasStabilityDataSchemaV0(EoCalibSchema):
 
-    NAME, VERSION = "EoBiasStabilityData", 0
-
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoBiasStabilityAmpExpData,
                                      multiKey="amps")
@@ -66,21 +62,18 @@ class EoBiasStabilityData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoBiasStabilityData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.detExposure = self._tables['detExposure']
+        self.ampExposure = self['ampExposure']
+        self.detExposure = self['detExposure']
 
 
-RegisterEoCalibTableSchema(EoBiasStabilityAmpExpData)
-RegisterEoCalibTableSchema(EoBiasStabilityDetExpData)
 RegisterEoCalibSchema(EoBiasStabilityData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
 NTEMP = 10
-
-testData = EoBiasStabilityData(amps=AMPS, nExposure=NEXPOSURE, nTemp=NTEMP)
+EoBiasStabilityData.testData = dict(testCtor=dict(amps=AMPS, nExposure=NEXPOSURE, nTemp=NTEMP))

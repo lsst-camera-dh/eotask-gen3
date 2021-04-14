@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoFlatPairAmpExpData",
            "EoFlatPairAmpRunData",
@@ -11,13 +11,13 @@ __all__ = ["EoFlatPairAmpExpData",
 
 class EoFlatPairAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoFlatPairAmpExpData", 0
     TABLELENGTH = "nPair"
 
-    signal = EoCalibField(name='SIGNAL', unit='e-')
-    flat1Signal = EoCalibField(name='FLAT1_SIGNAL', unit='e-')
-    flat2Signal = EoCalibField(name='FLAT2_SIGNAL', unit='e-')
-    rowMeanVar = EoCalibField(name='ROW_MEAN_VAR', unit='e-**2')
+    signal = EoCalibField(name='SIGNAL', unit='electron')
+    flat1Signal = EoCalibField(name='FLAT1_SIGNAL', unit='electron')
+    flat2Signal = EoCalibField(name='FLAT2_SIGNAL', unit='electron')
+    rowMeanVar = EoCalibField(name='ROW_MEAN_VAR', unit='electron**2')
 
 
 class EoFlatPairAmpExpData(EoCalibTable):
@@ -34,14 +34,14 @@ class EoFlatPairAmpExpData(EoCalibTable):
 
 class EoFlatPairAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoFlatPairAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
-    fullWell = EoCalibField(name="FULL_WELL", dtype=float, unit='ADU')
+    fullWell = EoCalibField(name="FULL_WELL", dtype=float, unit='adu')
     maxFracDev = EoCalibField(name="MAX_FRAC_DEV", dtype=float)
     rowMeanVarSlope = EoCalibField(name="ROW_MEAN_VAR_SLOPE", dtype=float)
-    maxObservedSignal = EoCalibField(name="MAX_OBSERVED_SIGNAL", dtype=float, unit='ADU')
-    linearityTurnoff = EoCalibField(name="LINEARITY_TURNOFF", dtype=float, unit='ADU')
+    maxObservedSignal = EoCalibField(name="MAX_OBSERVED_SIGNAL", dtype=float, unit='adu')
+    linearityTurnoff = EoCalibField(name="LINEARITY_TURNOFF", dtype=float, unit='adu')
 
 
 class EoFlatPairAmpRunData(EoCalibTable):
@@ -59,7 +59,7 @@ class EoFlatPairAmpRunData(EoCalibTable):
 
 class EoFlatPairDetExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoFlatPairDetExpData", 0
     TABLELENGTH = "nPair"
 
     flux = EoCalibField(name="FLUX", dtype=float)
@@ -80,6 +80,8 @@ class EoFlatPairDetExpData(EoCalibTable):
 
 class EoFlatPairDataSchemaV0(EoCalibSchema):
 
+    NAME, VERSION = "EoFlatPairData", 0
+
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoFlatPairAmpExpData,
                                      multiKey="amps")
@@ -97,21 +99,18 @@ class EoFlatPairData(EoCalib):
 
     _OBSTYPE = 'flat'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoFlatPairData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.amps = self._tables['amps']
-        self.detExposure = self._tables['detExposure']
+        self.ampExposure = self['ampExposure']
+        self.amps = self['amps']
+        self.detExposure = self['detExposure']
 
 
-RegisterEoCalibTableSchema(EoFlatPairAmpExpData)
-RegisterEoCalibTableSchema(EoFlatPairAmpRunData)
-RegisterEoCalibTableSchema(EoFlatPairDetExpData)
 RegisterEoCalibSchema(EoFlatPairData)
+
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
-
-testData = EoFlatPairData(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE)
+EoFlatPairData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE))

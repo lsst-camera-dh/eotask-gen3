@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoCtiAmpRunData",
            "EOCtiData"]
@@ -9,7 +9,6 @@ __all__ = ["EoCtiAmpRunData",
 
 class EoCtiAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nAmp"
 
     ctiSerial = EoCalibField(name="CTI_SERIAL", dtype=float)
@@ -42,17 +41,16 @@ class EOCtiData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EOCtiData, self).__init__(**kwargs)
-        self.amps = self._tables['amps']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoCtiAmpRunData)
 RegisterEoCalibSchema(EOCtiData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
 
-testData = EOCtiData(amps=AMPS, nAmp=len(AMPS))
+EOCtiData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS)))

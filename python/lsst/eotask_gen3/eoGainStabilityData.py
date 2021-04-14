@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoGainStabilityAmpExpData",
            "EoGainStabilityDetExpData",
@@ -10,10 +10,9 @@ __all__ = ["EoGainStabilityAmpExpData",
 
 class EoGainStabilityAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nExposure"
 
-    signal = EoCalibField(name="SIGNAL", dtype=float, unit='e-')
+    signal = EoCalibField(name="SIGNAL", dtype=float, unit='electron')
 
 
 class EoGainStabilityAmpExpData(EoCalibTable):
@@ -27,10 +26,9 @@ class EoGainStabilityAmpExpData(EoCalibTable):
 
 class EoGainStabilityDetExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nExposure"
 
-    mjd = EoCalibField(name="MJD", dtype=float, unit='e-')
+    mjd = EoCalibField(name="MJD", dtype=float, unit='electron')
     seqnum = EoCalibField(name="SEQNUM", dtype=int)
     flux = EoCalibField(name="FLUX", dtype=float)
 
@@ -62,19 +60,17 @@ class EoGainStabilityData(EoCalib):
 
     _OBSTYPE = 'flat'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoGainStabilityData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.detExposure = self._tables['detExposure']
+        self.ampExposure = self['ampExposure']
+        self.detExposure = self['detExposure']
 
 
-RegisterEoCalibTableSchema(EoGainStabilityAmpExpData)
-RegisterEoCalibTableSchema(EoGainStabilityDetExpData)
 RegisterEoCalibSchema(EoGainStabilityData)
+
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
-
-testData = EoGainStabilityData(amps=AMPS, nExposure=NEXPOSURE)
+EoGainStabilityData.testData = dict(testCtor=dict(amps=AMPS, nExposure=NEXPOSURE))

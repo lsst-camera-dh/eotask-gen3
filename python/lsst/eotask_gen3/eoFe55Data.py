@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoFe55AmpHitData",
            "EoFe55AmpRunData",
@@ -10,24 +10,23 @@ __all__ = ["EoFe55AmpHitData",
 
 class EoFe55AmpHitDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nHit"
 
     xPos = EoCalibField(name='XPOS', dtype=float, unit='pixel')
     yPos = EoCalibField(name='YPOS', dtype=float, unit='pixel')
     sigmaX = EoCalibField(name='SIGMAX', dtype=float, unit='pixel')
     sigmaY = EoCalibField(name='SIGMAY', dtype=float, unit='pixel')
-    dn = EoCalibField(name='DN', dtype=float, unit='ADU')
-    dnFpSum = EoCalibField(name='DN_FP_SUM', dtype=float, unit='ADU')
+    dn = EoCalibField(name='DN', dtype=float, unit='adu')
+    dnFpSum = EoCalibField(name='DN_FP_SUM', dtype=float, unit='adu')
     chiProb = EoCalibField(name='CHIPROB', dtype=float)
     chi2 = EoCalibField(name='CHI2', dtype=float)
     dof = EoCalibField(name='DOF', dtype=float)
-    maxDn = EoCalibField(name='MAXDN', dtype=float, unit='ADU')
+    maxDn = EoCalibField(name='MAXDN', dtype=float, unit='adu')
     xPeak = EoCalibField(name='XPEAK', dtype=int, unit='pixel')
     yPeak = EoCalibField(name='YPEAK', dtype=int, unit='pixel')
-    p9Data = EoCalibField(name='P9_DATA', dtype=float, shape=[3, 3], unit='ADU')
-    p9Model = EoCalibField(name='P9_MODEL', dtype=float, shape=[3, 3], unit='ADU')
-    pRectData = EoCalibField(name='PRECT_DATA', dtype=float, shape=[7, 7], unit='ADU')
+    p9Data = EoCalibField(name='P9_DATA', dtype=float, shape=[3, 3], unit='adu')
+    p9Model = EoCalibField(name='P9_MODEL', dtype=float, shape=[3, 3], unit='adu')
+    pRectData = EoCalibField(name='PRECT_DATA', dtype=float, shape=[7, 7], unit='adu')
 
 
 class EoFe55AmpHitData(EoCalibTable):  # pylint: disable=too-many-instance-attributes
@@ -54,7 +53,6 @@ class EoFe55AmpHitData(EoCalibTable):  # pylint: disable=too-many-instance-attri
 
 class EoFe55AmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nAmp"
 
     gain = EoCalibField(name="GAIN", dtype=float)
@@ -89,19 +87,16 @@ class EoFe55Data(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoFe55Data, self).__init__(**kwargs)
-        self.ampHits = self._tables['ampHits']
-        self.amps = self._tables['amps']
+        self.ampHits = self['ampHits']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoFe55AmpHitData)
-RegisterEoCalibTableSchema(EoFe55AmpRunData)
 RegisterEoCalibSchema(EoFe55Data)
 
 AMPS = ["%02i" % i for i in range(16)]
 NHIT = 100
-
-testData = EoFe55Data(amps=AMPS, nAmp=len(AMPS), nHit=NHIT)
+EoFe55Data.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nHit=NHIT))
