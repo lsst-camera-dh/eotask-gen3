@@ -1,4 +1,4 @@
-""" Electrical optical test code for LSST """
+""" Electrical optical testing code for LSST """
 
 from .eoCalibTable import *
 from .eoCalib import *
