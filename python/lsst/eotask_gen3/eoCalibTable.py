@@ -435,7 +435,7 @@ class EoCalibTable:
 
         Parameters
         ----------
-        data : `Union`, [`astropy.table.Table`, `Mapping`, `None`]
+        data : `Union`, [`astropy.table.Table`, `None`]
             If provided, the data used to build the table
             If `None`, table will be constructed using shape parameters
             taken for kwargs
@@ -445,16 +445,14 @@ class EoCalibTable:
         schema : `EoCalibTableSchema`
             If provided will override schema class
         """
-        self._schema = kwargs.get('schema', self.SCHEMA_CLASS())
+        kwcopy = kwargs.copy()
+        self._schema = kwcopy.pop('schema', self.SCHEMA_CLASS())
         self._version = self._schema.version()
         if isinstance(data, Table):
             self._schema.validateTable(data)
             self._table = data
-        elif isinstance(data, Mapping):
-            self._schema.validateDict(data)
-            self._table = self._schema.convertToTable(data)
         elif data is None:
-            self._table = self._schema.makeTable(**kwargs)
+            self._table = self._schema.makeTable(**kwcopy)
         else:  # pragma: no cover
             raise TypeError("EoCalibTable input data must be None, Table or dict, not %s" % (type(data)))
 
