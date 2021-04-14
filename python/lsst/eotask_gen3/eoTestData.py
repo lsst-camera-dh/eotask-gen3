@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoTestAmpExpData",
            "EoTestAmpRunData",
@@ -12,15 +12,13 @@ __all__ = ["EoTestAmpExpData",
 
 class EoTestAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoTestAmpExpData", 0
     TABLELENGTH = "nExposure"
 
-    varExp1 = EoCalibField(name="VAR1", dtype=float)
+    varExp1 = EoCalibField(name="VAR1", dtype=float, description="A variables", unit="s")
 
 
 class EoTestAmpExpDataSchemaV1(EoTestAmpExpDataSchemaV0):
 
-    NAME, VERSION = "EoTestAmpExpData", 1
     TABLELENGTH = "nExposure"
 
     varExp2 = EoCalibField(name="VAR2", dtype=float, shape=["nSample"])
@@ -42,7 +40,6 @@ class EoTestAmpExpData(EoCalibTable):
 
 class EoTestAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nAmp"
 
     varAmp1 = EoCalibField(name="VARAMP1", dtype=float)
@@ -59,15 +56,11 @@ class EoTestAmpRunData(EoCalibTable):
 
 class EoTestDataSchemaV0(EoCalibSchema):
 
-    NAME, VERSION = "EoTestData", 0
-
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoTestAmpRunData)
 
 
 class EoTestDataSchemaV1(EoTestDataSchemaV0):
-
-    NAME, VERSION = "EoTestData", 1
 
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoTestAmpExpData,
@@ -81,23 +74,20 @@ class EoTestData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoTestData, self).__init__(**kwargs)
         try:
-            self.ampExposure = self._tables['ampExposure']
+            self.ampExposure = self['ampExposure']
         except KeyError:
             self.ampExposure = None
-        self.amps = self._tables['amps']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoTestAmpExpData)
-RegisterEoCalibTableSchema(EoTestAmpRunData)
 RegisterEoCalibSchema(EoTestData)
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
 NSAMPLE = 10
-
-testData = EoTestData(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nSample=NSAMPLE)
+EoTestData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nSample=NSAMPLE))

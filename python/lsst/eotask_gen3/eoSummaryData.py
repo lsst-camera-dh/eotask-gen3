@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 from .eoReadNoiseData import EoReadNoiseAmpRunData
 from .eoDarkCurrentData import EoDarkCurrentAmpRunData
@@ -24,7 +24,6 @@ def copyEoCalibField(eoCalibField, nameSuffix=""):
 
 class EoSummaryAmpTableSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = 'nAmp'
 
     READNOISESCHEMA = EoReadNoiseAmpRunData.SCHEMA_CLASS
@@ -100,7 +99,6 @@ class EoSummaryAmpTableData(EoCalibTable):
 
 class EoSummaryDetTableSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = 'nDet'
 
 
@@ -123,20 +121,19 @@ class EOSummaryDataSchemaV0(EoCalibSchema):
 
 class EOSummaryData(EoCalib):
 
-    _CURRENT_SCHEMA = EOSummaryDataSchemaV0()
-    _SCHEMA = 'Eo Summary'
-    _VERSION = _CURRENT_SCHEMA.VERSION
+    SCHEMA_CLASS = EOSummaryDataSchemaV0
+
+    _OBSTYPE = 'all'
+    _SCHEMA = SCHEMA_CLASS.fullName()
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EOSummaryData, self).__init__(**kwargs)
-        self.amps = self._tables['amps']
-        self.dets = self._tables['dets']
+        self.amps = self['amps']
+        self.dets = self['dets']
 
 
-RegisterEoCalibTableSchema(EoSummaryAmpTableData)
-RegisterEoCalibTableSchema(EoSummaryDetTableData)
-RegisterEoCalibSchema(EOSummaryDataSchemaV0)
+RegisterEoCalibSchema(EOSummaryData)
 
 AMPS = ["%02i" % i for i in range(16)]
-
-testData = EOSummaryData(nAmp=len(AMPS))
+EOSummaryData.testData = dict(testCtor=dict(nAmp=len(AMPS)))

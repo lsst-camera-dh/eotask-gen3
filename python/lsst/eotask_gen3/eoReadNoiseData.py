@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoReadNoiseAmpExpData",
            "EoReadNoiseAmpRunData",
@@ -10,10 +10,9 @@ __all__ = ["EoReadNoiseAmpExpData",
 
 class EoReadNoiseAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = 'EoReadNoiseAmpExpData', 0
     TABLELENGTH = "nExposure"
 
-    totalNoise = EoCalibField(name="TOTAL_NOISE", dtype=float, unit='e-', shape=["nSample"])
+    totalNoise = EoCalibField(name="TOTAL_NOISE", dtype=float, unit='electron', shape=["nSample"])
 
 
 class EoReadNoiseAmpExpData(EoCalibTable):
@@ -27,12 +26,11 @@ class EoReadNoiseAmpExpData(EoCalibTable):
 
 class EoReadNoiseAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = 'EoReadNoiseAmpRunData', 0
     TABLELENGTH = "nAmp"
 
-    readNoise = EoCalibField(name="READ_NOISE", dtype=float, unit='e-')
-    totalNoise = EoCalibField(name="TOTAL_NOISE", dtype=float, unit='e-')
-    systemNoise = EoCalibField(name="SYSTEM_NOISE", dtype=float, unit='e-')
+    readNoise = EoCalibField(name="READ_NOISE", dtype=float, unit='electron')
+    totalNoise = EoCalibField(name="TOTAL_NOISE", dtype=float, unit='electron')
+    systemNoise = EoCalibField(name="SYSTEM_NOISE", dtype=float, unit='electron')
 
 
 class EoReadNoiseAmpRunData(EoCalibTable):
@@ -48,8 +46,6 @@ class EoReadNoiseAmpRunData(EoCalibTable):
 
 class EoReadNoiseDataSchemaV0(EoCalibSchema):
 
-    NAME, VERSION = 'EoReadNoiseData', 0
-
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoReadNoiseAmpExpData,
                                      multiKey="amps")
@@ -64,20 +60,18 @@ class EoReadNoiseData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoReadNoiseData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.amps = self._tables['amps']
+        self.ampExposure = self['ampExposure']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoReadNoiseAmpExpData)
-RegisterEoCalibTableSchema(EoReadNoiseAmpRunData)
 RegisterEoCalibSchema(EoReadNoiseData)
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
 NSAMPLES = 100
-
-testData = EoReadNoiseData(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nSample=NSAMPLES)
+EoReadNoiseData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS),
+                                              nExposure=NEXPOSURE, nSample=NSAMPLES))

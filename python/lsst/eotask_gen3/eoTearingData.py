@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoTearingAmpRunData",
            "EoTearingData"]
@@ -9,7 +9,7 @@ __all__ = ["EoTearingAmpRunData",
 
 class EoTearingAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoTearingAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
     nDetection = EoCalibField(name="NDETECT", dtype=int)
@@ -26,6 +26,8 @@ class EoTearingAmpRunData(EoCalibTable):
 
 class EoTearingDataSchemaV0(EoCalibSchema):
 
+    NAME, VERSION = "EoTearingData", 0
+
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoTearingAmpRunData)
 
@@ -40,12 +42,10 @@ class EoTearingData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoTearingData, self).__init__(**kwargs)
-        self.amps = self._tables['amps']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoTearingAmpRunDataSchemaV0)
-RegisterEoCalibSchema(EoTearingDataSchemaV0)
+RegisterEoCalibSchema(EoTearingData)
 
 AMPS = ["%02i" % i for i in range(16)]
-
-testData = EoTearingData(nAmp=len(AMPS))
+EoTearingData.testData = dict(testCtor=dict(nAmp=len(AMPS)))

@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoPtcAmpExpData",
            "EoPtcAmpRunData",
@@ -11,11 +11,11 @@ __all__ = ["EoPtcAmpExpData",
 
 class EoPtcAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoPtcAmpExpData", 0
     TABLELENGTH = "nExposure"
 
-    mean = EoCalibField(name="MEAN", dtype=float, unit='ADU')
-    var = EoCalibField(name="VAR", dtype=float, unit='ADU**2')
+    mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
+    var = EoCalibField(name="VAR", dtype=float, unit='adu**2')
     discard = EoCalibField(name="DISCARD", dtype=int, unit='pixel')
 
 
@@ -32,16 +32,16 @@ class EoPtcAmpExpData(EoCalibTable):
 
 class EoPtcAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoPtcAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
-    ptcGain = EoCalibField(name="PTC_GAIN", dtype=float, unit='ADU/e-')
-    ptcGainError = EoCalibField(name="PTC_GAIN_ERROR", dtype=float, unit='ADU/e-')
+    ptcGain = EoCalibField(name="PTC_GAIN", dtype=float, unit='adu/electron')
+    ptcGainError = EoCalibField(name="PTC_GAIN_ERROR", dtype=float, unit='adu/electron')
     ptcA00 = EoCalibField(name="PTC_A00", dtype=float)
     ptcA00Error = EoCalibField(name="PTC_A00_ERROR", dtype=float)
-    ptcNoise = EoCalibField(name="PTC_NOISE", dtype=float, unit='ADU')
-    ptcNoiseError = EoCalibField(name="PTC_NOISE_ERROR", dtype=float, unit='ADU')
-    ptcTurnoff = EoCalibField(name="PTC_TURNOFF", dtype=float, unit='ADU')
+    ptcNoise = EoCalibField(name="PTC_NOISE", dtype=float, unit='adu')
+    ptcNoiseError = EoCalibField(name="PTC_NOISE_ERROR", dtype=float, unit='adu')
+    ptcTurnoff = EoCalibField(name="PTC_TURNOFF", dtype=float, unit='adu')
 
 
 class EoPtcAmpRunData(EoCalibTable):
@@ -61,7 +61,7 @@ class EoPtcAmpRunData(EoCalibTable):
 
 class EoPtcDetExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
+    NAME, VERSION = "EoPtcDetExpData", 0
     TABLELENGTH = 'nExposure'
 
     exposure = EoCalibField(name="EXPOSURE", dtype=float)
@@ -99,21 +99,17 @@ class EoPtcData(EoCalib):
 
     _OBSTYPE = 'flat'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoPtcData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
-        self.amps = self._tables['amps']
-        self.detExposure = self._tables['detExposure']
+        self.ampExposure = self['ampExposure']
+        self.amps = self['amps']
+        self.detExposure = self['detExposure']
 
 
-RegisterEoCalibTableSchema(EoPtcAmpExpData)
-RegisterEoCalibTableSchema(EoPtcAmpRunData)
-RegisterEoCalibTableSchema(EoPtcDetExpData)
 RegisterEoCalibSchema(EoPtcData)
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
-
-testData = EoPtcData(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE)
+EoPtcData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE))

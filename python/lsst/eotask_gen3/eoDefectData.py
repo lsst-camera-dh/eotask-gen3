@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoDefectAmpRunData",
            "EoDefectData"]
@@ -9,7 +9,6 @@ __all__ = ["EoDefectAmpRunData",
 
 class EoDefectAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nAmp"
 
     nBrightPixel = EoCalibField(name="NUM_BRIGHT_PIXELS", dtype=int)
@@ -44,16 +43,14 @@ class EoDefectData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoDefectData, self).__init__(**kwargs)
-        self.amps = self._tables['amps']
+        self.amps = self['amps']
 
 
-RegisterEoCalibTableSchema(EoDefectAmpRunData)
 RegisterEoCalibSchema(EoDefectData)
 
 AMPS = ["%02i" % i for i in range(16)]
-
-testData = EoDefectData(nAmp=len(AMPS))
+EoDefectData.testData = dict(testCtor=dict(nAmp=len(AMPS)))

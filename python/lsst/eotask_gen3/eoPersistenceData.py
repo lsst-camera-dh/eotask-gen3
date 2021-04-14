@@ -1,7 +1,7 @@
 # from lsst.ip.isr import IsrCalib
 
-from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, RegisterEoCalibTableSchema
-from .eoCalib import EoCalibTableHandle, EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
+from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoPersistenceAmpExpData",
            "EoPersistenceData"]
@@ -9,11 +9,10 @@ __all__ = ["EoPersistenceAmpExpData",
 
 class EoPersistenceAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    VERSION = 0
     TABLELENGTH = "nExposure"
 
-    mean = EoCalibField(name="MEAN", dtype=float, unit='ADU')
-    stdev = EoCalibField(name="STDEV", dtype=float, unit='ADU')
+    mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
+    stdev = EoCalibField(name="STDEV", dtype=float, unit='adu')
 
 
 class EoPersistenceAmpExpData(EoCalibTable):
@@ -39,18 +38,16 @@ class EoPersistenceData(EoCalib):
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoPersistenceData, self).__init__(**kwargs)
-        self.ampExposure = self._tables['ampExposure']
+        self.ampExposure = self['ampExposure']
 
 
-RegisterEoCalibTableSchema(EoPersistenceAmpExpData)
 RegisterEoCalibSchema(EoPersistenceData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
 NEXPOSURE = 10
-
-testData = EoPersistenceData(amps=AMPS, nExposure=NEXPOSURE)
+EoPersistenceData.testData = dict(testCtor=dict(amps=AMPS, nExposure=NEXPOSURE))
