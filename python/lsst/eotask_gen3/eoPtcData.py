@@ -11,7 +11,6 @@ __all__ = ["EoPtcAmpExpData",
 
 class EoPtcAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoPtcAmpExpData", 0
     TABLELENGTH = "nExposure"
 
     mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
@@ -32,7 +31,6 @@ class EoPtcAmpExpData(EoCalibTable):
 
 class EoPtcAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoPtcAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
     ptcGain = EoCalibField(name="PTC_GAIN", dtype=float, unit='adu/electron')
@@ -61,7 +59,6 @@ class EoPtcAmpRunData(EoCalibTable):
 
 class EoPtcDetExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoPtcDetExpData", 0
     TABLELENGTH = 'nExposure'
 
     exposure = EoCalibField(name="EXPOSURE", dtype=float)

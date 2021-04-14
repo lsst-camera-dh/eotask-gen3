@@ -103,7 +103,6 @@ class EoCalibSchema:
     def writeMarkdown(self, stream=sys.stdout):
         for key, val in self._allTableHandles.items():
             val.schema.writeMarkdown(key, stream)
-            stream.write("|-|-|-|-|-|-|\n")
 
 
 class EoCalib:
@@ -218,14 +217,14 @@ class EoCalib:
 
         schema = cls.SCHEMA_CLASS()
         stream.write("#### Current Schema\n")
-        stream.write("#### %s %s\n" % (schema.dataClassName(), schema.fullName()))
+        stream.write("##### DataClass: %s\n##### SchemaClass: %s\n" % (schema.dataClassName(), schema.fullName()))
         schema.writeMarkdown(stream)
 
         if cls.PREVIOUS_SCHEMAS:
             stream.write("#### Previous Schema\n")
         for prevSchemaClass in cls.PREVIOUS_SCHEMAS:
             prevSchema = prevSchemaClass()
-            stream.write("#### %s\n" % prevSchema.fullName())
+            stream.write("##### SchemaClass: %s\n" % prevSchema.fullName())
             prevSchema.writeMarkdown(stream)
 
 

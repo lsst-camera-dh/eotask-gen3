@@ -9,7 +9,6 @@ __all__ = ["EoTearingAmpRunData",
 
 class EoTearingAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoTearingAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
     nDetection = EoCalibField(name="NDETECT", dtype=int)
@@ -25,8 +24,6 @@ class EoTearingAmpRunData(EoCalibTable):
 
 
 class EoTearingDataSchemaV0(EoCalibSchema):
-
-    NAME, VERSION = "EoTearingData", 0
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoTearingAmpRunData)
