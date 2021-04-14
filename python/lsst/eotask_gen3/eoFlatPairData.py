@@ -11,7 +11,6 @@ __all__ = ["EoFlatPairAmpExpData",
 
 class EoFlatPairAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoFlatPairAmpExpData", 0
     TABLELENGTH = "nPair"
 
     signal = EoCalibField(name='SIGNAL', unit='electron')
@@ -34,7 +33,6 @@ class EoFlatPairAmpExpData(EoCalibTable):
 
 class EoFlatPairAmpRunDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoFlatPairAmpRunData", 0
     TABLELENGTH = 'nAmp'
 
     fullWell = EoCalibField(name="FULL_WELL", dtype=float, unit='adu')
@@ -59,7 +57,6 @@ class EoFlatPairAmpRunData(EoCalibTable):
 
 class EoFlatPairDetExpDataSchemaV0(EoCalibTableSchema):
 
-    NAME, VERSION = "EoFlatPairDetExpData", 0
     TABLELENGTH = "nPair"
 
     flux = EoCalibField(name="FLUX", dtype=float)
@@ -79,8 +76,6 @@ class EoFlatPairDetExpData(EoCalibTable):
 
 
 class EoFlatPairDataSchemaV0(EoCalibSchema):
-
-    NAME, VERSION = "EoFlatPairData", 0
 
     ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
                                      tableClass=EoFlatPairAmpExpData,
