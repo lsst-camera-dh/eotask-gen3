@@ -399,6 +399,7 @@ class EoCalibTableSchema:
             val.writeMarkdownLine(key, stream)
         stream.write("\n\n")
 
+
 class EoCalibTable:
     """ Provides interface between `astropy.table.Table` and
     `EoCalibTableSchema`

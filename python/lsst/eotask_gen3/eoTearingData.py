@@ -35,7 +35,7 @@ class EoTearingData(EoCalib):
 
     _OBSTYPE = 'flat'
     _SCHEMA = SCHEMA_CLASS.fullName()
-    _VERSION = SCHEMA_CLASS.VERSION
+    _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
         super(EoTearingData, self).__init__(**kwargs)

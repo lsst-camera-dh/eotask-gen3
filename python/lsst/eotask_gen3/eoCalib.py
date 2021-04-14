@@ -330,7 +330,8 @@ class EoCalib:
         """ Write description of this class as markdown to stream """
         schema = cls.SCHEMA_CLASS()
         stream.write("#### Current Schema\n")
-        stream.write("##### DataClass: %s\n##### SchemaClass: %s\n" % (schema.dataClassName(), schema.fullName()))
+        stream.write("##### DataClass: %s\n##### SchemaClass: %s\n" %
+                     (schema.dataClassName(), schema.fullName()))
         schema.writeMarkdown(stream)
 
         if cls.PREVIOUS_SCHEMAS:
