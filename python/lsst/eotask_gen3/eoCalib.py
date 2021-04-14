@@ -21,10 +21,26 @@ __all__ = ["EoCalibSchema", "EoCalib",
 
 
 class EoCalibSchema:
+    """ Stores schema for a `EoCalib` object
+
+    Each sub-class will define one version of the schema.
+    The naming convention for the sub-classes is:
+    {DataClassName}SchemaV{VERSION} e.g., 'EoCalibDataSchemaV0'
+
+    Parameters
+    ----------
+    allTableHandles : `OrderedDict`, [`str`, `EoCalibTableHandle`]
+        Mapping between handle names and object
+    """
 
     @classmethod
     def findTableHandles(cls):
-        """Find quanitites that associated with a class"""
+        """ Find and return the EoCalibTableHandle objects in a class
+
+        Returns
+        -------
+        tableHandles : `OrderedDict`, [`str`, `EoCalibTableHandle`]
+        """
         theClasses = cls.mro()
         tableHandles = OrderedDict()
         for theClass in theClasses:
@@ -35,10 +51,15 @@ class EoCalibSchema:
 
     @classmethod
     def fullName(cls):
+        """ Return the name of this class """
         return cls.__name__
 
     @classmethod
     def version(cls):
+        """ Return the version number of this schema
+
+        This relies on the naming convention: {DataClassName}SchemaV{VERSION}
+        """
         cStr = cls.__name__
         try:
             return int(cStr[cStr.find("SchemaV")+7:])
@@ -48,17 +69,27 @@ class EoCalibSchema:
 
     @classmethod
     def dataClassName(cls):
+        """ Return the name of the associated data class
+
+        This relies on the naming convention: {DataClassName}SchemaV{VERSION}
+        """
         cStr = cls.__name__
         return cStr[:cStr.find("SchemaV")]
 
     def __init__(self):
+        """ C'tor,  Fills class parameters """
         self._allTableHandles = self.findTableHandles()
 
     def getTableHandle(self, tableObj):
+        """ Return the `EoCalibTableHandle` associated to tableObj
+
+        This uses the meta data field 'handle' """
         tableHandleName = EoCalibTableHandle.findTableMeta(tableObj, 'handle')
         return self._allTableHandles[tableHandleName]
 
     def castToTable(self, tableObj):
+        """ Use a `EoCalibTableHandle` to cast tableObj to
+        `astropy.table.Table` """
         tableHandle = self.getTableHandle(tableObj)
         if isinstance(tableObj, Table):
             tableHandle.validateTable(tableObj)
@@ -69,24 +100,37 @@ class EoCalibSchema:
         raise TypeError('Can only cast Mapping and Table to Table, not %s' % type(tableObj))  # pragma: no cover # noqa
 
     def castToTables(self, tableObjs):
+        """ Cast a list of tableObjs to a list of `astropy.table.Table` """
         return [self.castToTable(tableObj) for tableObj in tableObjs]
 
     def tableToDict(self, table):
+        """ Use a `EoCalibTableHandle` to convert table to `OrderedDict` """
         if not isinstance(table, Table):  # pragma: no cover
             raise TypeError('tableToDict was passed a %s, which is not a Table' % type(table))
         tableHandle = self.getTableHandle(table)
         return tableHandle.convertToDict(table)
 
     def tablesToDicts(self, tables):
+        """ Convert tables to `OrderedDict`, keyed by name """
         return OrderedDict([(table.meta['name'], self.tableToDict(table)) for table in tables])
 
     def makeTables(self, **kwargs):
+        """ Construct and return a nested `OrderedDict` of `EoCalibTable`
+
+        It is keyed by 'handle', 'name'
+        """
         tables = OrderedDict()
         for key, val in self._allTableHandles.items():
             tables[key] = val.makeTables(handle=key, **kwargs)
         return tables
 
     def sortTables(self, tableList):
+        """ Sort and return tableList into a nested `OrderedDict` of
+        `EoCalibTable`
+
+        It is keyed by 'handle', 'name' and matches return result
+        of `makeTables`
+        """
         tableDict = OrderedDict()
         for table in tableList:
             tableHandleName = EoCalibTableHandle.findTableMeta(table, 'handle')
@@ -101,11 +145,36 @@ class EoCalibSchema:
         return tableDict
 
     def writeMarkdown(self, stream=sys.stdout):
+        """ Write description of this class as markdown to stream """
         for key, val in self._allTableHandles.items():
             val.schema.writeMarkdown(key, stream)
 
 
 class EoCalib:
+    """ Provides interface between `list` of `astropy.table.Table` and
+    `EoCalibSchema`
+
+    Each sub-class will define one all the versions of a particular
+    data type, and provide backward compatibility
+    to older versions of the schema.
+
+    Parameters
+    ----------
+    SCHEMA_CLASS : `type`
+        Current schema class
+    PREVIOUS_SCHEMAS : `list`, [`type`]
+        Previous schema classes
+    schemaDict : `OrderedDict`, [`str`, `type`]
+
+    schema : `EoCalibSchema`
+
+    version : `int`
+
+    tableList : `list`, [`astropy.table.Table`]
+
+    tableDict : `OrderedDict`, [`str`, `OrderedDict`, [`str`, `EoCalibTable`]]
+
+    """
 
     SCHEMA_CLASS = EoCalibSchema
     PREVIOUS_SCHEMAS = []
@@ -115,6 +184,20 @@ class EoCalib:
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, data=None, **kwargs):
+        """ C'tor,  Fills class parameters
+
+        Parameters
+        ----------
+        data : `Union`, [`list`, `Mapping`, `None`]
+            If provided, the data used to build the table
+            If `None`, table will be constructed using shape parameters
+            taken for kwargs
+
+        Keywords
+        --------
+        schema : `EoCalibSchema`
+            If provided will override schema class
+        """
         self._schemaDict = OrderedDict([(val.fullName(), val) for val in self.PREVIOUS_SCHEMAS])
         self._schemaDict[self.SCHEMA_CLASS.fullName()] = self.SCHEMA_CLASS
         self._schema = kwargs.get('schema', self.SCHEMA_CLASS())
@@ -136,10 +219,12 @@ class EoCalib:
 
     @property
     def schema(self):
+        """ Return the schema associated to the data """
         return self._schema
 
     @property
     def tables(self):
+        """ Return the underlying `list` of `astropy.io.Table` """
         return self._tableList
 
     def __eq__(self, other):
@@ -150,24 +235,34 @@ class EoCalib:
         return self._tableDict[key]
 
     def updateMetadata(self, setDate=False, **kwargs):
-        pass
+        """ FIXME, replace once this inherits from IsrCalib """
 
     @classmethod
     def fromDict(cls, dictionary, **kwargs):
+        """ Construct from dictionary """
         return cls(data=dictionary, **kwargs)
 
     def toDict(self):
+        """ Convert to `dict` """
         return self._schema.tablesToDicts(self._tableList)
 
     @classmethod
     def fromTable(cls, tableList, **kwargs):
+        """ Construct from a list of `astropy.io.table` """
         return cls(data=tableList, **kwargs)
 
     def toTable(self):
+        """ 'Convert to a `list` of `astropy.table.Table`
+
+        Actually just returns the undering list of tables """
         return self._tableList
 
     @classmethod
     def readFits(cls, filename, **kwargs):
+        """ FIXME, temp function copied for IsrCalib
+
+        Remove once this class inherits from IsrCalib
+        """
         tableList = []
         tableList.append(Table.read(filename, hdu=1))
         extNum = 2  # Fits indices start at 1, we've read one already.
@@ -191,6 +286,10 @@ class EoCalib:
         return cls.fromTable(tableList, **kwargs)
 
     def writeFits(self, filename):
+        """ FIXME, temp function copied for IsrCalib
+
+        Remove once this class inherits from IsrCalib
+        """
         tableList = self.toTable()
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=Warning, module="astropy.io")
@@ -202,6 +301,20 @@ class EoCalib:
         return filename
 
     def reportDiffValues(self, otherCalib, fileObj=sys.stdout):
+        """ Report on all differing values between two `EoCalib` objects
+
+        Parameters
+        ----------
+        otherCalib : `EoCalib`
+            Object to compare against
+        fileObj : `file-like`
+            Stream to write report to.  Can be dev/null
+
+        Returns
+        -------
+        identical : `bool`
+            True if the object are identical, False otherwise
+        """
         if self.schema.fullName() != otherCalib.schema.fullName():
             fileObj.write("EoCalib schema do not match %s != %s" %
                           (self.schema.fullName(), otherCalib.schema.fullName()))
@@ -214,7 +327,7 @@ class EoCalib:
 
     @classmethod
     def writeMarkdown(cls, stream=sys.stdout):
-
+        """ Write description of this class as markdown to stream """
         schema = cls.SCHEMA_CLASS()
         stream.write("#### Current Schema\n")
         stream.write("##### DataClass: %s\n##### SchemaClass: %s\n" % (schema.dataClassName(), schema.fullName()))
@@ -232,10 +345,12 @@ EO_CALIB_CLASS_DICT = OrderedDict()
 
 
 def GetEoCalibClassDict():
+    """ Return the global `OrderedDict` of `EoCalib` sub-classes """
     return EO_CALIB_CLASS_DICT
 
 
 def RegisterEoCalibSchema(calibClass):
+    """ Add calibClass to the global `OrderedDict` of `EoCalib` sub-classes """
     if not issubclass(calibClass, EoCalib):  # pragma: no cover
         msg = "Can only register EoCalib sub-classes, not %s" % (type(calibClass))
         raise TypeError(msg)
@@ -244,7 +359,8 @@ def RegisterEoCalibSchema(calibClass):
 
 
 def WriteSchemaMarkdown(fileName):
-
+    """ Iterate on the global `OrderedDict` of `EoCalib` sub-classes
+    and write description of each to a markdown file """
     with open(fileName, 'w') as fout:
 
         for key, val in EO_CALIB_CLASS_DICT.items():
