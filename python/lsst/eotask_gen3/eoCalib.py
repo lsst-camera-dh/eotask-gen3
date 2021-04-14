@@ -218,14 +218,14 @@ class EoCalib:
 
         schema = cls.SCHEMA_CLASS()
         stream.write("#### Current Schema\n")
-        stream.write("#### %s %s\n" % (schema.dataClassName(), schema.fullName()))
+        stream.write("##### DataClass: %s\n##### SchemaClass: %s\n" % (schema.dataClassName(), schema.fullName()))
         schema.writeMarkdown(stream)
 
         if cls.PREVIOUS_SCHEMAS:
             stream.write("#### Previous Schema\n")
         for prevSchemaClass in cls.PREVIOUS_SCHEMAS:
             prevSchema = prevSchemaClass()
-            stream.write("#### %s\n" % prevSchema.fullName())
+            stream.write("##### SchemaClass: %s\n" % prevSchema.fullName())
             prevSchema.writeMarkdown(stream)
 
 

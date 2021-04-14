@@ -212,13 +212,15 @@ class EoCalibTableSchema:
         return outDict
 
     def writeMarkdown(self, name, stream=sys.stdout):
-        stream.write("|| Name || <td colspan=3>Class<\\td> || Version  || Length ||\n")
-        stream.write("| %s | <td colspan=3>%s<\\td> | %i | %s |\n" %
+        stream.write("| Name | Class | Version | Length |\n")
+        stream.write("|-|-|-|-|\n")
+        stream.write("| %s | %s | %i | %s |\n" %
                      (name, self.dataClassName(), self.version(), self.TABLELENGTH))
-        stream.write("|| Name || Column || Datatype || Shape || Units || Description ||\n")
+        stream.write("\n\n")
+        stream.write("| Name | Column | Datatype | Shape | Units | Description |\n")
         for key, val in self._fieldDict.items():
             val.writeMarkdownLine(key, stream)
-
+        stream.write("\n\n")
 
 class EoCalibTable:
 
