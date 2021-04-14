@@ -198,9 +198,10 @@ class EoCalib:
         schema : `EoCalibSchema`
             If provided will override schema class
         """
+        kwcopy = kwargs.copy()
         self._schemaDict = OrderedDict([(val.fullName(), val) for val in self.PREVIOUS_SCHEMAS])
         self._schemaDict[self.SCHEMA_CLASS.fullName()] = self.SCHEMA_CLASS
-        self._schema = kwargs.get('schema', self.SCHEMA_CLASS())
+        self._schema = kwcopy.pop('schema', self.SCHEMA_CLASS())
         self._version = self._schema.version()
         if isinstance(data, list):
             self._tableList = self._schema.castToTables(data)
@@ -209,13 +210,24 @@ class EoCalib:
             self._tableList = self._schema.castToTables(data.values())
             self._tableDict = self._schema.sortTables(self._tableList)
         elif data is None:
-            self._tableDict = self._schema.makeTables(**kwargs)
+            self._tableDict = self._schema.makeTables(**kwcopy)
             self._tableList = []
             for val in self._tableDict.values():
                 for val2 in val.values():
                     self._tableList.append(val2.table)
         else:  # pragma: no cover
             raise TypeError("EoCalib input data must be None, Table or dict, not %s" % (type(data)))
+
+    @classmethod
+    def allSchemaClasses(cls):
+        """ Return a `list` of all the associated schema classes """
+        return [cls.SCHEMA_CLASS] + cls.PREVIOUS_SCHEMAS
+
+    @classmethod
+    def schemaDict(cls):
+        """ Return an `OrderedDict` of all the associated schema classes
+        mapped by class name """
+        return OrderedDict([(val.fullName(), val) for val in cls.allSchemaClasses()])
 
     @property
     def schema(self):
@@ -263,6 +275,14 @@ class EoCalib:
 
         Remove once this class inherits from IsrCalib
         """
+        with fits.open(filename) as fFits:
+            try:
+                schemaName = fFits[0].header['schema']  # pylint: disable=no-member  # noqa
+            except KeyError:  # pragma: no cover
+                schemaName = fFits[0].header['SCHEMA']  # pylint: disable=no-member  # noqa
+
+        schema = cls.schemaDict()[schemaName]()
+
         tableList = []
         tableList.append(Table.read(filename, hdu=1))
         extNum = 2  # Fits indices start at 1, we've read one already.
@@ -283,7 +303,7 @@ class EoCalib:
                 if isinstance(v, fits.card.Undefined):
                     table.meta[k] = None  # pragma: no cover
 
-        return cls.fromTable(tableList, **kwargs)
+        return cls.fromTable(tableList, schema=schema, **kwargs)
 
     def writeFits(self, filename):
         """ FIXME, temp function copied for IsrCalib
@@ -294,7 +314,10 @@ class EoCalib:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=Warning, module="astropy.io")
             astropyList = [fits.table_to_hdu(table) for table in tableList]
-            astropyList.insert(0, fits.PrimaryHDU())
+
+            primaryHdu = fits.PrimaryHDU()
+            primaryHdu.header['schema'] = self._schema.fullName()
+            astropyList.insert(0, primaryHdu)
 
             writer = fits.HDUList(astropyList)
             writer.writeto(filename, overwrite=True)
