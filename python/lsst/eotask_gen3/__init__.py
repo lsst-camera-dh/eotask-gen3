@@ -1,7 +1,10 @@
 """ Electrical optical testing code for LSST """
 
+# Base classes for data structures
 from .eoCalibTable import *
 from .eoCalib import *
+
+# Data Structures
 from .eoBiasStabilityData import *
 from .eoBrighterFatterData import *
 from .eoCtiData import *
@@ -17,3 +20,6 @@ from .eoReadNoiseData import *
 from .eoSummaryData import *
 from .eoTearingData import *
 from .eoTestData import *
+
+# Base classes for tasks
+from .eoCalibBase import *
