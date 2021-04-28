@@ -1,6 +1,6 @@
 """ Base classes for Electrical Optical (EO) calibration tasks.
 
-Provides five bases classes for different iteration scenarios:
+Provides six bases classes for different iteration scenarios:
 
     1. EoAmpExpCalibTask : loops over amps, then over exposures
     2. EoAmpPairCalibTask : loops over amps, then over exposure pairs
@@ -8,7 +8,6 @@ Provides five bases classes for different iteration scenarios:
         (e.g., a stacked bias frame or stacked dark frame)
     4. EoDetExpCalibTask : loops over exposures (analyzes entire detector)
     5. EoDetRunCalibTask : analyzes a single stacked image
-
 """
 
 import copy
@@ -16,13 +15,17 @@ import copy
 import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
-from lsst.pipe.ip.isr import IsrTask
+from lsst.ip.isr import IsrTask, AssembleCcdTask, Defects
 
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
            'EoAmpRunCalibTaskConnections', 'EoAmpRunCalibTaskConfig', 'EoAmpRunCalibTask',
            'EoDetExpCalibTaskConnections', 'EoDetExpCalibTaskConfig', 'EoDetExpCalibTask',
-           'EoDetRunCalibTaskConnections', 'EoDetRunCalibTaskConfig', 'EoDetRunCalibTask']
+           'EoDetRunCalibTaskConnections', 'EoDetRunCalibTaskConfig', 'EoDetRunCalibTask',
+           'CAMERA_CONNECT', 'BIAS_CONNECT', 'DARK_CONNECT', 'DEFECTS_CONNECT', 'GAINS_CONNECT',
+           'INPUT_RAW_AMPS_CONNECT', 'OUTPUT_IMAGE_CONNECT', 'ISR_CONFIG', 'ASSEMBLE_CCD_CONFIG',
+           'OUTPUT_DEFECTS_CONNECT', 'runIsrOnAmp', 'runIsrOnExp']
+           
 
 
 CAMERA_CONNECT = cT.PrerequisiteInput(
@@ -36,6 +39,14 @@ CAMERA_CONNECT = cT.PrerequisiteInput(
 BIAS_CONNECT = cT.PrerequisiteInput(
     name="bias",
     doc="Input bias calibration.",
+    storageClass="ExposureF",
+    dimensions=("instrument", "detector"),
+    isCalibration=True,
+)
+
+DARK_CONNECT = cT.PrerequisiteInput(
+    name="dark",
+    doc="Input dark calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
     isCalibration=True,
@@ -80,18 +91,39 @@ OUTPUT_CONNECT = cT.Output(
     dimensions=("instrument", "detector"),
 )
 
+OUTPUT_IMAGE_CONNECT = cT.Output(
+    name="calibOutput",
+    doc="Combined Image",
+    storageClass="ExposureF",
+    dimensions=("instrument", "detector"),
+    isCalibration=True,
+)
+
+OUTPUT_DEFECTS_CONNECT = cT.Output(
+    name='defects',
+    doc="Output defect tables.",
+    storageClass="Defects",
+    dimensions=("instrument", "detector"),
+    isCalibration=True,
+)
+
 ISR_CONFIG = pexConfig.ConfigurableField(
     target=IsrTask,
     doc="Used to run a reduced version of ISR approrpiate for EO analyses",
 )
 
+ASSEMBLE_CCD_CONFIG = pexConfig.ConfigurableField(
+    target=AssembleCcdTask,
+    doc="Used to run a reduced version of ISR approrpiate for EO analyses",
+)
 
-def runIsrOnAmp(isrTask, ampExposure, amp, **kwargs):
-    return isrTask.runIsrOnAmp(ampExposure, amp, **kwargs)
+
+def runIsrOnAmp(task, ampExposure, amp, **kwargs):
+    return task.isr.runIsrOnAmp(ampExposure, amp, **kwargs)
 
 
-def runIsrOnExp(isrTask, rawExposure, **kwargs):
-    return isrTask.runIsr(rawExposure, **kwargs)
+def runIsrOnExp(task, rawExposure, **kwargs):
+    return task.isr.runIsr(rawExposure, **kwargs)
 
 
 def copyConnect(connection):
@@ -100,6 +132,47 @@ def copyConnect(connection):
 
 def copyConfig(config):
     return copy.deepcopy(config)
+
+
+def extractAmpImage(detImage, amp):
+    return detImage[amp]
+
+
+def extractAmpDefects(detDefects, amp):
+    def convertFp(fp, amp):
+        return fp
+    def fpInAmp(fp, amp):
+        return fp.index == amp.index
+    fpAmp = [ convertFp(fp, amp) for fp in detDefects.footprintSet() if fpInAmp(fp, amp) ]
+    return Defects.fromFootprintList(fpAmp)
+
+
+def extractAmpNonlinearity(detNlc, amp):
+    return detNlc[amp]
+
+
+def extractAmpGain(detGain, amp):
+    return detGain[amp]
+
+
+def extractAmpCalibs(amp, **kwargs):
+    detBias = kwargs.get('bias', None)
+    detDark = kwargs.get('dark', None)
+    detDefects = kwargs.get('defects', None)
+    detNlc = kwargs.get('linearity', None)
+    detGain = kwargs.get('gain', None)
+    ampCalibDict = {}
+    if detBias is not None:
+        ampCalibDict['bias'] = extractAmpImage(detBias, amp)
+    if detDark is not None:
+        ampCalibDict['dark'] = extractAmpImage(detDark, amp)
+    if detDefects is not None:
+        ampCalibDict['defects'] = extractAmpDefects(detDefects, amp)
+    if detNlc is not None:
+        ampCalibDict['linearity'] = extractAmpNonlinearity(detNlc, amp)
+    if detGain is not None:
+        ampCalibDict['gain'] = extractAmpGain(detGain, amp)
+    return ampCalibDict
 
 
 class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
@@ -111,6 +184,7 @@ class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
     defects = copyConnect(DEFECTS_CONNECT)
     gains = copyConnect(GAINS_CONNECT)
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
+    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpExpCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -139,7 +213,7 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
         super().__init__(**kwargs)
         self.makeSubtask("isr")
 
-    def run(self, inputExps, **kwargs):
+    def run(self, inputExps, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -164,9 +238,10 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
         nAmps = len(det.getAmplifiers())
         outputData = self.makeOutputData(amps=det.getAmplifiers(), nAmps=nAmps, nExposure=len(inputExps))
         for amp in det.getAmplifiers():
+            ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iExp, inputExp in enumerate(inputExps):
-                calibExp = runIsrOnAmp(self.isr, inputExp.get(parameters={amp: amp}), **kwargs)
-                self.analyzeAmpExp(calibExp, outputData, amp, iExp)
+                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), amp, **ampCalibs)
+                self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
             self.analyzeAmpRunData(outputData, amp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
@@ -193,6 +268,7 @@ class EoAmpPairCalibTaskConnections(pipeBase.PipelineTaskConnections,
     defects = copyConnect(DEFECTS_CONNECT)
     gains = copyConnect(GAINS_CONNECT)
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
+    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpPairCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -219,8 +295,9 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
     def __init__(self, **kwargs):
         """ C'tor """
         super().__init__(**kwargs)
+        self.makeSubtask("isr")
 
-    def run(self, inputPairs, **kwargs):
+    def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -245,12 +322,13 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
         for amp in amps:
+            ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
-                calibExp1 = self.runIsrOnAmp(inputPair[0].get(parameters={amp: amp}), **kwargs)
-                calibExp2 = self.runIsrOnAmp(inputPair[1].get(parameters={amp: amp}), **kwargs)
-                self.analyzeAmpExposureData(calibExp1, calibExp2, outputData, amp, iPair)
+                calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={amp: amp}), amp, **ampCalibs)
+                calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={amp: amp}), amp, **ampCalibs)
+                self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
             self.analyzeAmpRunData(outputData, amp)
-        self.analyzeDetectorRunData(outputData)
+        self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
     def makeOutputData(self, **kwargs):
@@ -270,6 +348,7 @@ class EoAmpRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read calibrated data """
     stackedCalExp = copyConnect(INPUT_STACK_EXP_CONNECT)
+    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -277,7 +356,7 @@ class EoAmpRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
     """ Class snippet to use connections for stacked-calibrated exposure """
 
 
-class EoAmpRunCalibTask(pipeBase.pipeTask):
+class EoAmpRunCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that loop over amps on stacked image
 
     Implements three methods that can be overridden in sub-classes:
@@ -291,11 +370,7 @@ class EoAmpRunCalibTask(pipeBase.pipeTask):
     ConfigClass = EoAmpRunCalibTaskConfig
     _DefaultName = "DoNotUse"
 
-    def __init__(self, **kwargs):
-        """ C'tor """
-        super().__init__(**kwargs)
-
-    def run(self, stackedCalExp, **kwargs):
+    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -317,15 +392,15 @@ class EoAmpRunCalibTask(pipeBase.pipeTask):
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps))
         for amp in amps:
-            ampExposure = stackedCalExp[amp]
+            ampExposure = extractAmpImage(stackedCalExp, amp)
             self.analyzeAmpRunData(ampExposure, outputData, amp, **kwargs)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
-    def makeOutputData(self, **kwargs):
+    def makeOutputData(self, amps, nAmps):
         raise NotImplementedError
 
-    def analyzeAmpRunData(self, ampExposure, outputData, amp, **kwargs):
+    def analyzeAmpRunData(self, ampExposure, outputData, amp):
         """ Analyze data from on amp """
 
     def analyzeDetRunData(self, outputData):
@@ -340,6 +415,7 @@ class EoDetExpCalibTaskConnections(pipeBase.PipelineTaskConnections):
     defects = copyConnect(DEFECTS_CONNECT)
     gains = copyConnect(GAINS_CONNECT)
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
+    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoDetExpCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -348,7 +424,7 @@ class EoDetExpCalibTaskConfig(pipeBase.PipelineTaskConfig,
     isr = copyConfig(ISR_CONFIG)
 
 
-class EoDetExpCalibTask(pipeBase.pipeTask):
+class EoDetExpCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that loop over amps on stacked image
 
     Implements three methods that can be overridden in sub-classes:
@@ -365,8 +441,9 @@ class EoDetExpCalibTask(pipeBase.pipeTask):
     def __init__(self, **kwargs):
         """ C'tor """
         super().__init__(**kwargs)
+        self.makeSubtask("isr")
 
-    def run(self, stackedCalExp, **kwargs):
+    def run(self, inputExps, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -383,12 +460,10 @@ class EoDetExpCalibTask(pipeBase.pipeTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
-        camera = kwargs['camera']
-        det = camera.get(inputExp[0].dataId['detector'])
         outputData = self.makeOutputData(nExposure=len(inputExps))
         for iExp, inputExp in enumerate(inputExps):
-            calibExp = runIsrOnExp(self.isr, inputExp.get(), **kwargs)
-            self.analyzeDetExp(calibExp, outputData, iExp)
+            calibExp = runIsrOnExp(self, inputExp.get(), **kwargs)
+            self.analyzeDetExpData(calibExp, outputData, iExp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
@@ -406,6 +481,7 @@ class EoDetRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read calibrated data """
     stackedCalExp = copyConnect(INPUT_STACK_EXP_CONNECT)
+    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoDetRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -413,7 +489,7 @@ class EoDetRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
     """ Class snippet to use connections for stacked-calibrated exposure """
 
 
-class EoDetRunCalibTask(pipeBase.pipeTask):
+class EoDetRunCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that analyze a stacked image
 
     Implements three methods that can be overridden in sub-classes:
@@ -426,11 +502,7 @@ class EoDetRunCalibTask(pipeBase.pipeTask):
     ConfigClass = EoDetRunCalibTaskConfig
     _DefaultName = "DoNotUse"
 
-    def __init__(self, **kwargs):
-        """ C'tor """
-        super().__init__(**kwargs)
-
-    def run(self, stackedCalExp, **kwargs):
+    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters

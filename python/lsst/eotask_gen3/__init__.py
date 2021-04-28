@@ -10,6 +10,9 @@ from .eoBrighterFatterData import *
 from .eoCtiData import *
 from .eoDarkCurrentData import *
 from .eoDefectData import *
+from .eoBrightPixelsData import *
+from .eoTrapsData import *
+from .eoDarkPixelsData import *
 from .eoFe55Data import *
 from .eoFlatPairData import *
 from .eoGainStabilityData import *

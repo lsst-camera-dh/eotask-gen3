@@ -14,7 +14,8 @@ class EoBiasStabilityAmpExpDataSchemaV0(EoCalibTableSchema):
 
     mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
     stdev = EoCalibField(name="STDEV", dtype=float, unit='adu')
-
+    rowMedian = EoCalibField(name="ROW_MEDIAN", dtype=float, unit='adu', shape=['nRow'])
+    
 
 class EoBiasStabilityAmpExpData(EoCalibTable):
 
@@ -24,6 +25,7 @@ class EoBiasStabilityAmpExpData(EoCalibTable):
         super(EoBiasStabilityAmpExpData, self).__init__(data=None, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.stdev = self.table[self.SCHEMA_CLASS.stdev.name]
+        self.rowMedian = self.table[self.SCHEMA_CLASS.rowMedian.name]
 
 
 class EoBiasStabilityDetExpDataSchemaV0(EoCalibTableSchema):
