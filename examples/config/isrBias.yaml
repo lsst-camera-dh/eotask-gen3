@@ -1,0 +1,19 @@
+description: Make bias subtracted and defect masked frames
+tasks:
+  isr:
+    class: lsst.ip.isr.isrTask.IsrTask
+    config:
+      connections.ccdExposure: 'raw'
+      connections.outputExposure: 'calExpBias'
+      doBias: True
+      doVariance: True
+      doLinearize: False
+      doCrosstalk: False
+      doDefect: False
+      doNanMasking: True
+      doInterpolate: True
+      doBrighterFatter: False
+      doDark: False
+      doFlat: False
+      doApplyGains: False
+      doFringe: False
