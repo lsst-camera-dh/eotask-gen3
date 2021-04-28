@@ -4,7 +4,7 @@ from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCali
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
 __all__ = ["EoCtiAmpRunData",
-           "EOCtiData"]
+           "EoCtiData"]
 
 
 class EoCtiAmpRunDataSchemaV0(EoCalibTableSchema):
@@ -29,28 +29,28 @@ class EoCtiAmpRunData(EoCalibTable):
         self.ctiParallelError = self.table[self.SCHEMA_CLASS.ctiParallelError.name]
 
 
-class EOCtiDataSchemaV0(EoCalibSchema):
+class EoCtiDataSchemaV0(EoCalibSchema):
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoCtiAmpRunData)
 
 
-class EOCtiData(EoCalib):
+class EoCtiData(EoCalib):
 
-    SCHEMA_CLASS = EOCtiDataSchemaV0
+    SCHEMA_CLASS = EoCtiDataSchemaV0
 
     _OBSTYPE = 'bias'
     _SCHEMA = SCHEMA_CLASS.fullName()
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
-        super(EOCtiData, self).__init__(**kwargs)
+        super(EoCtiData, self).__init__(**kwargs)
         self.amps = self['amps']
 
 
-RegisterEoCalibSchema(EOCtiData)
+RegisterEoCalibSchema(EoCtiData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
 
-EOCtiData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS)))
+EoCtiData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS)))
