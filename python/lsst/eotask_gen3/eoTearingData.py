@@ -3,30 +3,31 @@
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoTearingAmpRunData",
+__all__ = ["EoTearingAmpExpData",
            "EoTearingData"]
 
 
-class EoTearingAmpRunDataSchemaV0(EoCalibTableSchema):
+class EoTearingAmpExpDataSchemaV0(EoCalibTableSchema):
 
-    TABLELENGTH = 'nAmp'
+    TABLELENGTH = 'nExposure'
 
     nDetection = EoCalibField(name="NDETECT", dtype=int)
 
 
-class EoTearingAmpRunData(EoCalibTable):
+class EoTearingAmpExpData(EoCalibTable):
 
-    SCHEMA_CLASS = EoTearingAmpRunDataSchemaV0
+    SCHEMA_CLASS = EoTearingAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoTearingAmpRunData, self).__init__(data=data, **kwargs)
-        self.ndetection = self.table[self.SCHEMA_CLASS.nDetection.name]
+        super(EoTearingAmpExpData, self).__init__(data=data, **kwargs)
+        self.nDetection = self.table[self.SCHEMA_CLASS.nDetection.name]
 
 
 class EoTearingDataSchemaV0(EoCalibSchema):
 
-    amps = EoCalibTableHandle(tableName="amps",
-                              tableClass=EoTearingAmpRunData)
+    ampsExposure = EoCalibTableHandle(tableName="ampExp_{key}",
+                                      tableClass=EoTearingAmpExpData,
+                                      multiKey="amps")
 
 
 class EoTearingData(EoCalib):
@@ -39,10 +40,11 @@ class EoTearingData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoTearingData, self).__init__(**kwargs)
-        self.amps = self['amps']
+        self.ampExposure = self['ampExposure']
 
 
 RegisterEoCalibSchema(EoTearingData)
 
 AMPS = ["%02i" % i for i in range(16)]
-EoTearingData.testData = dict(testCtor=dict(nAmp=len(AMPS)))
+NEXPOSURE = 10
+EoTearingData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE))
