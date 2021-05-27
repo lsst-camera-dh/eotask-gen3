@@ -16,7 +16,7 @@ from .eoCalibBase import CAMERA_CONNECT, BIAS_CONNECT, DARK_CONNECT, DEFECTS_CON
 
 
 class EoCombineCalibTaskConnections(pipeBase.PipelineTaskConnections,
-                                    dimensions=("instrument", "exposure", "detector")):
+                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read raw amplifier data and
     perform minimal Isr on each amplifier """
     camera = copyConnect(CAMERA_CONNECT)
@@ -126,12 +126,12 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             toStack = []
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for inputExp in inputExps:
-                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), amp, **ampCalibs)
+                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), **ampCalibs)
                 toStack.append(calibExp.getMaskedImage())
-            combined = afwImage.MaskedImageF(amp.getWidth(), amp.getHeight())
+            combined = afwImage.MaskedImageF(amp.getRawBBox().getWidth(), amp.getRawBBox().getHeight())
             combinedExp = afwImage.makeExposure(combined)  # pylint: disable=no-member
             combineType = afwMath.stringToStatisticsProperty(self.config.combine)  # pylint: disable=no-member
-            afwMath.statisticsStack(combinedExp, toStack, combineType, stats)  # pylint: disable=no-member
+            afwMath.statisticsStack(combined, toStack, combineType, stats)  # pylint: disable=no-member
             combinedExp.setDetector(det)
             ampDict[amp.name] = combinedExp
         outputImage = self.assembleCcd.assembleCcd(ampDict)  # pylint: disable=no-member
@@ -176,43 +176,7 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
         calibTime = time.strftime("%X %Z", now)
         header.set("CALIB_CREATE_DATE", calibDate)
         header.set("CALIB_CREATE_TIME", calibTime)
-
-        # Merge input headers
-        inputHeaders = [exp.getMetadata() for exp in expList if exp is not None]
-        merged = merge_headers(inputHeaders, mode='drop')
-        for k, v in merged.items():
-            if k not in header:
-                md = expList[0].getMetadata()
-                comment = md.getComment(k) if k in md else None
-                header.set(k, v, comment=comment)
-
-        # Construct list of visits
-        visitInfoList = [exp.getInfo().getVisitInfo() for exp in expList if exp is not None]
-        for i, visit in enumerate(visitInfoList):
-            if visit is None:
-                continue
-            header.set("CPP_INPUT_%d" % (i,), visit.getExposureId())
-            header.set("CPP_INPUT_DATE_%d" % (i,), str(visit.getDate()))
-            header.set("CPP_INPUT_EXPT_%d" % (i,), visit.getExposureTime())
-
-        # Not yet working: DM-22302
-        # Create an observation group so we can add some standard headers
-        # independent of the form in the input files.
-        # Use try block in case we are dealing with unexpected data headers
-        try:
-            group = ObservationGroup(visitInfoList, pedantic=False)
-        except Exception:
-            self.log.warn("Exception making an obs group for headers. Continuing.")
-            # Fall back to setting a DATE-OBS from the calibDate
-            dateCards = {"DATE-OBS": "{}T00:00:00.00".format(calibDate)}
-            comments["DATE-OBS"] = "Date of start of day of calibration midpoint"
-        else:
-            oldest, newest = group.extremes()
-            dateCards = dates_to_fits(oldest.datetime_begin, newest.datetime_end)
-
-        for k, v in dateCards.items():
-            header.set(k, v, comment=comments.get(k, None))
-
+ 
         return header
 
 
@@ -226,7 +190,7 @@ class EoCombineBiasTaskConfig(pipeBase.PipelineTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "cpBias"
+        self.connections.output = "eo_bias"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
         self.isr.doSetBadRegions = False
@@ -267,7 +231,7 @@ class EoCombineDarkTaskConfig(pipeBase.PipelineTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "cpBias"
+        self.connections.output = "eo_dark"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False
@@ -301,7 +265,7 @@ class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
     bias = copyConnect(BIAS_CONNECT)
     defects = copyConnect(DEFECTS_CONNECT)
     dark = copyConnect(DARK_CONNECT)
-    gains = copyConnect(GAINS_CONNECT)
+    #gains = copyConnect(GAINS_CONNECT)
 
 
 class EoCombineFlatTaskConfig(pipeBase.PipelineTaskConfig,
@@ -309,7 +273,7 @@ class EoCombineFlatTaskConfig(pipeBase.PipelineTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "cpBias"
+        self.connections.output = "eo_flat"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False

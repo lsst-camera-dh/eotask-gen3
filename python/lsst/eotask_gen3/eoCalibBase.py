@@ -16,6 +16,7 @@ import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 from lsst.ip.isr import IsrTask, AssembleCcdTask, Defects
+from lsst.afw.cameraGeom import AmplifierIsolator
 
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
@@ -121,39 +122,26 @@ ASSEMBLE_CCD_CONFIG = pexConfig.ConfigurableField(
 def runIsrOnAmp(task, ampExposure, amp, **kwargs):
     return task.isr.runIsrOnAmp(ampExposure, amp, **kwargs)
 
-
 def runIsrOnExp(task, rawExposure, **kwargs):
-    return task.isr.runIsr(rawExposure, **kwargs)
-
+    return task.isr.run(rawExposure, **kwargs)
 
 def copyConnect(connection):
     return copy.deepcopy(connection)
 
-
 def copyConfig(config):
     return copy.deepcopy(config)
 
-
 def extractAmpImage(detImage, amp):
-    return detImage[amp]
-
+    return AmplifierIsolator.apply(detImage, amp)
 
 def extractAmpDefects(detDefects, amp):
-    def convertFp(fp, amp):
-        return fp
-    def fpInAmp(fp, amp):
-        return fp.index == amp.index
-    fpAmp = [ convertFp(fp, amp) for fp in detDefects.footprintSet() if fpInAmp(fp, amp) ]
-    return Defects.fromFootprintList(fpAmp)
-
+    return detDefects.getAmpDefects(amp)
 
 def extractAmpNonlinearity(detNlc, amp):
     return detNlc[amp]
 
-
 def extractAmpGain(detGain, amp):
     return detGain[amp]
-
 
 def extractAmpCalibs(amp, **kwargs):
     detBias = kwargs.get('bias', None)
