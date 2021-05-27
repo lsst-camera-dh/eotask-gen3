@@ -122,18 +122,18 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
         if numExps < self.config.maxVisitsToCalcErrorFromInputVariance:
             stats.setCalcErrorFromInputVariance(True)
 
-        for amp in det.getAmplifiers():
+        for iamp, amp in enumerate(det.getAmplifiers()):
             toStack = []
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for inputExp in inputExps:
-                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), **ampCalibs)
+                calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
                 toStack.append(calibExp.getMaskedImage())
             combined = afwImage.MaskedImageF(amp.getRawBBox().getWidth(), amp.getRawBBox().getHeight())
             combinedExp = afwImage.makeExposure(combined)  # pylint: disable=no-member
             combineType = afwMath.stringToStatisticsProperty(self.config.combine)  # pylint: disable=no-member
             afwMath.statisticsStack(combined, toStack, combineType, stats)  # pylint: disable=no-member
             combinedExp.setDetector(det)
-            ampDict[amp.name] = combinedExp
+            ampDict[amp.getName()] = combinedExp
         outputImage = self.assembleCcd.assembleCcd(ampDict)  # pylint: disable=no-member
         self.combineHeaders(inputExps, outputImage, calibType=self.config.calibrationType)
         return pipeBase.Struct(outputImage=outputImage)
@@ -185,12 +185,12 @@ class EoCombineBiasTaskConnections(EoCombineCalibTaskConnections):
     perform minimal Isr on each amplifier """
 
 
-class EoCombineBiasTaskConfig(pipeBase.PipelineTaskConfig,
+class EoCombineBiasTaskConfig(EoCombineCalibTaskConfig,
                               pipelineConnections=EoCombineBiasTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "eo_bias"
+        self.connections.outputImage = "eo_bias"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
         self.isr.doSetBadRegions = False
@@ -202,7 +202,7 @@ class EoCombineBiasTaskConfig(pipeBase.PipelineTaskConfig,
         self.isr.doWidenSaturationTrails = False
         self.isr.doDark = False
         self.isr.doFlat = False
-        self.isr.doFring = False
+        self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
@@ -226,12 +226,12 @@ class EoCombineDarkTaskConnections(EoCombineCalibTaskConnections):
     defects = copyConnect(DEFECTS_CONNECT)
 
 
-class EoCombineDarkTaskConfig(pipeBase.PipelineTaskConfig,
+class EoCombineDarkTaskConfig(EoCombineCalibTaskConfig,
                               pipelineConnections=EoCombineDarkTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "eo_dark"
+        self.connections.outputImage = "eo_dark"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False
@@ -243,8 +243,8 @@ class EoCombineDarkTaskConfig(pipeBase.PipelineTaskConfig,
         self.isr.doWidenSaturationTrails = False
         self.isr.doDark = False
         self.isr.doFlat = False
-        self.isr.doFring = False
-        self.isr.doInterpolate = True
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
 
@@ -268,12 +268,12 @@ class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
     #gains = copyConnect(GAINS_CONNECT)
 
 
-class EoCombineFlatTaskConfig(pipeBase.PipelineTaskConfig,
+class EoCombineFlatTaskConfig(EoCombineCalibTaskConfig,
                               pipelineConnections=EoCombineFlatTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "eo_flat"
+        self.connections.outputImage = "eo_flat"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False
@@ -285,8 +285,8 @@ class EoCombineFlatTaskConfig(pipeBase.PipelineTaskConfig,
         self.isr.doWidenSaturationTrails = False
         self.isr.doDark = True
         self.isr.doFlat = False
-        self.isr.doFring = False
-        self.isr.doInterpolate = True
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
 

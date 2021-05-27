@@ -38,7 +38,7 @@ CAMERA_CONNECT = cT.PrerequisiteInput(
 )
 
 BIAS_CONNECT = cT.PrerequisiteInput(
-    name="bias",
+    name="eo_bias",
     doc="Input bias calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
@@ -46,7 +46,7 @@ BIAS_CONNECT = cT.PrerequisiteInput(
 )
 
 DARK_CONNECT = cT.PrerequisiteInput(
-    name="dark",
+    name="eo_dark",
     doc="Input dark calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
@@ -70,12 +70,12 @@ GAINS_CONNECT = cT.PrerequisiteInput(
 )
 
 INPUT_RAW_AMPS_CONNECT = cT.Input(
-    name="raw.amp",
+    name="raw",
     doc="Input Frames.",
     storageClass="Exposure",
     dimensions=("instrument", "exposure", "detector"),
     multiple=True,
-    deferred=True,
+    deferLoad=True,
 )
 
 INPUT_STACK_EXP_CONNECT = cT.Input(
@@ -119,11 +119,11 @@ ASSEMBLE_CCD_CONFIG = pexConfig.ConfigurableField(
 )
 
 
-def runIsrOnAmp(task, ampExposure, amp, **kwargs):
-    return task.isr.runIsrOnAmp(ampExposure, amp, **kwargs)
+def runIsrOnAmp(task, ampExposure, **kwargs):
+    return task.isr.run(ampExposure, **kwargs).exposure
 
 def runIsrOnExp(task, rawExposure, **kwargs):
-    return task.isr.run(rawExposure, **kwargs)
+    return task.isr.run(rawExposure, **kwargs).exposure
 
 def copyConnect(connection):
     return copy.deepcopy(connection)
@@ -395,7 +395,8 @@ class EoAmpRunCalibTask(pipeBase.PipelineTask):
         """ Aggregate data from amps for detector """
 
 
-class EoDetExpCalibTaskConnections(pipeBase.PipelineTaskConnections):
+class EoDetExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
+                                   dimensions=("instrument", "detector", "exposure")):
     """ Class snippet with connections needed to read raw data
     and perform mininal Isr """
     camera = copyConnect(CAMERA_CONNECT)

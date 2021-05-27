@@ -12,7 +12,6 @@ from .eoDarkCurrentData import *
 from .eoDefectData import *
 from .eoBrightPixelsData import *
 from .eoTrapsData import *
-from .eoDarkPixelsData import *
 from .eoFe55Data import *
 from .eoFlatPairData import *
 from .eoGainStabilityData import *
@@ -26,3 +25,6 @@ from .eoTestData import *
 
 # Base classes for tasks
 from .eoCalibBase import *
+
+# Combine tasks
+from .eoCombine import *
