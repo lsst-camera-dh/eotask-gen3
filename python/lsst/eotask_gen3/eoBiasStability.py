@@ -1,6 +1,7 @@
 import numpy as np
 
 import lsst.afw.math as afwMath
+import lsst.pipe.base.connectionTypes as cT
 
 from .eoCalibBase import EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask
 from .eoBiasStabilityData import EoBiasStabilityData
@@ -8,12 +9,36 @@ from .eoBiasStabilityData import EoBiasStabilityData
 __all__ = ["EoBiasStabilityTask", "EoBiasStabilityTaskConfig"]
 
 
+class EoBiasStabilityTaskConnections(EoAmpExpCalibTaskConnections):
+
+    outputData = cT.Output(
+        name="eoBiasStability",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
+
 class EoBiasStabilityTaskConfig(EoAmpExpCalibTaskConfig,
-                                pipelineConnections=EoAmpExpCalibTaskConnections):
+                                pipelineConnections=EoBiasStabilityTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "BiasStability"
+        self.connections.outputData = "eoBiasStability"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = False
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoBiasStabilityTask(EoAmpExpCalibTask):
@@ -26,12 +51,17 @@ class EoBiasStabilityTask(EoAmpExpCalibTask):
         self.statCtrl = afwMath.StatisticsControl()
     
     def makeOutputData(self, amps, nExposure, **kwargs):  # pylint: disable=arguments-differ
-        return EoBiasStabilityData(amps=amps, nAmp=len(amps), nExposure=nExposure,
-                                   nRow=amps[0].getWidth(), nTemp=self.config.nTemp)
+
+        ampNames = [amp.getName() for amp in amps]
+
+        return EoBiasStabilityData(amps=ampNames, nAmp=len(amps), nExposure=nExposure,
+                                   nRow=amps[0].getRawBBox().getWidth(), nTemp=10)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
-        outTable = outputData.ampExposure[amp.index]
-        stats = afwMath.makeStatistics(calibExp, afwMath.MEANCLIP | afwMath.STDEVCLIP, self.statCtrl)
+        import pdb
+        #pdb.set_trace()
+        outTable = outputData.ampExposure["ampExp_%s" % amp.getName()]
+        stats = afwMath.makeStatistics(calibExp.image, afwMath.MEANCLIP | afwMath.STDEVCLIP, self.statCtrl)
         outTable.mean[iExp] = stats.getValue(afwMath.MEANCLIP)
         outTable.stdev[iExp] = stats.getValue(afwMath.STDEVCLIP)
         outTable.rowMedian[iExp] = np.median(calibExp.image.array, axis=0)
@@ -41,5 +71,5 @@ class EoBiasStabilityTask(EoAmpExpCalibTask):
         outTable.seqnum[iExp] = calibExp.meta['SEQNUM']
         outTable.mjd[iExp] = calibExp.meta['MJD']
         for iTemp in range(self.config.nTemp):
-            outTable.temp[iExp][iTemp] = calibExp.meta['Temp%s'] % iTemp
+            outTable.temp[iExp][iTemp] = -100. # calibExp.meta['Temp%s'] % iTemp
         

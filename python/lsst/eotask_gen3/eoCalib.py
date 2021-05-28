@@ -12,6 +12,8 @@ from collections import OrderedDict
 from astropy.table import Table
 from astropy.io import fits
 from astropy.utils.diff import report_diff_values
+from lsst.utils import doImport
+from lsst.daf.butler.core.utils import getFullTypeName
 
 from .eoCalibTable import EoCalibTableHandle
 
@@ -227,6 +229,9 @@ class EoCalib:
     def schemaDict(cls):
         """ Return an `OrderedDict` of all the associated schema classes
         mapped by class name """
+        import pdb
+        pdb.set_trace()
+
         return OrderedDict([(val.fullName(), val) for val in cls.allSchemaClasses()])
 
     @property
@@ -277,11 +282,17 @@ class EoCalib:
         """
         with fits.open(filename) as fFits:
             try:
+                typeName = fFits[0].header['typename']  # pylint: disable=no-member  # noqa
+            except KeyError:  # pragma: no cover
+                typeName = fFits[0].header['TYPENAME']  # pylint: disable=no-member  # noqa
+
+            try:
                 schemaName = fFits[0].header['schema']  # pylint: disable=no-member  # noqa
             except KeyError:  # pragma: no cover
                 schemaName = fFits[0].header['SCHEMA']  # pylint: disable=no-member  # noqa
-
-        schema = cls.schemaDict()[schemaName]()
+            
+        subCls = doImport(typeName)
+        schema = subCls.schemaDict()[schemaName]()
 
         tableList = []
         tableList.append(Table.read(filename, hdu=1))
@@ -303,7 +314,7 @@ class EoCalib:
                 if isinstance(v, fits.card.Undefined):
                     table.meta[k] = None  # pragma: no cover
 
-        return cls.fromTable(tableList, schema=schema, **kwargs)
+        return subCls.fromTable(tableList, schema=schema, **kwargs)
 
     def writeFits(self, filename):
         """ FIXME, temp function copied for IsrCalib
@@ -316,6 +327,8 @@ class EoCalib:
             astropyList = [fits.table_to_hdu(table) for table in tableList]
 
             primaryHdu = fits.PrimaryHDU()
+            typeName = getFullTypeName(self)
+            primaryHdu.header['typename'] = typeName            
             primaryHdu.header['schema'] = self._schema.fullName()
             astropyList.insert(0, primaryHdu)
 

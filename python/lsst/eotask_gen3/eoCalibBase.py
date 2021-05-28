@@ -164,7 +164,7 @@ def extractAmpCalibs(amp, **kwargs):
 
 
 class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
-                                   dimensions=("instrument", "exposure", "detector")):
+                                   dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read raw amplifier data and
     perform minimal Isr on each amplifier """
     camera = copyConnect(CAMERA_CONNECT)
@@ -172,7 +172,6 @@ class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
     defects = copyConnect(DEFECTS_CONNECT)
     gains = copyConnect(GAINS_CONNECT)
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
-    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpExpCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -225,12 +224,13 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
         det = camera.get(inputExps[0].dataId['detector'])
         nAmps = len(det.getAmplifiers())
         outputData = self.makeOutputData(amps=det.getAmplifiers(), nAmps=nAmps, nExposure=len(inputExps))
-        for amp in det.getAmplifiers():
+
+        for iamp, amp in enumerate(det.getAmplifiers()):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iExp, inputExp in enumerate(inputExps):
-                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), amp, **ampCalibs)
+                calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
-            self.analyzeAmpRunData(outputData, amp)
+            self.analyzeAmpRunData(outputData, iamp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 

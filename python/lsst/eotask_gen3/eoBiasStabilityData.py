@@ -22,7 +22,7 @@ class EoBiasStabilityAmpExpData(EoCalibTable):
     SCHEMA_CLASS = EoBiasStabilityAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoBiasStabilityAmpExpData, self).__init__(data=None, **kwargs)
+        super(EoBiasStabilityAmpExpData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.stdev = self.table[self.SCHEMA_CLASS.stdev.name]
         self.rowMedian = self.table[self.SCHEMA_CLASS.rowMedian.name]
