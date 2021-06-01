@@ -83,6 +83,7 @@ INPUT_STACK_EXP_CONNECT = cT.Input(
     doc="Stacked Calibrated Input Frame",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
+    isCalibration=True,
 )
 
 OUTPUT_CONNECT = cT.Output(
@@ -230,7 +231,7 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
             for iExp, inputExp in enumerate(inputExps):
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
-            self.analyzeAmpRunData(outputData, iamp)
+            self.analyzeAmpRunData(outputData, iamp, amp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
@@ -309,13 +310,13 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         det = camera.get(inputPairs[0].dataId['detector'])
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
-        for amp in amps:
+        for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={amp: amp}), amp, **ampCalibs)
                 calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={amp: amp}), amp, **ampCalibs)
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
-            self.analyzeAmpRunData(outputData, amp)
+            self.analyzeAmpRunData(outputData, iamp, amp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
@@ -335,8 +336,9 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
 class EoAmpRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read calibrated data """
+
+    camera = copyConnect(CAMERA_CONNECT)
     stackedCalExp = copyConnect(INPUT_STACK_EXP_CONNECT)
-    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -376,19 +378,19 @@ class EoAmpRunCalibTask(pipeBase.PipelineTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(stackedCalExp.dataId['detector'])
+        det = camera.get(stackedCalExp.getDetector().getId())
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps))
-        for amp in amps:
+        for iamp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
-            self.analyzeAmpRunData(ampExposure, outputData, amp, **kwargs)
+            self.analyzeAmpRunData(ampExposure, outputData, iamp, amp, **kwargs)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
     def makeOutputData(self, amps, nAmps):
         raise NotImplementedError
 
-    def analyzeAmpRunData(self, ampExposure, outputData, amp):
+    def analyzeAmpRunData(self, ampExposure, outputData, iamp, amp, **kwargs):
         """ Analyze data from on amp """
 
     def analyzeDetRunData(self, outputData):

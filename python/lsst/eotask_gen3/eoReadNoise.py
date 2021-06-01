@@ -1,7 +1,9 @@
 import numpy as np
 
+import lsst.pex.config as pexConfig
 import lsst.afw.math as afwMath
 import lsst.geom as lsstGeom
+import lsst.pipe.base.connectionTypes as cT
 
 from .eoCalibBase import EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask
 from .eoReadNoiseData import EoReadNoiseData
@@ -38,12 +40,39 @@ class SubRegionSampler:
         return np.array(samples)
 
 
+class EoReadNoiseTaskConnections(EoAmpExpCalibTaskConnections):
+    
+    outputData = cT.Output(
+        name="eoReadNoise",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
 class EoReadNoiseTaskConfig(EoAmpExpCalibTaskConfig,
-                            pipelineConnections=EoAmpExpCalibTaskConnections):
+                            pipelineConnections=EoReadNoiseTaskConnections):
+    
+    dx = pexConfig.Field("Size of region to sample", int, default=100)
+    dy = pexConfig.Field("Size of region to sample", int, default=100)
+    nsamp = pexConfig.Field("Number of samples", int, default=100)
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "ReadNoise"
+        self.connections.outputData = "eoReadNoise"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = False
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoReadNoiseTask(EoAmpExpCalibTask):
@@ -51,29 +80,29 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
     ConfigClass = EoReadNoiseTaskConfig
     _DefaultName = "readNoise"
 
-    def makeOutputData(self, amps, nExposure):  # pylint: disable=arguments-differ
+    def makeOutputData(self, amps, nAmps, nExposure):  # pylint: disable=arguments-differ
 
-        return EoReadNoiseData(amps=amps, nAmp=len(amps), nExposure=nExposure, nSamples=self.config.nsamp)
+        return EoReadNoiseData(amps=amps, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
 
-        imaging = calibExp.imaging  # FIXME
+        imaging = calibExp.getDetector().getAmplifiers()[0].getBBox() # FIXME
         dx = self.config.dx
         dy = self.config.dy
         nsamp = self.config.nsamp
 
         sampler = SubRegionSampler(dx, dy, nsamp, imaging=imaging)
-        outputData.ampExp[amp.index].totalNoise[iExp] = sampler.noiseSamples(calibExp)
+        outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise[iExp] = sampler.noiseSamples(calibExp)
 
-    def analyzeAmpRunData(self, outputData, amp):
+    def analyzeAmpRunData(self, outputData, iamp, amp):
 
-        totalNoise = afwMath.makeStatistics(outputData.ampExp[amp.index].totalNoise,
+        totalNoise = afwMath.makeStatistics(outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise,
                                             afwMath.MEDIAN).getValue()
         systemNoise = 0.  # FIXME
         if totalNoise >= systemNoise:
             readNoise = np.sqrt(totalNoise**2 - systemNoise**2)
         else:
             readNoise = -1
-        outputData.amps.totalNoise[amp.index] = totalNoise
-        outputData.amps.systemNoise[amp.index] = systemNoise
-        outputData.amps.readNoiseNoise[amp.index] = readNoise
+        outputData.amps["amps"].totalNoise[iamp] = totalNoise
+        outputData.amps["amps"].systemNoise[iamp] = systemNoise
+        outputData.amps["amps"].readNoiseNoise[iamp] = readNoise

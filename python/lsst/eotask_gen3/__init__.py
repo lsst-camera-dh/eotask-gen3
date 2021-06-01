@@ -8,8 +8,11 @@ from .eoCalib import *
 from .eoBiasStabilityData import *
 from .eoBrighterFatterData import *
 from .eoCtiData import *
+from .eoDarkPixels import *
+from .eoDarkPixelsData import *
 from .eoDarkCurrentData import *
 from .eoDefectData import *
+from .eoBrightPixels import *
 from .eoBrightPixelsData import *
 from .eoTrapsData import *
 from .eoFe55Data import *

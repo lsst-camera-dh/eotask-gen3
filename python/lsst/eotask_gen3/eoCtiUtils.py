@@ -141,21 +141,20 @@ class SubImage:
     """Functor to produce sub-images depending on scan direction."""
 
     def __init__(self, calibExp, amp, overscans, direction):
-        geom = amp.geom
-        self.imaging = geom.imaging
+        self.imaging = amp.getBBox()
         self.image = calibExp
         if direction == 'p':
             self._bbox = self._parallelBox
-            llc = lsstGeom.Point2I(geom.parallel_overscan.getMinX(),
-                                   geom.parallel_overscan.getMinY() + overscans)
+            llc = lsstGeom.Point2I(amp.getRawParallelOverscanBBox().getMinX(),
+                                   amp.getRawParallelOverscanBBox() + overscans)
             urc = geom.parallel_overscan.getCorners()[2]
             self._biasReg = lsstGeom.Box2I(llc, urc)
             self.lastpix = self.imaging.getMaxY()
             return
         if direction == 's':
             self._bbox = self._serialBox
-            llc = lsstGeom.Point2I(geom.serial_overscan.getMinX() + overscans,
-                                   geom.serial_overscan.getMinY())
+            llc = lsstGeom.Point2I(geom.getRawSerialOverscanBBox().getMinX() + overscans,
+                                   geom.getRawSerialOverscanBBox().getMinY())
             urc = geom.serial_overscan.getCorners()[2]
             #
             # Omit the last 4 columns to avoid the bright column in the
@@ -193,7 +192,7 @@ class SubImage:
 
 
 def estimateCti(calibExp, amp, direction, overscans, statCtrl):
-    nFrames = calibExp.meta['nFrames']
+    nFrames = 10 # alibExp.meta['nFrames']
     subimage = SubImage(calibExp, amp, overscans, direction)
     lastpix = subimage.lastpix
 

@@ -1,7 +1,11 @@
 
 import numpy as np
 
+import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
+import lsst.pipe.base.connectionTypes as cT
+import lsst.afw.detection as afwDetect
+
 from lsst.ip.isr import Defects
 
 from .eoCalibBase import (EoAmpRunCalibTaskConfig, EoAmpRunCalibTaskConnections, EoAmpRunCalibTask,\
@@ -13,15 +17,33 @@ __all__ = ["EoBrightPixelTask", "EoBrightPixelTaskConfig"]
 
 class EoBrightPixelsTaskConnections(EoAmpRunCalibTaskConnections):
 
-    defectsOut = copyConnect(OUTPUT_DEFECTS_CONNECT)
+    outputData = cT.Output(
+        name="eoBrightPixelsStats",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
 
+    defects = cT.Output(
+        name='BrightPixel',
+        doc="Output defect tables.",
+        storageClass="Defects",
+        dimensions=("instrument", "detector"),
+        isCalibration=True,
+    )
+    
 
 class EoBrightPixelTaskConfig(EoAmpRunCalibTaskConfig,
-                              pipelineConnections=EoAmpRunCalibTaskConnections):
+                              pipelineConnections=EoBrightPixelsTaskConnections):
    
+    ethresh = pexConfig.Field("Bright pixel threshold in e- per pixel per second", int, default=5)
+    colthresh = pexConfig.Field("Bright column threshold in # bright pixels", int, default=20)
+    
     def setDefaults(self):
-        self.connections.output = "BrightPixel"
-
+        self.connections.stackedCalExp = "eo_dark"
+        self.connections.outputData = "eoBrightPixelStats"
+        self.connections.defects = "BrightPixel"
+        
 
 class EoBrightPixelTask(EoAmpRunCalibTask):
 
@@ -45,21 +67,34 @@ class EoBrightPixelTask(EoAmpRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
-        camera = kwargs['camera']
-        det = camera.get(stackedCalExp.dataId['detector'])
-        amps = det.getAmplifiers(nAmps=len(amps))        
-        outputData = self.makeOutputData()
-        nBrightPixel, nBrightColumn, fpSet = self.findBrightPixels(stackedCalExp, amp)
-        defects = Defects.fromFootprintList(fpSet.getFootprints())
+        det = stackedCalExp.getDetector()
+        amps = det.getAmplifiers()
+        nAmp = len(amps)
+        outputData = self.makeOutputData(nAmp=nAmp)
+        outputTable = outputData.amps['amps']
+        import pdb
+        fpMap = {}
+        for iamp, amp in enumerate(amps):
+            nBrightPixel, nBrightColumn, fpSet = self.findBrightPixels(stackedCalExp, amp, 1.)
+            fpMap[amp] = fpSet
+            outputTable.nBrightPixel[iamp] = nBrightPixel
+            outputTable.nBrightColumn[iamp] = nBrightColumn
+        pdb.set_trace()
+        fpCcd = self.mergeFootprints(fpMap)
+        defects = Defects(defectList=fpCcd)
         return pipeBase.Struct(outputData=outputData, defects=defects)        
 
-    def makeOutputData(self, nAmps, **kwargs):
-        return EoBrightPixelsData(nAmps=nAmps)
+    def makeOutputData(self, nAmp, **kwargs):
+        return EoBrightPixelsData(nAmp=nAmp)
 
     def findBrightPixels(self, stackedCalExp, amp, gain):
-        exptime = stackedCalExp.meta['EXPTIME']
+        try:
+            exptime = stackedCalExp.getMetadata().toDict()['EXPTIME']
+        except KeyError:
+            print("Warning no EXPTIME: using 1.")
+            exptime = 1.
         threshold = afwDetect.Threshold(self.config.ethresh * exptime)
-        fpSet = afwDetect.FootprintSet(stackedCalExp, threshold)
+        fpSet = afwDetect.FootprintSet(stackedCalExp[amp].image, threshold)
         # 
         # Organize bright pixels by column.
         #
@@ -81,7 +116,7 @@ class EoBrightPixelTask(EoAmpRunCalibTask):
         x0 = stackedCalExp.getX0()
         y0 = stackedCalExp.getY0()
         for x in columns:
-            if badColumn(columns[x], self.config.colthresh):
+            if self.badColumn(columns[x], self.config.colthresh):
                 brightCols.append(x - x0)
             else:
                 brightPixs.extend([(x - x0, y - y0) for y in columns[x]])
@@ -114,3 +149,27 @@ class EoBrightPixelTask(EoAmpRunCalibTask):
         if len(maskedPixelCount) > 0 and max(maskedPixelCount) >= threshold:
             return True
         return False
+
+
+    @staticmethod
+    def mergeFootprints(fpMap):        
+        outList = []
+        for amp, fpSet in fpMap.items():
+            for fp in fpSet.getFootprints():       
+                detBBox = fp.getBBox()
+                #if amp.getFlipX():
+                #    minX = amp.getRawBBox().getX1() - bbox.getMaxX()
+                #    maxX = amp.getRawBBox().getX1() - bbox.getMinX()
+                #else:
+                #    minX = bbox.getMinX() + amp.getRawBBox().getX0()
+                #    maxX = bbox.getMaxX() + amp.getRawBBox().getX0()
+                #if amp.getFlipY():
+                #    minY = amp.getRawBBox().getY1() - bbox.getMaxY()
+                #    maxY = amp.getRawBBox().getY1() - bbox.getMinY()
+                #else:
+                #    minY = bbox.getMinY() + amp.getRawBBox().getY0()
+                #    maxY = bbox.getMaxY() + amp.getRawBBox().getY0()
+                #    detBBox = lsst.geom.Box2I(lsst.geom.Point2I(minX, minY),
+                #                              lsst.geom.Point2I(maxX, maxY))
+                outList.append(detBBox)
+        return outList
