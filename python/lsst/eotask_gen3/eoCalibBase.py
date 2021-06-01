@@ -171,7 +171,8 @@ class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
     camera = copyConnect(CAMERA_CONNECT)
     bias = copyConnect(BIAS_CONNECT)
     defects = copyConnect(DEFECTS_CONNECT)
-    gains = copyConnect(GAINS_CONNECT)
+    dark = copyConnect(DARK_CONNECT)
+    gains = copyConnect(GAINS_CONNECT)    
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
 
 
@@ -230,7 +231,7 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iExp, inputExp in enumerate(inputExps):
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
-                self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
+                self.analyzeAmpExpData(calibExp, outputData, iamp, amp, iExp)
             self.analyzeAmpRunData(outputData, iamp, amp)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
@@ -238,10 +239,10 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
     def makeOutputData(self, **kwargs):
         raise NotImplementedError
 
-    def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
+    def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
         """ Analyze calibrated exposure for one amp """
 
-    def analyzeAmpRunData(self, outputData, amp):
+    def analyzeAmpRunData(self, outputData, iamp, amp):
         """ Aggregate data from all exposures for one amp """
 
     def analyzeDetRunData(self, outputData):

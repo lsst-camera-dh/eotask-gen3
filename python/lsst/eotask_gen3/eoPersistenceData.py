@@ -27,9 +27,9 @@ class EoPersistenceAmpExpData(EoCalibTable):
 
 class EoPersistenceDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoPersistenceAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoPersistenceAmpExpData,
+                                multiKey="amps")
 
 
 class EoPersistenceData(EoCalib):
@@ -42,7 +42,7 @@ class EoPersistenceData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoPersistenceData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
 
 
 RegisterEoCalibSchema(EoPersistenceData)

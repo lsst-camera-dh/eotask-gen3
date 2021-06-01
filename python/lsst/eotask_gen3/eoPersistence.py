@@ -1,6 +1,7 @@
 
 import lsst.afw.math as afwMath
 
+import lsst.pipe.base.connectionTypes as cT
 from .eoCalibBase import EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask
 from .eoPersistenceData import EoPersistenceData
 
@@ -48,10 +49,12 @@ class EoPersistenceTask(EoAmpExpCalibTask):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
 
-    def makeOutputObject(self, amps, nExposure):  # pylint: disable=arguments-differ,no-self-use
-        return EoPersistenceData(amps=amps, nExposure=nExposure)
+    def makeOutputData(self, amps, nExposure, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        ampNames = [amp.getName() for amp in amps]
+        return EoPersistenceData(amps=ampNames, nExposure=nExposure)
 
-    def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
-        stats = afwMath.makeStatistics(calibExp, afwMath.MEANCLIP | afwMath.STDEVCLIP, self.statCtrl)
-        outputData.ampExposure[amp.index].mean[iExp] = stats.getValue(afwMath.MEANCLIP)
-        outputData.ampExposure[amp.index].stdev[iExp] = stats.getValue(afwMath.STDEVCLIP)
+    def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
+        stats = afwMath.makeStatistics(calibExp.image, afwMath.MEANCLIP | afwMath.STDEVCLIP, self.statCtrl)
+        outputData.ampExp["ampExp_%s" % amp.getName()].mean[iExp] = stats.getValue(afwMath.MEANCLIP)
+        outputData.ampExp["ampExp_%s" % amp.getName()].stdev[iExp] = stats.getValue(afwMath.STDEVCLIP)
+
