@@ -7,12 +7,36 @@ from .eoPersistenceData import EoPersistenceData
 __all__ = ["EoPersistenceTask", "EoPersistenceTaskConfig"]
 
 
+
+class EoPersistanceTaskConnections(EoAmpExpCalibTaskConnections):
+
+    outputData = cT.Output(
+        name="eoBiasStability",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
 class EoPersistenceTaskConfig(EoAmpExpCalibTaskConfig,
-                              pipelineConnections=EoAmpExpCalibTaskConnections):
+                              pipelineConnections=EoPersistanceTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "Persistence"
+        self.connections.outputData = "eoPersistence"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = True
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoPersistenceTask(EoAmpExpCalibTask):
