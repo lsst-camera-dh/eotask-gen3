@@ -16,7 +16,7 @@ __all__ = ["EoFlatPairTask", "EoFlatPairTaskConfig"]
 
 class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
 
-    photodiodeData = cT.Input(
+    photodiodeData = cT.PrerequisiteInput(
         name="photodiode",
         doc="Input photodiode data",
         storageClass="Dataframe",
@@ -42,7 +42,7 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
     
-    def run(self, inputPairs, photodiodeDataPairs, **kwargs):  # pylint: disable=arguments-differ
+    def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -66,12 +66,13 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         det = camera.get(inputPairs[0].dataId['detector'])
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
-        self.analyzePdData(photodiodeDataPairs, outputData)
-        for amp in amps:
+        if kwargs.get('photodiodeDataPairs', None):
+            self.analyzePdData(photodiodeDataPairs, outputData)
+        for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)                        
             for iPair, inputPair in enumerate(inputPairs):
-                calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={amp: amp}), amp, **ampCalibs)
-                calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={amp: amp}), amp, **ampCalibs)
+                calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={"amp": iamp}), amp, **ampCalibs)
+                calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={"amp": iamp}), amp, **ampCalibs)
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
             self.analyzeAmpRunData(outputData, amp)
         return pipeBase.Struct(outputData=outputData)
@@ -92,17 +93,17 @@ class EoFlatPairTask(EoAmpPairCalibTask):
             outTable.seqnum[iPair] = pdData[0].seqnum
             outTable.dayobs[iPair] = pdData[0].dayobs
     
-    def analyzeAmpExpData(self, calibExp1, calibExp2, outputData, amp, iExp):  # pylint: disable=too-many-arguments
+    def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
         outTable = outputData.ampExposure[amp]
         signal, sig1, sig2 = self.pairMean(calibExp1, calibExp2, amp, self.statCtrl)
-        outTable.signal[iExp] = signal
-        outTable.flat1Signal[iExp] = sig1        
-        outTable.flat1Signal[iExp] = sig2
-        outTable.rowMeanVar[iExp] = self.rowMeanVariance(calibExp1, calibExp2, amp, self.statCtrl)
+        outTable.signal[iPair] = signal
+        outTable.flat1Signal[iPair] = sig1        
+        outTable.flat1Signal[iPair] = sig2
+        outTable.rowMeanVar[iPair] = self.rowMeanVariance(calibExp1, calibExp2, amp, self.statCtrl)
         
-    def analyzeAmpRunData(self, outputData, amp):
-        inTableAmp = outputData.ampExposure[amp.index]
-        outTable = outputData.amps
+    def analyzeAmpRunData(self, outputData, iamp, amp):
+        inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
+        outTable = outputData.amps['amps']
         detResp = DetectorResponse(inTableAmp.flux)
         results = detResp.linearity(inTableAmp.signal, specRange=(1e3, 9e4))
         outTable.fullWell[amp.index] = detResp.fullWell(inTableAmp.signal)

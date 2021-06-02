@@ -17,6 +17,7 @@ import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 from lsst.ip.isr import IsrTask, AssembleCcdTask, Defects
 from lsst.afw.cameraGeom import AmplifierIsolator
+from lsst.cp.pipe.utils import arrangeFlatsByExpId
 
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
@@ -287,6 +288,27 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         super().__init__(**kwargs)
         self.makeSubtask("isr")
 
+
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        """Ensure that the input and output dimensions are passed along.
+
+        Parameters
+        ----------
+        butlerQC : `~lsst.daf.butler.butlerQuantumContext.ButlerQuantumContext`
+            Butler to operate on.
+        inputRefs : `~lsst.pipe.base.connections.InputQuantizedConnection`
+            Input data refs to load.
+        ouptutRefs : `~lsst.pipe.base.connections.OutputQuantizedConnection`
+            Output data refs to persist.
+        """
+        inputExps = inputRefs.pop('inputExps')
+        expIds = [expId.dataId['exposure'] for expId in inputRefs.inputExps]
+        inputs = butlerQC.get(inputRefs)
+        inputs['inputPairs'] = arrangeFlatsByExpId(inputExps, expIds).values()      
+        outputs = self.run(**inputs)
+        butlerQC.put(outputs, outputRefs)
+        
+        
     def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
