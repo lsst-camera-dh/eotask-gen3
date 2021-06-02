@@ -58,8 +58,6 @@ class EoBiasStabilityTask(EoAmpExpCalibTask):
                                    nRow=amps[0].getRawBBox().getWidth(), nTemp=10)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
-        import pdb
-        #pdb.set_trace()
         outTable = outputData.ampExposure["ampExp_%s" % amp.getName()]
         stats = afwMath.makeStatistics(calibExp.image, afwMath.MEANCLIP | afwMath.STDEVCLIP, self.statCtrl)
         outTable.mean[iExp] = stats.getValue(afwMath.MEANCLIP)

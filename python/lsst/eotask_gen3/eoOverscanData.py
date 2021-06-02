@@ -15,7 +15,7 @@ class EoOverscanAmpExpDataSchemaV0(EoCalibTableSchema):
     columnVariance = EoCalibField(name='COLUMN_VARIANCE', dtype=float, unit='electron', shape=['nCol'])
     rowMean = EoCalibField(name='ROW_MEAN', dtype=float, unit='electron', shape=['nRow'])
     rowVariance = EoCalibField(name='ROW_VARIANCE', dtype=float, unit='electron', shape=['nRow'])
-    flatFeildSignal = EoCalibField(name='FLATFIELD_SIGNAL', dtype=float, unit='electron')
+    flatFieldSignal = EoCalibField(name='FLATFIELD_SIGNAL', dtype=float, unit='electron')
     serialOverscanNoise = EoCalibField(name='SERIAL_OVERSCAN_NOISE', dtype=float, unit='electron')
     parallenOverscanNoise = EoCalibField(name='PARALLEL_OVERSCAN_NOISE', dtype=float, unit='electron')
 
@@ -32,13 +32,14 @@ class EoOverscanAmpExpData(EoCalibTable):
         self.rowVariance = self.table[self.SCHEMA_CLASS.rowVariance.name]
         self.serialOverscanNoise = self.table[self.SCHEMA_CLASS.serialOverscanNoise.name]
         self.parallenOverscanNoise = self.table[self.SCHEMA_CLASS.parallenOverscanNoise.name]
+        self.flatFieldSignal = self.table[self.SCHEMA_CLASS.flatFieldSignal.name]
 
 
 class EoOverscanDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoOverscanAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoOverscanAmpExpData,
+                                multiKey="amps")
 
 
 class EoOverscanData(EoCalib):
@@ -51,7 +52,7 @@ class EoOverscanData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoOverscanData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
 
 
 RegisterEoCalibSchema(EoOverscanData)

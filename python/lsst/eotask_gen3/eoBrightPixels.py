@@ -72,14 +72,12 @@ class EoBrightPixelTask(EoAmpRunCalibTask):
         nAmp = len(amps)
         outputData = self.makeOutputData(nAmp=nAmp)
         outputTable = outputData.amps['amps']
-        import pdb
         fpMap = {}
         for iamp, amp in enumerate(amps):
             nBrightPixel, nBrightColumn, fpSet = self.findBrightPixels(stackedCalExp, amp, 1.)
             fpMap[amp] = fpSet
             outputTable.nBrightPixel[iamp] = nBrightPixel
             outputTable.nBrightColumn[iamp] = nBrightColumn
-        pdb.set_trace()
         fpCcd = self.mergeFootprints(fpMap)
         defects = Defects(defectList=fpCcd)
         return pipeBase.Struct(outputData=outputData, defects=defects)        

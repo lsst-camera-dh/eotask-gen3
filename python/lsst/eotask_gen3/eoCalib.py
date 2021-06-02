@@ -229,9 +229,6 @@ class EoCalib:
     def schemaDict(cls):
         """ Return an `OrderedDict` of all the associated schema classes
         mapped by class name """
-        import pdb
-        pdb.set_trace()
-
         return OrderedDict([(val.fullName(), val) for val in cls.allSchemaClasses()])
 
     @property
