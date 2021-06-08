@@ -188,7 +188,7 @@ class SubImage:
 
     def _serialBox(self, start, end):
         llc = lsstGeom.PointI(start, self.amp.getRawDataBBox().getMinY())
-        urc = lsstGeom.PointI(end, self.amp.RawDataBBox().getMaxY())
+        urc = lsstGeom.PointI(end, self.amp.getRawDataBBox().getMaxY())
         return lsstGeom.BoxI(llc, urc)
 
 
