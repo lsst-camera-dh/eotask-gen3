@@ -143,13 +143,14 @@ class SubImage:
     def __init__(self, calibExp, amp, overscans, direction):
         self.imaging = amp.getBBox()
         self.image = calibExp
+        self.amp = amp
         if direction == 'p':
             self._bbox = self._parallelBox
             llc = lsstGeom.Point2I(amp.getRawParallelOverscanBBox().getMinX(),
                                    amp.getRawParallelOverscanBBox() + overscans)
             urc = amp.getRawParallelOverscanBBox.getCorners()[2]
             self._biasReg = lsstGeom.Box2I(llc, urc)
-            self.lastpix = self.getRawDataBBox().getMaxY()
+            self.lastpix = amp.getRawDataBBox().getMaxY()
             return
         if direction == 's':
             self._bbox = self._serialBox
@@ -162,7 +163,7 @@ class SubImage:
             #
             urc[0] -= 4
             self._biasReg = lsstGeom.Box2I(llc, urc)
-            self.lastpix = self.getRawDataBBox().getMaxX()
+            self.lastpix = amp.getRawDataBBox().getMaxX()
             return
         raise ValueError("Unknown scan direction: " + str(direction))
 
@@ -181,13 +182,13 @@ class SubImage:
         return my_exp
 
     def _parallelBox(self, start, end):
-        llc = lsstGeom.PointI(self.getRawDataBBox().getMinX(), start)
-        urc = lsstGeom.PointI(self.getRawDataBBox().getMaxX(), end)
+        llc = lsstGeom.PointI(self.amp.getRawDataBBox().getMinX(), start)
+        urc = lsstGeom.PointI(self.amp.getRawDataBBox().getMaxX(), end)
         return lsstGeom.BoxI(llc, urc)
 
     def _serialBox(self, start, end):
-        llc = lsstGeom.PointI(start, self.getRawDataBBox().getMinY())
-        urc = lsstGeom.PointI(end, self.getRawDataBBox().getMaxY())
+        llc = lsstGeom.PointI(start, self.amp.getRawDataBBox().getMinY())
+        urc = lsstGeom.PointI(end, self.amp.RawDataBBox().getMaxY())
         return lsstGeom.BoxI(llc, urc)
 
 
