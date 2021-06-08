@@ -47,8 +47,8 @@ class EoCtiTask(EoAmpRunCalibTask):
         return EoCtiData(amps=amps, nAmp=nAmps)
 
     def analyzeAmpRunData(self, ampExposure, outputData, iamp, amp, **kwargs):
-        ctiSerialEstim = estimateCti(ampExposure, amp, 's', self.statCtrl, self.config.overscans)
-        ctiParallelEstim = estimateCti(ampExposure, amp, 'p', self.statCtrl, self.config.overscans)
+        ctiSerialEstim = estimateCti(ampExposure, amp, 's', self.config.overscans, self.statCtrl)
+        ctiParallelEstim = estimateCti(ampExposure, amp, 'p', self.config.overscans, self.statCtrl)
 
         outputTable = outputData.amps['amps']
 
