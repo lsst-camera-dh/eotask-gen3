@@ -26,7 +26,7 @@ class AmpTearingStats:
             Number of pixels to avoid on leading and trailing edge of
             serial overscan to compute the bias level for each row.
         """
-        self.imarr = calibExp[ampGeom.getRawDataBBox()]
+        self.imarr = calibExp[ampGeom.getRawDataBBox()].image.array
         self._ratioProfiles = None
         self._ratios = None
         self._stdevs = None
@@ -51,7 +51,7 @@ class AmpTearingStats:
         return self._rstats
 
     @property
-    def ratio_profiles(self):
+    def ratioProfiles(self):
         """Profiles of the edge pixel ratios."""
         if self._ratioProfiles is None:
             self._ratioProfiles = (self.imarr[:, 1]/self.imarr[:, 0], self.imarr[:, -2]/self.imarr[:, -1])
@@ -75,7 +75,7 @@ class AmpTearingStats:
     def _computeRatios(self):
         self._ratios = []
         self._stdevs = []
-        for profile in self._ratioProfiles:
+        for profile in self.ratioProfiles:
             myRatios = []
             myStdevs = []
             for yloc in self.ylocs:
