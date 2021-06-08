@@ -45,7 +45,7 @@ def main():
     parser = argparse.ArgumentParser(prog='eoIngestPd.py')
     parser.add_argument('-b', '--butler', type=str, help='Butler Repo')
     parser.add_argument('--output-run', type=str, help="The name of the run datasets should be output to", default="LSSTCam/photodiode/all")
-    parser.add_argument('files', type=str, nargs='+', help='files to import')
+    parser.add_argument('files', type=str, nargs='+', help='Files to import')
     # unpack options
     args = parser.parse_args()
 
