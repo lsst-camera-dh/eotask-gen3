@@ -24,13 +24,35 @@ class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
         multiple=True,
     )
     
+    outputData = cT.Output(
+        name="eoFlatPair",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
+
 
 class EoFlatPairTaskConfig(EoAmpPairCalibTaskConfig,
                            pipelineConnections=EoAmpPairCalibTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "FlatPair"
+        self.connections.output = "eoFlatPair"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = True
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoFlatPairTask(EoAmpPairCalibTask):
@@ -65,7 +87,8 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         camera = kwargs['camera']
         det = camera.get(inputPairs[0].dataId['detector'])
         amps = det.getAmplifiers()
-        outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
+        ampNames = [amp.getName() for amp in amps]
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nPair=len(inputPairs))
         if kwargs.get('photodiodeDataPairs', None):
             self.analyzePdData(photodiodeDataPairs, outputData)
         for iamp, amp in enumerate(amps):

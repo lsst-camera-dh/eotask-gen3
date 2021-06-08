@@ -98,9 +98,9 @@ class EoFlatPairData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoFlatPairData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
         self.amps = self['amps']
-        self.detExposure = self['detExposure']
+        self.detExp = self['detExp']
 
 
 RegisterEoCalibSchema(EoFlatPairData)

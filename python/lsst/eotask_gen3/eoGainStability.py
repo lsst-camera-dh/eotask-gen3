@@ -16,9 +16,16 @@ class EoGainStabilityTaskConnections(EoAmpExpCalibTaskConnections):
     photodiodeData = cT.Input(
         name="photodiode",
         doc="Input photodiode data",
-        storageClass="Dataframe",
+        storageClass="AstropyTable",
         dimensions=("instrument", "exposure"),
         multiple=True,
+    )
+
+    outputData = cT.Output(
+        name="eoGainStability",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
     )
 
 
@@ -27,7 +34,21 @@ class EoGainStabilityTaskConfig(EoAmpExpCalibTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member                
-        self.connections.output = "GainStability"
+        self.connections.outputData = "eoGainStability"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = True
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoGainStabilityTask(EoAmpExpCalibTask):
@@ -62,12 +83,15 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
         camera = kwargs['camera']
         det = camera.get(inputExps[0].dataId['detector'])
         amps = det.getAmplifiers()
-        outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nExposure=len(inputExps))
+
+        ampNames = [amp.getName() for amp in amps]
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps))
+
         self.analyzePdData(photodiodeData, outputData)
-        for amp in amps:
+        for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)                                    
             for iExp, inputExp in enumerate(inputExps):
-                calibExp = runIsrOnAmp(self, inputExp.get(parameters={amp: amp}), amp, **ampCalibs)
+                calibExp = runIsrOnAmp(self, inputExp.get(parameters={'amp': iamp}), **ampCalibs)
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
         return pipeBase.Struct(outputData=outputData)
             
@@ -75,22 +99,22 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
         return EoGainStabilityData(amps=amps, nAmps=nAmps, nExposure=nExposure)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
-        outTable = outputData.ampExposure[amp.index]
-        stats = afwMath.makeStatistics(calibExp, afwMath.MEDIAN, self.statCtrl)
+        outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
+        stats = afwMath.makeStatistics(calibExp.image, afwMath.MEDIAN, self.statCtrl)
         outTable.signal[iExp] = stats.getValue(afwMath.MEDIAN)
 
     def analyzePdData(self, photodiodeData, outputData):
-        outTable = outputData.detExposure
+        outTable = outputData.detExp['detExp']
         for iExp, pdData in enumerate(photodiodeData):
             flux = self.getFlux(pdData)
             outTable.flux[iExp] = flux
-            outTable.seqnum[iExp] = pdData.seqnum
-            outTable.dayobs[iExp] = pdData.dayobs
+            outTable.seqnum[iExp] = 0 #pdData.seqnum
+            outTable.mjd[iExp] = 0 #pdData.dayobs
 
     @staticmethod
     def getFlux(pdData, factor=5):
-        x = pdData.x
-        y = pdData.y
+        x = pdData['Time']
+        y = pdData['Current']
         ythresh = (max(y) - min(y))/factor + min(y)
         index = np.where(y < ythresh)
         y0 = np.median(y[index])

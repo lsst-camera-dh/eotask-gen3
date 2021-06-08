@@ -46,12 +46,12 @@ class EoGainStabilityDetExpData(EoCalibTable):
 
 class EoGainStabilityDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoGainStabilityAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoGainStabilityAmpExpData,
+                                multiKey="amps")
 
-    detExposure = EoCalibTableHandle(tableName="detExp",
-                                     tableClass=EoGainStabilityDetExpData)
+    detExp = EoCalibTableHandle(tableName="detExp",
+                                tableClass=EoGainStabilityDetExpData)
 
 
 class EoGainStabilityData(EoCalib):
@@ -64,8 +64,8 @@ class EoGainStabilityData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoGainStabilityData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
-        self.detExposure = self['detExposure']
+        self.ampExp = self['ampExp']
+        self.detExp = self['detExp']
 
 
 RegisterEoCalibSchema(EoGainStabilityData)
