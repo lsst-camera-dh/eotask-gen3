@@ -147,22 +147,22 @@ class SubImage:
             self._bbox = self._parallelBox
             llc = lsstGeom.Point2I(amp.getRawParallelOverscanBBox().getMinX(),
                                    amp.getRawParallelOverscanBBox() + overscans)
-            urc = geom.parallel_overscan.getCorners()[2]
+            urc = amp.getRawParallelOverscanBBox.getCorners()[2]
             self._biasReg = lsstGeom.Box2I(llc, urc)
-            self.lastpix = self.imaging.getMaxY()
+            self.lastpix = self.getRawDataBBox().getMaxY()
             return
         if direction == 's':
             self._bbox = self._serialBox
-            llc = lsstGeom.Point2I(geom.getRawSerialOverscanBBox().getMinX() + overscans,
-                                   geom.getRawSerialOverscanBBox().getMinY())
-            urc = geom.serial_overscan.getCorners()[2]
+            llc = lsstGeom.Point2I(amp.getRawSerialOverscanBBox().getMinX() + overscans,
+                                   amp.getRawSerialOverscanBBox().getMinY())
+            urc = amp.getRawSerialOverscanBBox().getCorners()[2]
             #
             # Omit the last 4 columns to avoid the bright column in the
             # last overscan column in the e2v vendor data.
             #
             urc[0] -= 4
             self._biasReg = lsstGeom.Box2I(llc, urc)
-            self.lastpix = self.imaging.getMaxX()
+            self.lastpix = self.getRawDataBBox().getMaxX()
             return
         raise ValueError("Unknown scan direction: " + str(direction))
 
@@ -181,13 +181,13 @@ class SubImage:
         return my_exp
 
     def _parallelBox(self, start, end):
-        llc = lsstGeom.PointI(self.imaging.getMinX(), start)
-        urc = lsstGeom.PointI(self.imaging.getMaxX(), end)
+        llc = lsstGeom.PointI(self.getRawDataBBox().getMinX(), start)
+        urc = lsstGeom.PointI(self.getRawDataBBox().getMaxX(), end)
         return lsstGeom.BoxI(llc, urc)
 
     def _serialBox(self, start, end):
-        llc = lsstGeom.PointI(start, self.imaging.getMinY())
-        urc = lsstGeom.PointI(end, self.imaging.getMaxY())
+        llc = lsstGeom.PointI(start, self.getRawDataBBox().getMinY())
+        urc = lsstGeom.PointI(end, self.getRawDataBBox().getMaxY())
         return lsstGeom.BoxI(llc, urc)
 
 
