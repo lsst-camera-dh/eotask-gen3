@@ -26,7 +26,7 @@ class AmpTearingStats:
             Number of pixels to avoid on leading and trailing edge of
             serial overscan to compute the bias level for each row.
         """
-        self.imarr = calibExp[ampGeom.imaging]
+        self.imarr = calibExp[ampGeom.getRawDataBBox()]
         self._ratioProfiles = None
         self._ratios = None
         self._stdevs = None

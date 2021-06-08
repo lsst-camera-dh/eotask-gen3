@@ -1,19 +1,44 @@
 
 import lsst.afw.math as afwMath
 
-from .eoCalibBase import EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask
+from .eoCalibBase import (EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask,
+                          extractAmpImage)
 from .eoTearingData import EoTearingData
 from .eoTearingUtils import AmpTearingStats
 
 __all__ = ["EoTearingTask", "EoTearingTaskConfig"]
 
 
+class EoTearingTaskConnections(EoAmpExpCalibTaskConnections):
+
+    outputData = cT.Output(
+        name="eoTearing",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
+    
 class EoTearingTaskConfig(EoAmpExpCalibTaskConfig,
-                          pipelineConnections=EoAmpExpCalibTaskConnections):
+                          pipelineConnections=EoTearingTaskConnections):
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.output = "Tearing"
+        self.connections.outputData = "Tearing"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = True
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoTearingTask(EoAmpExpCalibTask):
@@ -26,15 +51,16 @@ class EoTearingTask(EoAmpExpCalibTask):
         self.statCtrl = afwMath.StatisticsControl()
             
     def makeOutputData(self, amps, nExposure, **kwargs):  # pylint: disable=arguments-differ,no-self-use
-        return EoTearingData(amps=amps, nAmp=len(amps), nExposure=nExposure)
+        ampNames = [amp.getName() for amp in amps]
+        return EoTearingData(amps=ampNames, nAmp=len(amps), nExposure=nExposure)
 
-    def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
-        outTable = outputData.ampExposure[amp.index]
+    def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
+        outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         outTable.nDetection[iExp] = self.ampTearingCount(calibExp, amp)
 
     @staticmethod
     def ampTearingCount(calibExp, amp, cut1=0.05, cut2=-0.01, nsig=1):
-        ampTearing = AmpTearingStats(calibExp, amp.geom)
+        ampTearing = AmpTearingStats(calibExp, amp.getDetector().getAmplifiers()[0])
         ntear = 0
         rstats1, rstats2 = ampTearing.rstats
         if (rstats1.diff - cut1 > nsig*rstats1.error and
