@@ -25,9 +25,9 @@ class EoTearingAmpExpData(EoCalibTable):
 
 class EoTearingDataSchemaV0(EoCalibSchema):
 
-    ampsExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                      tableClass=EoTearingAmpExpData,
-                                      multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoTearingAmpExpData,
+                                multiKey="amps")
 
 
 class EoTearingData(EoCalib):
@@ -40,7 +40,7 @@ class EoTearingData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoTearingData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
 
 
 RegisterEoCalibSchema(EoTearingData)

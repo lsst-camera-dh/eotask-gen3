@@ -1,6 +1,8 @@
 
 import lsst.afw.math as afwMath
 
+import lsst.pipe.base.connectionTypes as cT
+
 from .eoCalibBase import (EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask,
                           extractAmpImage)
 from .eoTearingData import EoTearingData
@@ -60,7 +62,7 @@ class EoTearingTask(EoAmpExpCalibTask):
 
     @staticmethod
     def ampTearingCount(calibExp, amp, cut1=0.05, cut2=-0.01, nsig=1):
-        ampTearing = AmpTearingStats(calibExp, amp.getDetector().getAmplifiers()[0])
+        ampTearing = AmpTearingStats(calibExp, amp)
         ntear = 0
         rstats1, rstats2 = ampTearing.rstats
         if (rstats1.diff - cut1 > nsig*rstats1.error and
