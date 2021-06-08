@@ -54,7 +54,7 @@ class EoGainStabilityTaskConfig(EoAmpExpCalibTaskConfig,
 class EoGainStabilityTask(EoAmpExpCalibTask):
 
     ConfigClass = EoGainStabilityTaskConfig
-    _DefaultName = "biasStability"
+    _DefaultName = "eoGainStability"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
