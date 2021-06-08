@@ -406,7 +406,8 @@ class EoAmpRunCalibTask(pipeBase.PipelineTask):
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps))
         for iamp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
-            self.analyzeAmpRunData(ampExposure, outputData, iamp, amp, **kwargs)
+            ampAmp = ampExposure.getDetector().getAmplifiers()[0]
+            self.analyzeAmpRunData(ampExposure, outputData, iamp, ampAmp, **kwargs)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
