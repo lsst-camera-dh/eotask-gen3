@@ -176,6 +176,9 @@ class SubImage:
         return biasEstimate
 
     def __call__(self, start, end=None):
+
+        import pdb
+        pdb.set_trace()
         if end is None:
             end = start
         my_exp = self.image.Factory(self.image, self._bbox(start, end))
