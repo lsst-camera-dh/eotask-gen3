@@ -400,14 +400,16 @@ class EoAmpRunCalibTask(pipeBase.PipelineTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
-        camera = kwargs['camera']
-        det = camera.get(stackedCalExp.getDetector().getId())
-        amps = det.getAmplifiers()
+        #camera = kwargs['camera']
+        #det = camera.get(stackedCalExp.getDetector().getId())
+        #amps = det.getAmplifiers()
+        amps = stackedCalExp.getDetector().getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps))
         for iamp, amp in enumerate(amps):
-            ampExposure = extractAmpImage(stackedCalExp, amp)
-            ampAmp = ampExposure.getDetector().getAmplifiers()[0]
-            self.analyzeAmpRunData(ampExposure, outputData, iamp, ampAmp, **kwargs)
+            #ampExposure = extractAmpImage(stackedCalExp, amp)
+            #ampAmp = ampExposure.getDetector().getAmplifiers()[0]
+            #self.analyzeAmpRunData(ampExposure, outputData, iamp, ampAmp, **kwargs)
+            self.analyzeAmpRunData(stackedCalExp, outputData, iamp, amp, **kwargs)            
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 

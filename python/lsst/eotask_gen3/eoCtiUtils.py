@@ -38,7 +38,7 @@ class Estimator:
             makeStatistics = lambda *args: afwMath.makeStatistics(*args[:3])
         if self.statistic not in (afwMath.MEAN, afwMath.MEDIAN):
             # In case other statistics are given, set error to zero for now.
-            self.value = makeStatistics(self.image, self.statistic,
+            self.value = makeStatistics(self.image.image, self.statistic,
                                         self.statCtrl).getValue()
             self.error = 0
             return
@@ -49,7 +49,7 @@ class Estimator:
         # the expected count per pixel, but within factors of order
         # unity to the error on the mean for numpix \la O(100)*count/pixel.
         flags = self.statistic | afwMath.SUM | afwMath.MEAN  # pylint: disable=no-member
-        stats = makeStatistics(self.image, flags, self.statCtrl)
+        stats = makeStatistics(self.image.image, flags, self.statCtrl)
         pixel_sum = stats.getValue(afwMath.SUM)  # pylint: disable=no-member
         # Infer the number of pixels taking into account masking.
         if pixel_sum == 0:
@@ -147,8 +147,8 @@ class SubImage:
         if direction == 'p':
             self._bbox = self._parallelBox
             llc = lsstGeom.Point2I(amp.getRawParallelOverscanBBox().getMinX(),
-                                   amp.getRawParallelOverscanBBox() + overscans)
-            urc = amp.getRawParallelOverscanBBox.getCorners()[2]
+                                   amp.getRawParallelOverscanBBox().getMinY() + overscans)
+            urc = amp.getRawParallelOverscanBBox().getCorners()[2]
             self._biasReg = lsstGeom.Box2I(llc, urc)
             self.lastpix = amp.getRawDataBBox().getMaxY()
             return
@@ -156,6 +156,8 @@ class SubImage:
             self._bbox = self._serialBox
             llc = lsstGeom.Point2I(amp.getRawSerialOverscanBBox().getMinX() + overscans,
                                    amp.getRawSerialOverscanBBox().getMinY())
+            import pdb
+            pdb.set_trace()
             urc = amp.getRawSerialOverscanBBox().getCorners()[2]
             #
             # Omit the last 4 columns to avoid the bright column in the
@@ -170,15 +172,13 @@ class SubImage:
     def biasEst(self, statistic=afwMath.MEAN):
         subim = self.image.Factory(self.image, self._biasReg)
         biasEstimate = Estimator()
-        biasEstimate.value = afwMath.makeStatistics(subim, statistic).getValue()
+        biasEstimate.value = afwMath.makeStatistics(subim.image, statistic).getValue()
         num_pix = len(subim.getImage().getArray().flatten())
-        biasEstimate.error = afwMath.makeStatistics(subim, afwMath.STDEV).getValue()/np.sqrt(float(num_pix))  # pylint: disable=no-member
+        biasEstimate.error = afwMath.makeStatistics(subim.image, afwMath.STDEV).getValue()/np.sqrt(float(num_pix))  # pylint: disable=no-member
         return biasEstimate
 
     def __call__(self, start, end=None):
 
-        import pdb
-        pdb.set_trace()
         if end is None:
             end = start
         my_exp = self.image.Factory(self.image, self._bbox(start, end))
