@@ -17,7 +17,6 @@ import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 from lsst.ip.isr import IsrTask, AssembleCcdTask, Defects
 from lsst.afw.cameraGeom import AmplifierIsolator
-from lsst.cp.pipe.utils import arrangeFlatsByExpId
 
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
@@ -165,6 +164,51 @@ def extractAmpCalibs(amp, **kwargs):
     return ampCalibDict
 
 
+def arrangeFlatsByExpId(exposureList, exposureIdList):
+    """Arrange exposures by exposure ID.
+    There is no guarantee that this will properly group exposures, but
+    allows a sequence of flats that have different illumination
+    (despite having the same exposure time) to be processed.
+    Parameters
+    ----------
+    exposureList : `list`[`lsst.afw.image.exposure.exposure.ExposureF`]
+        Input list of exposures.
+    exposureIdList : `list`[`int`]
+        List of exposure ids as obtained by dataId[`exposure`].
+    Returns
+    ------
+    flatsAtExpId : `dict` [`float`,
+                   `list`[(`lsst.afw.image.exposure.exposure.ExposureF`, `int`)]]
+        Dictionary that groups flat-field exposures (and their IDs)
+        sequentially by their exposure id.
+    Notes
+    -----
+    This algorithm sorts the input exposures by their exposure id, and
+    then assigns each pair of exposures (exp_j, exp_{j+1}) to pair k,
+    such that 2*k = j, where j is the python index of one of the
+    exposures (starting from zero).  By checking for the IndexError
+    while appending, we can ensure that there will only ever be fully
+    populated pairs.
+    """
+    flatsAtExpId = {}
+    # sortedExposures = sorted(exposureList, key=lambda exp: exp.getInfo().getVisitInfo().getExposureId())
+    assert len(exposureList) == len(exposureIdList), "Different lengths for exp. list and exp. ID lists"
+    # Sort exposures by expIds, which are in the second list `exposureIdList`.
+    sortedExposures = sorted(zip(exposureList, exposureIdList), key=lambda pair: pair[1])
+
+    for jPair, expTuple in enumerate(sortedExposures):
+        if (jPair + 1) % 2:
+            kPair = jPair // 2
+            listAtExpId = flatsAtExpId.setdefault(kPair, [])
+            try:
+                listAtExpId.append(expTuple)
+                listAtExpId.append(sortedExposures[jPair + 1])
+            except IndexError:
+                pass
+
+    return flatsAtExpId
+
+
 class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read raw amplifier data and
@@ -306,8 +350,7 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         inputs = butlerQC.get(inputRefs)
         inputs['inputPairs'] = arrangeFlatsByExpId(inputExps, expIds).values()      
         outputs = self.run(**inputs)
-        butlerQC.put(outputs, outputRefs)
-        
+        butlerQC.put(outputs, outputRefs)        
         
     def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
