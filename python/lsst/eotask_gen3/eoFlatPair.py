@@ -62,7 +62,7 @@ class EoFlatPairTaskConfig(EoAmpPairCalibTaskConfig,
 class EoFlatPairTask(EoAmpPairCalibTask):
 
     ConfigClass = EoFlatPairTaskConfig
-    _DefaultName = "flatPair"
+    _DefaultName = "eoFlatPair"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

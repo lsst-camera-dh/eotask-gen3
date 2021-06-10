@@ -1,4 +1,3 @@
-
 import copy
 import numpy as np
 
@@ -39,33 +38,48 @@ class EoPtcTaskConnections(EoAmpPairCalibTaskConnections):
     photodiodeData = cT.Input(
         name="photodiode",
         doc="Input photodiode data",
-        storageClass="Dataframe",
+        storageClass="AstropyTable",
         dimensions=("instrument", "exposure"),
         multiple=True,
+        deferLoad=True,
     )
     
 
 class EoPtcTaskConfig(EoAmpPairCalibTaskConfig,
-                      pipelineConnections=EoAmpPairCalibTaskConnections):
+                      pipelineConnections=EoPtcTaskConnections):
 
-    max_frac_offset = pexConfig.Field(
-        "maximum fraction offset from median gain curve to omit points from PTC fit.", float, default=0.2)
+    maxPDFracDev = pexConfig.Field("Maximum photodiode fractional deviation", float, default=0.05)
+    maxFracOffset = pexConfig.Field("maximum fraction offset from median gain curve to omit points from PTC fit.", float, default=0.2)
     
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.output = "Ptc"
+        self.connections.outputData = "eoPtc"
+        self.isr.expectWcs = False
+        self.isr.doSaturation = False
+        self.isr.doSetBadRegions = False
+        self.isr.doAssembleCcd = False
+        self.isr.doBias = True
+        self.isr.doLinearize = False
+        self.isr.doDefect = False
+        self.isr.doNanMasking = False
+        self.isr.doWidenSaturationTrails = False
+        self.isr.doDark = True
+        self.isr.doFlat = False
+        self.isr.doFringe = False
+        self.isr.doInterpolate = False
+        self.isr.doWrite = False
 
 
 class EoPtcTask(EoAmpPairCalibTask):
 
     ConfigClass = EoPtcTaskConfig
-    _DefaultName = "flatPair"
+    _DefaultName = "eoPtc"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
     
-    def run(self, inputPairs, photodiodeDataPairs, **kwargs):  # pylint: disable=arguments-differ
+    def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
@@ -86,59 +100,65 @@ class EoPtcTask(EoAmpPairCalibTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputPairs[0].dataId['detector'])
+        det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()
-        outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
-        self.analyzePdData(photodiodeDataPairs, outputData)
-        for amp in amps:
+        ampNames = [amp.getName() for amp in amps]
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nPair=len(inputPairs))
+        photodiodePairs = kwargs.get('photodiodePairs', None)
+        if photodiodePairs is not None:
+            self.analyzePdData(photodiodePairs, outputData)
+        for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)            
             for iPair, inputPair in enumerate(inputPairs):
-                calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={amp: amp}), **ampCalibs)
-                calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={amp: amp}), **ampCalibs)
+                if len(inputPair) != 2:
+                    print("exposurePair %i has %i items" % (iPair, len(inputPair)))
+                    continue
+                calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
+                calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)                
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
-            self.analyzeAmpRunData(outputData, amp)
+            self.analyzeAmpRunData(outputData, iamp, amp)
         return pipeBase.Struct(outputData=outputData)
     
-    def makeOutputData(self, amps, nAmps, nPair):  # pylint: disable=arguments-differ,no-self-use
-        return EoPtcData(amps=amps, nAmps=nAmps, nPair=nPair)
+    def makeOutputData(self, amps, nAmps, nPair, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        return EoPtcData(amps=amps, nAmp=nAmps, nPair=nPair, **kwargs)
 
     def analyzePdData(self, photodiodeDataPairs, outputData):
-        outTable = outputData.detExposure
+        outTable = outputData.detExp['detExp']
         for iPair, pdData in enumerate(photodiodeDataPairs):
             pd1 = self.getFlux(pdData[0])
             pd2 = self.getFlux(pdData[1])
-            if np.abs((pd1 - pd2)/((pd1 + pd2)/2.)) > self.config.max_pd_frac_dev:
+            if np.abs((pd1 - pd2)/((pd1 + pd2)/2.)) > self.config.maxPDFracDev:
                 flux = np.nan
             else:
                 flux = 0.5*(pd1 * pd2)
             outTable.flux[iPair] = flux
-            outTable.seqnum[iPair] = pdData[0].seqnum
-            outTable.dayobs[iPair] = pdData[0].dayobs
+            outTable.seqnum[iPair] = 0 #
+            outTable.dayobs[iPair] = 0 #
 
     def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
-        outTable = outputData.ampExposure[amp]
+        outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         results = self.pairMean(calibExp1, calibExp2, self.statCtrl)
         outTable.mean[iPair] = results[0]
         outTable.var[iPair] = results[1]
         outTable.discard[iPair] = results[2]
         
     def analyzeAmpRunData(self, outputData, amp):
-        inTableAmp = outputData.ampExposure[amp.index]
-        outTable = outputData.amps
+        inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
+        inTableExp = outputData.detExp['detExp']
+        outTable = outputData.amps['amps']
         results = self.fitPtcCurve(inTableAmp.mean, inTableAmp.var, self.config.sigCut)
-        outTable.ptcGain[amp.index] = results[0]
-        outTable.ptcGainError[amp.index] = results[1]
-        outTable.ptcA00[amp.index] = results[2]
-        outTable.ptcA00Error[amp.index] = results[3]
-        outTable.ptcNoise[amp.index] = results[4]
-        outTable.ptcNoiseError[amp.index] = results[5]
-        outTable.ptcTurnoff[amp.index] = results[6]
+        outTable.ptcGain[iamp] = results[0]
+        outTable.ptcGainError[iamp] = results[1]
+        outTable.ptcA00[iamp] = results[2]
+        outTable.ptcA00Error[iamp] = results[3]
+        outTable.ptcNoise[iamp] = results[4]
+        outTable.ptcNoiseError[iamp] = results[5]
+        outTable.ptcTurnoff[iamp] = results[6]
         
     @staticmethod
     def pairMean(calibExp1, calibExp2, statCtrl):
-
-        mean1 = afwMath.makeStatistics(calibExp1, afwMath.MEAN, statCtrl).getValue()
-        mean2 = afwMath.makeStatistics(calibExp2, afwMath.MEAN, statCtrl).getValue()
+        mean1 = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()
+        mean2 = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()        
         fmean = (mean1 + mean2)/2.
         # Pierre Astier's symmetric weights to make the difference
         # image have zero mean
@@ -213,7 +233,12 @@ class EoPtcTask(EoAmpPairCalibTask):
         return (ptcGain, ptcError, ptcA00, ptcA00Error, ptcNoise,
                 ptcNoiseError, ptcTurnoff)
 
-
     @staticmethod
     def getFlux(pdData):
-        return np.trazp(pdData[0], pdData[1])
+        x = pdData['Time']
+        y = pdData['Current']
+        ythresh = (max(y) - min(y))/factor + min(y)
+        index = np.where(y < ythresh)
+        y0 = np.median(y[index])
+        y -= y0
+        return sum((y[1:] + y[:-1])/2.*(x[1:] - x[:-1]))

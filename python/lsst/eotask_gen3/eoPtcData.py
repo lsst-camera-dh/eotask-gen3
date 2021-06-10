@@ -79,16 +79,16 @@ class EoPtcDetExpData(EoCalibTable):
 
 class EoPtcDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoPtcAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                    tableClass=EoPtcAmpExpData,
+                                    multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoPtcAmpRunData)
 
-    detExposure = EoCalibTableHandle(tableName="detExp",
-                                     tableClass=EoPtcDetExpData)
-
+    detExp = EoCalibTableHandle(tableName="detExp",
+                                    tableClass=EoPtcDetExpData)
+    
 
 class EoPtcData(EoCalib):
 
@@ -100,9 +100,9 @@ class EoPtcData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoPtcData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
         self.amps = self['amps']
-        self.detExposure = self['detExposure']
+        self.detExp = self['detExp']
 
 
 RegisterEoCalibSchema(EoPtcData)
