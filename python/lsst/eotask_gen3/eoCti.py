@@ -33,7 +33,6 @@ class EoCtiTaskConfig(EoAmpRunCalibTaskConfig,
         self.connections.outputData = "eoCti"
 
 
-
 class EoCtiTask(EoAmpRunCalibTask):
 
     ConfigClass = EoCtiTaskConfig

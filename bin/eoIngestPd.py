@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 import argparse
 
@@ -69,8 +71,9 @@ def main():
         table = Table.read(aFile, format='ascii')
 
         setTableMetaData(table, dataIdRecords)
-        dataId = dict(instrument=dataIdRecords.instrument,
-                      exposure=dataIdRecords.id)
+        #dataId = dict(instrument=dataIdRecords.instrument,
+        #exposure=dataIdRecords.id)
+        dataId = dataIdRecords.dataId
 
         with butler.transaction():
             butler.put(table, "photodiode", dataId=dataId)

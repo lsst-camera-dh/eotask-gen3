@@ -24,7 +24,7 @@ class EoFlatPairAmpExpData(EoCalibTable):
     SCHEMA_CLASS = EoFlatPairAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoFlatPairAmpExpData, self).__init__(data=None, **kwargs)
+        super(EoFlatPairAmpExpData, self).__init__(data=data, **kwargs)
         self.signal = self.table[self.SCHEMA_CLASS.signal.name]
         self.flat1Signal = self.table[self.SCHEMA_CLASS.flat1Signal.name]
         self.flat2Signal = self.table[self.SCHEMA_CLASS.flat2Signal.name]
@@ -47,7 +47,7 @@ class EoFlatPairAmpRunData(EoCalibTable):
     SCHEMA_CLASS = EoFlatPairAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoFlatPairAmpRunData, self).__init__(data=None, **kwargs)
+        super(EoFlatPairAmpRunData, self).__init__(data=data, **kwargs)
         self.fullWell = self.table[self.SCHEMA_CLASS.fullWell.name]
         self.maxFracDev = self.table[self.SCHEMA_CLASS.maxFracDev.name]
         self.rowMeanVarSlope = self.table[self.SCHEMA_CLASS.rowMeanVarSlope.name]
@@ -77,16 +77,16 @@ class EoFlatPairDetExpData(EoCalibTable):
 
 class EoFlatPairDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoFlatPairAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoFlatPairAmpExpData,
+                                multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoFlatPairAmpRunData)
 
-    detExposure = EoCalibTableHandle(tableName="detExp",
-                                     tableClass=EoFlatPairDetExpData)
-
+    detExp = EoCalibTableHandle(tableName="detExp",
+                                tableClass=EoFlatPairDetExpData)
+    
 
 class EoFlatPairData(EoCalib):
 

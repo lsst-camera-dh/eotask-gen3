@@ -295,15 +295,15 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
 
 
 class EoAmpPairCalibTaskConnections(pipeBase.PipelineTaskConnections,
-                                    dimensions=("instrument", "exposure", "detector")):
+                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read raw amplifier data and
     perform minimal Isr on each amplifier """
     camera = copyConnect(CAMERA_CONNECT)
     bias = copyConnect(BIAS_CONNECT)
     defects = copyConnect(DEFECTS_CONNECT)
     gains = copyConnect(GAINS_CONNECT)
+    dark = copyConnect(DARK_CONNECT)
     inputExps = copyConnect(INPUT_RAW_AMPS_CONNECT)
-    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoAmpPairCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -345,12 +345,26 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         ouptutRefs : `~lsst.pipe.base.connections.OutputQuantizedConnection`
             Output data refs to persist.
         """
-        inputExps = inputRefs.pop('inputExps')
-        expIds = [expId.dataId['exposure'] for expId in inputRefs.inputExps]
         inputs = butlerQC.get(inputRefs)
-        inputs['inputPairs'] = arrangeFlatsByExpId(inputExps, expIds).values()      
+
+        inputExps = inputs.pop('inputExps')
+        expIds = [expId.dataId['exposure'] for expId in inputExps]
+        inputPairs = [v for v in arrangeFlatsByExpId(inputExps, expIds).values()]
+
+        try:
+            pdData = inputs['photodiodeData'] 
+            pdDict = { pdRef.dataId['exposure'] : pdRef for pdRef in pdData }
+            pdPairs = [ [pdDict[expId[0][1]], pdDict[expId[1][1]]] for expId in inputPairs ]            
+        except:
+            pdPairs = None
+
+        inputs['inputPairs'] = inputPairs
+        if pdPairs is not None:
+            inputs['photodiodeDict'] = pdPairs
+        
         outputs = self.run(**inputs)
         butlerQC.put(outputs, outputRefs)        
+
         
     def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
