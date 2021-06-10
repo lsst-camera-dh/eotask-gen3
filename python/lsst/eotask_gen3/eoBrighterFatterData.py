@@ -8,21 +8,21 @@ __all__ = ["EoBrighterFatterAmpExpData",
            "EoBrighterFatterData"]
 
 
-class EoBrighterFatterAmpExpDataSchemaV0(EoCalibTableSchema):
+class EoBrighterFatterAmpPairDataSchemaV0(EoCalibTableSchema):
 
-    TABLELENGTH = "nExposure"
+    TABLELENGTH = "nPair"
 
     mean = EoCalibField(name="MEAN", dtype=float, unit='electron')
     covarience = EoCalibField(name="COV", dtype=float, unit='electron**2', shape=['nCov', 'nCov'])
     covarienceError = EoCalibField(name="COV_ERROR", dtype=float, unit='electron**2', shape=['nCov', 'nCov'])
 
 
-class EoBrighterFatterAmpExpData(EoCalibTable):
+class EoBrighterFatterAmpPairData(EoCalibTable):
 
-    SCHEMA_CLASS = EoBrighterFatterAmpExpDataSchemaV0
+    SCHEMA_CLASS = EoBrighterFatterAmpPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoBrighterFatterAmpExpData, self).__init__(data=data, **kwargs)
+        super(EoBrighterFatterAmpPairData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.covarience = self.table[self.SCHEMA_CLASS.covarience.name]
         self.covarienceError = self.table[self.SCHEMA_CLASS.covarienceError.name]
@@ -62,9 +62,9 @@ class EoBrighterFatterAmpRunData(EoCalibTable):
 
 class EoBrighterFatterDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoBrighterFatterAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                    tableClass=EoBrighterFatterAmpExpData,
+                                    multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoBrighterFatterAmpRunData)
@@ -80,7 +80,7 @@ class EoBrighterFatterData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoBrighterFatterData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
         self.amps = self['amps']
 
 
@@ -88,6 +88,6 @@ RegisterEoCalibSchema(EoBrighterFatterData)
 
 
 AMPS = ["%02i" % i for i in range(16)]
-NEXPOSURE = 10
+NPAIR = 10
 NCOV = 3
-EoBrighterFatterData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE, nCov=NCOV))
+EoBrighterFatterData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nPair=NPAIR, nCov=NCOV))
