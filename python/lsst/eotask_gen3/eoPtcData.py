@@ -3,27 +3,27 @@
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoPtcAmpExpData",
+__all__ = ["EoPtcAmpPairData",
            "EoPtcAmpRunData",
-           "EoPtcDetExpData",
+           "EoPtcDetPairData",
            "EoPtcData"]
 
 
-class EoPtcAmpExpDataSchemaV0(EoCalibTableSchema):
+class EoPtcAmpPairDataSchemaV0(EoCalibTableSchema):
 
-    TABLELENGTH = "nExposure"
+    TABLELENGTH = "nPair"
 
     mean = EoCalibField(name="MEAN", dtype=float, unit='adu')
     var = EoCalibField(name="VAR", dtype=float, unit='adu**2')
     discard = EoCalibField(name="DISCARD", dtype=int, unit='pixel')
 
 
-class EoPtcAmpExpData(EoCalibTable):
+class EoPtcAmpPairData(EoCalibTable):
 
-    SCHEMA_CLASS = EoPtcAmpExpDataSchemaV0
+    SCHEMA_CLASS = EoPtcAmpPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoPtcAmpExpData, self).__init__(data=data, **kwargs)
+        super(EoPtcAmpPairData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.var = self.table[self.SCHEMA_CLASS.var.name]
         self.discard = self.table[self.SCHEMA_CLASS.discard.name]
@@ -57,21 +57,21 @@ class EoPtcAmpRunData(EoCalibTable):
         self.ptcTurnoff = self.table[self.SCHEMA_CLASS.ptcTurnoff.name]
 
 
-class EoPtcDetExpDataSchemaV0(EoCalibTableSchema):
+class EoPtcDetPairDataSchemaV0(EoCalibTableSchema):
 
-    TABLELENGTH = 'nExposure'
+    TABLELENGTH = 'nPair'
 
     exposure = EoCalibField(name="EXPOSURE", dtype=float)
     seqnum = EoCalibField(name="SEQNUM", dtype=int)
     dayobs = EoCalibField(name="DAYOBS", dtype=int)
 
 
-class EoPtcDetExpData(EoCalibTable):
+class EoPtcDetPairData(EoCalibTable):
 
-    SCHEMA_CLASS = EoPtcDetExpDataSchemaV0
+    SCHEMA_CLASS = EoPtcDetPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
-        super(EoPtcDetExpData, self).__init__(data=None, **kwargs)
+        super(EoPtcDetPairData, self).__init__(data=None, **kwargs)
         self.exposure = self.table[self.SCHEMA_CLASS.exposure.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
         self.dayobs = self.table[self.SCHEMA_CLASS.dayobs.name]
@@ -80,14 +80,14 @@ class EoPtcDetExpData(EoCalibTable):
 class EoPtcDataSchemaV0(EoCalibSchema):
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
-                                    tableClass=EoPtcAmpExpData,
+                                    tableClass=EoPtcAmpPairData,
                                     multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoPtcAmpRunData)
 
     detExp = EoCalibTableHandle(tableName="detExp",
-                                    tableClass=EoPtcDetExpData)
+                                    tableClass=EoPtcDetPairData)
     
 
 class EoPtcData(EoCalib):
@@ -108,5 +108,5 @@ class EoPtcData(EoCalib):
 RegisterEoCalibSchema(EoPtcData)
 
 AMPS = ["%02i" % i for i in range(16)]
-NEXPOSURE = 10
-EoPtcData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nExposure=NEXPOSURE))
+NPAIR = 10
+EoPtcData.testData = dict(testCtor=dict(amps=AMPS, nAmp=len(AMPS), nPair=NPAIR))

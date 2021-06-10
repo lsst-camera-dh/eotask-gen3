@@ -43,13 +43,21 @@ class EoPtcTaskConnections(EoAmpPairCalibTaskConnections):
         multiple=True,
         deferLoad=True,
     )
-    
+
+    outputData = cT.Output(
+        name="eoPtc",
+        doc="Electrial Optical Calibration Output",
+        storageClass="EoCalib",
+        dimensions=("instrument", "detector"),
+    )
+
 
 class EoPtcTaskConfig(EoAmpPairCalibTaskConfig,
                       pipelineConnections=EoPtcTaskConnections):
 
     maxPDFracDev = pexConfig.Field("Maximum photodiode fractional deviation", float, default=0.05)
     maxFracOffset = pexConfig.Field("maximum fraction offset from median gain curve to omit points from PTC fit.", float, default=0.2)
+    sigCut = pexConfig.Field("Cut on outliers in sigma", float, default=5.0)
     
     def setDefaults(self):
         # pylint: disable=no-member
@@ -137,12 +145,12 @@ class EoPtcTask(EoAmpPairCalibTask):
 
     def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
-        results = self.pairMean(calibExp1, calibExp2, self.statCtrl)
+        results = self.pairMean(calibExp1, calibExp2, amp, self.statCtrl)
         outTable.mean[iPair] = results[0]
         outTable.var[iPair] = results[1]
         outTable.discard[iPair] = results[2]
         
-    def analyzeAmpRunData(self, outputData, amp):
+    def analyzeAmpRunData(self, outputData, iamp, amp):
         inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
         inTableExp = outputData.detExp['detExp']
         outTable = outputData.amps['amps']
@@ -156,7 +164,7 @@ class EoPtcTask(EoAmpPairCalibTask):
         outTable.ptcTurnoff[iamp] = results[6]
         
     @staticmethod
-    def pairMean(calibExp1, calibExp2, statCtrl):
+    def pairMean(calibExp1, calibExp2, amp, statCtrl):
         mean1 = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()
         mean2 = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()        
         fmean = (mean1 + mean2)/2.
@@ -164,12 +172,12 @@ class EoPtcTask(EoAmpPairCalibTask):
         # image have zero mean
         weight1 = mean2/fmean
         weight2 = mean1/fmean
-        calibExp1 *= weight1
-        calibExp2 *= weight2
+        calibExp1.image.array *= weight1
+        calibExp2.image.array *= weight2
 
         # Make a robust estimate of variance by filtering outliers
-        image1 = np.ravel(calibExp1.getArrays()[0])
-        image2 = np.ravel(calibExp2.getArrays()[0])
+        image1 = np.ravel(calibExp1.image.array)
+        image2 = np.ravel(calibExp2.image.array)                    
         fdiff = image1 - image2
         mad = astats.mad_std(fdiff)  #/2.
         # The factor 14.826 below makes the filter the equivalent of a 10-sigma
