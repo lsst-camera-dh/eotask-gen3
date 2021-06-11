@@ -51,4 +51,5 @@ RegisterEoCalibSchema(EoNonlinearityData)
 
 AMPS = ["%02i" % i for i in range(16)]
 NPROFILE = 20
-EoNonlinearityData.testData = dict(testCtor=dict(nAmp=len(AMPS), nProf=NPROFILE)
+EoNonlinearityData.testData = dict(testCtor=dict(nAmp=len(AMPS), nProf=NPROFILE))
+

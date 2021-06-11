@@ -1,5 +1,7 @@
 
 import numpy as np
+from scipy.optimize import leastsq
+from scipy.interpolate import UnivariateSpline
 
 import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
@@ -128,10 +130,14 @@ class EoNonlinearityTaskConnections(EoAmpRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
     )
 
+    def __init__(self, *, config=None):
+        super().__init__(config=config)        
+        self.inputs.discard('camera')
+        self.inputs.discard('stackedCalExp')
     
 
 class EoNonlinearityTaskConfig(EoAmpRunCalibTaskConfig,
-                              pipelineConnections=EoNonlinearityTaskConnections):
+                               pipelineConnections=EoNonlinearityTaskConnections):
 
     nProfileBins = pexConfig.Field("Number of bins for Nonlinearity profile", int, default=30)
     fitMin = pexConfig.Field("Mininum of range to fit [ADU]", float, default=0.)
@@ -139,9 +145,9 @@ class EoNonlinearityTaskConfig(EoAmpRunCalibTaskConfig,
     nullPoint = pexConfig.Field("Signal value at which to set correction to zero", float, default=0.)    
     
     def setDefaults(self):
-        self.connections.eoPtc = "eoPtc"
+        self.connections.ptcData = "eoPtc"
         self.connections.outputData = "eoNonlinearity"
-        
+    
 
 class EoNonlinearityTask(EoAmpRunCalibTask):
 
@@ -166,31 +172,30 @@ class EoNonlinearityTask(EoAmpRunCalibTask):
             Output data in formatted tables
         """
         inputAmpTables = ptcData.ampExp
-        outputData = self.makeOutputData(nAmp=len(inputTables), nProfile=self.config.nProfile)
-        outTable = outputData.amps['amps']
-        flux = inputExpTable.flux
-        for iAmp, (ampName, ampData) in inputAmpTables.items():
+        outputData = self.makeOutputData(nAmp=len(inputAmpTables), nProf=self.config.nProfileBins)
+        outputTable = outputData.amps['amps']
+        for iamp, (ampName, ampData) in enumerate(inputAmpTables.items()):
             ampMean = ampData.mean
             ampVar = ampData.var
-            profX, profYCorr, profErr = self.findNonlinearity(ampMean, ampVar)
+            profX, profYCorr, profYErr = self.findNonlinearity(ampMean, ampVar)
             outputTable.profX[iamp] = profX
             outputTable.profYCorr[iamp] = profYCorr
             outputTable.profYErr[iamp] = profYErr
         return pipeBase.Struct(outputData=outputData)
 
-    def makeOutputData(self, nAmp, **kwargs):
-        return EoNonlinearityData(nAmp=nAmp, nProfile=self.config.nProfileBins)
+    def makeOutputData(self, nAmp, nProf, **kwargs):
+        return EoNonlinearityData(nAmp=nAmp, nProf=nProf, **kwargs)
 
-    def findNonlinearity(self, xdata, ydata)
+    def findNonlinearity(self, xdata, ydata):
 
-        xbins = np.linspace(self.config.fitMin, self.config.fitMax, self.config.nProfileBins)
+        xbins = np.linspace(self.config.fitMin, self.config.fitMax, self.config.nProfileBins+1)
 
-        mask = (fit_range[0] < xdata) * (fit_range[1] > xdata)
+        mask = (self.config.fitMin < xdata) * (self.config.fitMax > xdata)
         xdata_fit = xdata[mask]
         ydata_fit = ydata[mask]
         mean_slope = (ydata_fit/xdata_fit).mean()
         pars = (mean_slope,)
-        results = scipy.optimize.leastsq(chi2_model, pars, full_output=1, args=(xdata_fit, ydata_fit))
+        results = leastsq(chi2_model, pars, full_output=1, args=(xdata_fit, ydata_fit))
         model_yvals = lin_func(results[0], xdata)
         frac_resid = (ydata - model_yvals)/model_yvals
         frac_resid_err = 1./xdata

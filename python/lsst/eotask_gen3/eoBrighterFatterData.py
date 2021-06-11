@@ -3,7 +3,7 @@
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 
-__all__ = ["EoBrighterFatterAmpExpData",
+__all__ = ["EoBrighterFatterAmpPairData",
            "EoBrighterFatterAmpRunData",
            "EoBrighterFatterData"]
 
@@ -63,7 +63,7 @@ class EoBrighterFatterAmpRunData(EoCalibTable):
 class EoBrighterFatterDataSchemaV0(EoCalibSchema):
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
-                                    tableClass=EoBrighterFatterAmpExpData,
+                                    tableClass=EoBrighterFatterAmpPairData,
                                     multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",

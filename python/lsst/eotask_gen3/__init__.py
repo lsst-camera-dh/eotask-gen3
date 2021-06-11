@@ -20,6 +20,7 @@ from .eoFlatPairData import *
 from .eoGainStabilityData import *
 from .eoOverscanData import *
 from .eoPersistenceData import *
+from .eoPtc import *
 from .eoPtcData import *
 from .eoReadNoiseData import *
 from .eoSummaryData import *

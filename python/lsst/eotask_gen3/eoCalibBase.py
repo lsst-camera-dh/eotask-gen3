@@ -387,14 +387,20 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputPairs[0].dataId['detector'])
+        det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
         for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
-                calibExp1 = runIsrOnAmp(self, inputPair[0].get(parameters={amp: amp}), amp, **ampCalibs)
-                calibExp2 = runIsrOnAmp(self, inputPair[1].get(parameters={amp: amp}), amp, **ampCalibs)
+                if len(inputPair) != 2:
+                    print("Length of pair %i = %i" % (iPair, len(inputPair)))
+                try:
+                    calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
+                    calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
+                except:
+                    import pdb
+                    pdb.set_trace()
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
             self.analyzeAmpRunData(outputData, iamp, amp)
         self.analyzeDetRunData(outputData)
