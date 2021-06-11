@@ -1,0 +1,149 @@
+description: >
+    Pipelines for electrical-optical testing
+tasks:
+    eoBias:
+        class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
+        config:
+            # exposure.observation_type = 'bias'
+            connections.inputExps: "raw"
+            connections.outputImage: "eoBias"
+    eoPersistanceBias:
+        class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
+        config:
+            # exposure.observation_type = 'bias' and exposure.observation_reason = 'BOT_persistence'
+            connections.inputExps: "raw"
+            connections.outputImage: "eoPersistanceBias"
+    eoFe55Bias:
+        class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
+        config:
+            # exposure.observation_type = 'bias' and exposure.observation_reason = 'fe55'
+            connections.inputExps: "raw"
+            connections.outputImage: "eoFe55Bias"
+    eoDark:
+        class: lsst.eotask_gen3.eoCombine.EoCombineDarkTask
+        config:
+            # exposure.observation_type = 'bias'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.outputImage: "eoDark"
+    eoFlatLow:
+        class: lsst.eotask_gen3.eoCombine.EoCombineFlatTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat' and exposure.exposure_time < 30
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputImage: "eoFlatLow"
+    eoFlatHigh:
+        class: lsst.eotask_gen3.eoCombine.EoCombineFlatTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat' and exposure.exposure_time > 30
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputImage: "eoFlatHigh"
+    eoBrightPixels:
+        class: lsst.eotask_gen3.eoBrightPixels.EoBrightPixelTask
+        config:
+            connections.stackedCalExp: "eoDark"
+            connections.outputData: "eoBrightPixelStats"
+            connections.defects: "eoBrightPixels"
+    eoDarkPixels:
+        class: lsst.eotask_gen3.eoDarkPixels.EoDarkPixelTask
+        config:
+            connections.stackedCalExp: "eoFlatHigh"
+            connections.outputData: "eoDarkPixelStats"
+            connections.defects: "eoDarkPixels"
+    eoDefects:
+        class: lsst.eotask_gen3.eoDefects.EoDefects
+        config:
+            connections.brightPixels: "eoBrightPixels"
+            connections.darkPixels: "eoDarkPixels"
+            connections.defects: "eoDefects"
+    eoFe55:
+        class: lsst.eotask_gen3.eoFe55.EoFe55Task
+        config:
+            # exposure.observation_type = 'fe55_flat' and exposure.observation_reason = 'fe55'
+            connections.inputExps: "raw" 
+            connections.bias: "eoBias"
+            connections.defects: "defects"
+            connections.dark: "eoDark"
+            connections.outputData: "eoFe55"
+    eoPtc:
+        class: lsst.eotask_gen3.eoPtc.EoPtcTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
+            connections.inputExps: "raw" 
+            connections.bias: "eoBias"
+            connections.defects: "defects"
+            connections.dark: "eoDark"
+            connections.outputData: "eoPtc"
+    eoNonlinearity:
+        class: lsst.eotask_gen3.eoNonlinearity.EoNonlinearityTask
+        config:
+            connections.ptcData: "eoPtc"
+            connections.outputData: "eoNonlinearity"
+    eoBiasStability:
+        class: lsst.eotask_gen3.eoBiasStability.EoBiasStabilityTask
+        config:
+            # exposure.observation_type = 'bias'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.defects: "defects"
+            connections.outputData: "eoBiasStability"
+    eoOverscan:
+        class: lsst.eotask_gen3.eoOverscan.EoOverscanTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoOverscan"
+    eoFlatPair:
+        class: lsst.eotask_gen3.eoFlatPair.EoFlatPairTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoFlatPair"
+    eoGainStability:
+        class: lsst.eotask_gen3.eoGainStability.EoGainStabilityTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoGainStability"
+    eoBrighterFatter:
+        class: lsst.eotask_gen3.eoBrighterFatter.EoBrighterFatterTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoBrighterFatter"
+    eoPersistance:
+        class: lsst.eotask_gen3.eoPersistance.EoPersistanceTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'bot_persistance'
+            connections.inputExps: "raw"
+            connections.bias: "eoPersistanceBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoPeristance"
+    eoTearing:
+        class: lsst.eotask_gen3.eoTearing.EoTearingTask
+        config:
+            # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.dark: "eoDark"
+            connections.defects: "defects"
+            connections.outputData: "eoTearing"
