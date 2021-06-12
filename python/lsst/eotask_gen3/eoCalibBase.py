@@ -395,12 +395,9 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
                     print("Length of pair %i = %i" % (iPair, len(inputPair)))
-                try:
-                    calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
-                    calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
-                except:
-                    import pdb
-                    pdb.set_trace()
+                    continue
+                calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
+                calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
             self.analyzeAmpRunData(outputData, iamp, amp)
         self.analyzeDetRunData(outputData)

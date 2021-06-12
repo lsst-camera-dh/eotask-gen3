@@ -84,7 +84,7 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
 
         return EoReadNoiseData(amps=amps, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp)
 
-    def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
+    def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
 
         imaging = calibExp.getDetector().getAmplifiers()[0].getBBox() # FIXME
         dx = self.config.dx

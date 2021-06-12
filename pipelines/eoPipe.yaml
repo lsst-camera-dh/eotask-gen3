@@ -7,12 +7,12 @@ tasks:
             # exposure.observation_type = 'bias'
             connections.inputExps: "raw"
             connections.outputImage: "eoBias"
-    eoPersistanceBias:
+    eoPersistenceBias:
         class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
         config:
             # exposure.observation_type = 'bias' and exposure.observation_reason = 'BOT_persistence'
             connections.inputExps: "raw"
-            connections.outputImage: "eoPersistanceBias"
+            connections.outputImage: "eoPersistenceBias"
     eoFe55Bias:
         class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
         config:
@@ -85,6 +85,14 @@ tasks:
         config:
             connections.ptcData: "eoPtc"
             connections.outputData: "eoNonlinearity"
+    eoReadNoise:
+        class: lsst.eotask_gen3.eoReadNoise.EoReadNoiseTask
+        config:
+            # exposure.observation_type = 'bias' and exposure.observation_reason = 'biase'
+            connections.inputExps: "raw"
+            connections.bias: "eoBias"
+            connections.defects: "defects"
+            connections.outputData: "eoReadNoise"
     eoBiasStability:
         class: lsst.eotask_gen3.eoBiasStability.EoBiasStabilityTask
         config:
@@ -93,6 +101,11 @@ tasks:
             connections.bias: "eoBias"
             connections.defects: "defects"
             connections.outputData: "eoBiasStability"
+    eoDarkCurrent:
+        class: lsst.eotask_gen3.eoDarkCurrent.EoDarkCurrentTask
+        config:
+            connections.stackedCalExp: "eoDark"
+            connections.outputData: "eoDarkCurrent"
     eoOverscan:
         class: lsst.eotask_gen3.eoOverscan.EoOverscanTask
         config:
@@ -129,15 +142,15 @@ tasks:
             connections.dark: "eoDark"
             connections.defects: "defects"
             connections.outputData: "eoBrighterFatter"
-    eoPersistance:
-        class: lsst.eotask_gen3.eoPersistance.EoPersistanceTask
+    eoPersistence:
+        class: lsst.eotask_gen3.eoPersistence.EoPersistenceTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'bot_persistance'
             connections.inputExps: "raw"
-            connections.bias: "eoPersistanceBias"
+            connections.bias: "eoPersistenceBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
-            connections.outputData: "eoPeristance"
+            connections.outputData: "eoPeristence"
     eoTearing:
         class: lsst.eotask_gen3.eoTearing.EoTearingTask
         config:

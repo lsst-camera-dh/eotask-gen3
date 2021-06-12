@@ -19,6 +19,7 @@ from .eoFe55Data import *
 from .eoFlatPairData import *
 from .eoGainStabilityData import *
 from .eoOverscanData import *
+from .eoPersistence import *
 from .eoPersistenceData import *
 from .eoPtc import *
 from .eoPtcData import *
