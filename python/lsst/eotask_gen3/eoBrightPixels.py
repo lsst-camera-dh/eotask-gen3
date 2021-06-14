@@ -25,7 +25,7 @@ class EoBrightPixelsTaskConnections(EoAmpRunCalibTaskConnections):
     )
 
     defects = cT.Output(
-        name='BrightPixel',
+        name='eoBrightPixel',
         doc="Output defect tables.",
         storageClass="Defects",
         dimensions=("instrument", "detector"),

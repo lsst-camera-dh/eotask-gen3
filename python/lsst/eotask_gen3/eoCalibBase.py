@@ -18,6 +18,8 @@ import lsst.pipe.base.connectionTypes as cT
 from lsst.ip.isr import IsrTask, AssembleCcdTask, Defects
 from lsst.afw.cameraGeom import AmplifierIsolator
 
+from .eoDataSelection import EoDataSelection
+
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
            'EoAmpRunCalibTaskConnections', 'EoAmpRunCalibTaskConfig', 'EoAmpRunCalibTask',
@@ -226,7 +228,8 @@ class EoAmpExpCalibTaskConfig(pipeBase.PipelineTaskConfig,
     """ Class snippet to define IsrTask as a sub-task and attach the
     correct connections """
     isr = copyConfig(ISR_CONFIG)
-
+    dataSelection = pexConfig.ChoiceField("Data sub-selection rules", str, EoDataSelection.choiceDict(), default="any")
+    
 
 class EoAmpExpCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that loop over amps, then over exposures
@@ -241,12 +244,38 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
     """
     ConfigClass = EoAmpExpCalibTaskConfig
     _DefaultName = "DoNotUse"
-
+    
     def __init__(self, **kwargs):
         """ C'tor """
         super().__init__(**kwargs)
         self.makeSubtask("isr")
+        self._dataSelection = EoDataSelection.getSelection(self.config.dataSelection)
 
+    @property
+    def dataSelection(self):
+        return self._dataSelection
+
+    @property
+    def getDataQuery(self):
+        return self._dataSelection.queryString
+    
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        """ Here we filter the input data selection
+
+        Parameters
+        ----------
+        butlerQC : `~lsst.daf.butler.butlerQuantumContext.ButlerQuantumContext`
+            Butler to operate on.
+        inputRefs : `~lsst.pipe.base.connections.InputQuantizedConnection`
+            Input data refs to load.
+        ouptutRefs : `~lsst.pipe.base.connections.OutputQuantizedConnection`
+            Output data refs to persist.
+        """
+        inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)
+        inputs = butlerQC.get(inputRefs)
+        outputs = self.run(**inputs)
+        butlerQC.put(outputs, outputRefs)        
+        
     def run(self, inputExps, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
@@ -311,6 +340,7 @@ class EoAmpPairCalibTaskConfig(pipeBase.PipelineTaskConfig,
     """ Class snippet to define IsrTask as a sub-task and attach the
     correct connections """
     isr = copyConfig(ISR_CONFIG)
+    dataSelection = pexConfig.ChoiceField("Data sub-selection rules", str, EoDataSelection.choiceDict(), default="any")
 
 
 class EoAmpPairCalibTask(pipeBase.PipelineTask):
@@ -331,7 +361,15 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         """ C'tor """
         super().__init__(**kwargs)
         self.makeSubtask("isr")
+        self._dataSelection = EoDataSelection.getSelection(self.config.dataSelection)
 
+    @property
+    def dataSelection(self):
+        return self._dataSelection
+
+    @property
+    def getDataQuery(self):
+        return self._dataSelection.queryString
 
     def runQuantum(self, butlerQC, inputRefs, outputRefs):
         """Ensure that the input and output dimensions are passed along.
@@ -345,6 +383,7 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         ouptutRefs : `~lsst.pipe.base.connections.OutputQuantizedConnection`
             Output data refs to persist.
         """
+        inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)        
         inputs = butlerQC.get(inputRefs)
 
         inputExps = inputs.pop('inputExps')

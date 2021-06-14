@@ -14,6 +14,8 @@ from .eoCalibBase import CAMERA_CONNECT, BIAS_CONNECT, DARK_CONNECT, DEFECTS_CON
                           GAINS_CONNECT, INPUT_RAW_AMPS_CONNECT, OUTPUT_IMAGE_CONNECT,\
                           copyConnect, runIsrOnAmp, extractAmpCalibs
 
+from .eoDataSelection import EoDataSelection
+
 
 class EoCombineCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                     dimensions=("instrument", "detector")):
@@ -75,6 +77,14 @@ class EoCombineCalibTaskConfig(pipeBase.PipelineTaskConfig,
         doc="Used to run a reduced version of ISR approrpiate for EO analyses",
     )
 
+    dataSelection = pexConfig.ChoiceField(
+        dtype=str,
+        allowed=EoDataSelection.choiceDict(),
+        doc="Data sub-selection rules",
+        default="any"
+    )
+
+    
 
 class EoCombineCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that loop over amps, then over exposures
@@ -89,6 +99,32 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
         super().__init__(**kwargs)
         self.makeSubtask("isr")
         self.makeSubtask("assembleCcd")
+        self._dataSelection = EoDataSelection.getSelection(self.config.dataSelection)
+
+    @property
+    def dataSelection(self):
+        return self._dataSelection
+
+    @property
+    def getDataQuery(self):
+        return self._dataSelection.queryString
+    
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        """ Here we filter the input data selection
+
+        Parameters
+        ----------
+        butlerQC : `~lsst.daf.butler.butlerQuantumContext.ButlerQuantumContext`
+            Butler to operate on.
+        inputRefs : `~lsst.pipe.base.connections.InputQuantizedConnection`
+            Input data refs to load.
+        ouptutRefs : `~lsst.pipe.base.connections.OutputQuantizedConnection`
+            Output data refs to persist.
+        """
+        inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)
+        inputs = butlerQC.get(inputRefs)
+        outputs = self.run(**inputs)
+        butlerQC.put(outputs, outputRefs)        
 
     def run(self, inputExps, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
@@ -190,7 +226,7 @@ class EoCombineBiasTaskConfig(EoCombineCalibTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.outputImage = "eo_bias"
+        self.connections.outputImage = "eoBias"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
         self.isr.doSetBadRegions = False
@@ -206,6 +242,7 @@ class EoCombineBiasTaskConfig(EoCombineCalibTaskConfig,
         self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
+        self.dataSelection = 'anyBias'
 
 
 class EoCombineBiasTask(EoCombineCalibTask):
@@ -215,7 +252,6 @@ class EoCombineBiasTask(EoCombineCalibTask):
     """
     ConfigClass = EoCombineBiasTaskConfig
     _DefaultName = "combineBias"
-
 
 
 class EoCombineDarkTaskConnections(EoCombineCalibTaskConnections):
@@ -247,6 +283,7 @@ class EoCombineDarkTaskConfig(EoCombineCalibTaskConfig,
         self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
+        self.dataSelection = 'darkDark'
 
 
 class EoCombineDarkTask(EoCombineCalibTask):
@@ -256,7 +293,7 @@ class EoCombineDarkTask(EoCombineCalibTask):
     """
     ConfigClass = EoCombineDarkTaskConfig
     _DefaultName = "combineDark"
-
+    dataSelection = EoDataSelection.getSelection('dark')
 
 class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
     """ Class snippet with connections needed to read raw amplifier data and
@@ -289,6 +326,7 @@ class EoCombineFlatTaskConfig(EoCombineCalibTaskConfig,
         self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.assembleCcd.doTrim = False
+        self.dataSelection = 'superFlatLow'
 
 
 class EoCombineFlatTask(EoCombineCalibTask):
