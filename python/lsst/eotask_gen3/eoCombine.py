@@ -293,7 +293,7 @@ class EoCombineDarkTask(EoCombineCalibTask):
     """
     ConfigClass = EoCombineDarkTaskConfig
     _DefaultName = "combineDark"
-    dataSelection = EoDataSelection.getSelection('dark')
+
 
 class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
     """ Class snippet with connections needed to read raw amplifier data and

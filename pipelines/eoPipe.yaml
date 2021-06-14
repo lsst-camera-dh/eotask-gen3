@@ -5,28 +5,28 @@ tasks:
         class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
         config:
             # exposure.observation_type = 'bias'
-	    dataSelection: "anyBias"
+            dataSelection: "anyBias"
             connections.inputExps: "raw"
             connections.outputImage: "eoBias"
     eoPersistenceBias:
         class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
         config:
             # exposure.observation_type = 'bias' and exposure.observation_reason = 'BOT_persistence'
-	    dataSelection: "botPersistenceBias"
-	    connections.inputExps: "raw"
+            dataSelection: "botPersistenceBias"
+            connections.inputExps: "raw"
             connections.outputImage: "eoPersistenceBias"
     eoFe55Bias:
         class: lsst.eotask_gen3.eoCombine.EoCombineBiasTask
         config:
             # exposure.observation_type = 'bias' and exposure.observation_reason = 'fe55'
-	    dataSelection: "fe55Bias"
-	    connections.inputExps: "raw"
+            dataSelection: "fe55Bias"
+            connections.inputExps: "raw"
             connections.outputImage: "eoFe55Bias"
     eoDark:
         class: lsst.eotask_gen3.eoCombine.EoCombineDarkTask
         config:
             # exposure.observation_type = 'dark' and exposure.observation_reason = 'dark'
-	    dataSelection: "darkDark"	    
+            dataSelection: "darkDark"
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.outputImage: "eoDark"
@@ -34,8 +34,8 @@ tasks:
         class: lsst.eotask_gen3.eoCombine.EoCombineFlatTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat' and exposure.exposure_time < 30
-	    dataSelection: "superFlatLow"	    
-	    connections.inputExps: "raw"
+            dataSelection: "superFlatLow"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -44,15 +44,15 @@ tasks:
         class: lsst.eotask_gen3.eoCombine.EoCombineFlatTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat' and exposure.exposure_time > 30
-	    dataSelection: "superFlatHigh"	    
-	    connections.inputExps: "raw"
+            dataSelection: "superFlatHigh"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
             connections.outputImage: "eoFlatHigh"
     eoBrightPixels:
         class: lsst.eotask_gen3.eoBrightPixels.EoBrightPixelTask
-        config:	
+        config:
             connections.stackedCalExp: "eoDark"
             connections.outputData: "eoBrightPixelStats"
             connections.defects: "eoBrightPixels"
@@ -72,8 +72,8 @@ tasks:
         class: lsst.eotask_gen3.eoFe55.EoFe55Task
         config:
             # exposure.observation_type = 'fe55_flat' and exposure.observation_reason = 'fe55'
-	    dataSelection: "fe55Flat"	    
-	    connections.inputExps: "raw" 
+            dataSelection: "fe55Flat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.defects: "defects"
             connections.dark: "eoDark"
@@ -82,8 +82,8 @@ tasks:
         class: lsst.eotask_gen3.eoPtc.EoPtcTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
-	    dataSelection: "flatFlat"	    
-	    connections.inputExps: "raw" 
+            dataSelection: "flatFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.defects: "defects"
             connections.dark: "eoDark"
@@ -97,8 +97,8 @@ tasks:
         class: lsst.eotask_gen3.eoReadNoise.EoReadNoiseTask
         config:
             # exposure.observation_type = 'bias' and exposure.observation_reason = 'bias'
-	    dataSelection: "biasBias"	    
-	    connections.inputExps: "raw"
+            dataSelection: "biasBias"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.defects: "defects"
             connections.outputData: "eoReadNoise"
@@ -106,7 +106,7 @@ tasks:
         class: lsst.eotask_gen3.eoBiasStability.EoBiasStabilityTask
         config:
             # exposure.observation_type = 'bias'
-	    dataSelection: "anyBias"	    	    
+            dataSelection: "anyBias"
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.defects: "defects"
@@ -120,8 +120,8 @@ tasks:
         class: lsst.eotask_gen3.eoOverscan.EoOverscanTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
-	    dataSelection: "flatFlat"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "flatFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -130,8 +130,8 @@ tasks:
         class: lsst.eotask_gen3.eoFlatPair.EoFlatPairTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
-	    dataSelection: "flatFlat"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "flatFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -140,8 +140,8 @@ tasks:
         class: lsst.eotask_gen3.eoGainStability.EoGainStabilityTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat'
-	    dataSelection: "anySuperFlat"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "anySuperFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -150,8 +150,8 @@ tasks:
         class: lsst.eotask_gen3.eoBrighterFatter.EoBrighterFatterTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'flat'
-	    dataSelection: "flatFlat"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "flatFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -160,8 +160,8 @@ tasks:
         class: lsst.eotask_gen3.eoPersistence.EoPersistenceTask
         config:
             # exposure.observation_type = 'dark' and exposure.observation_reason = 'bot_persistance'
-	    dataSelection: "botPersistenceDark"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "botPersistenceDark"
+            connections.inputExps: "raw"
             connections.bias: "eoPersistenceBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
@@ -170,8 +170,8 @@ tasks:
         class: lsst.eotask_gen3.eoTearing.EoTearingTask
         config:
             # exposure.observation_type = 'flat' and exposure.observation_reason = 'sflat'
-	    dataSelection: "anySuperFlat"	    	    
-	    connections.inputExps: "raw"
+            dataSelection: "anySuperFlat"
+            connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"

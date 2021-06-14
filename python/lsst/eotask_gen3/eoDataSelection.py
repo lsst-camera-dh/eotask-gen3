@@ -42,8 +42,8 @@ class EoDataSelection:
         return cls._selectionDict[key]
 
     @classmethod
-    def addSelection(cls, key, queryString, selectionFuncion)
-        cls._selectionDict[key] = cls(queryString, selectionFuncion)
+    def addSelection(cls, key, doc, queryString, selectionFunction):
+        cls._selectionDict[key] = cls(doc, queryString, selectionFunction)
 
     @classmethod
     def choiceDict(cls):
@@ -98,39 +98,51 @@ def eoSelectFe55Flat(deferredDatasetRef):
 
 
 EoDataSelection.addSelection("any",
-                             "True"
+                             "Select all exposures",
+                             "",
                              eoSelectAny)
 EoDataSelection.addSelection("anyBias",
+                             "Select all bias exposures",
                              "exposure.observation_type = 'bias'",
                              eoSelectAnyBias)
 EoDataSelection.addSelection("biasBias",
+                             "Select bias exposures from bias acquistions", 
                              "exposure.observation_type = 'bias' AND exposure.observation_reason = 'bias'",
                              eoSelectBiasBias)
 EoDataSelection.addSelection("botPersistenceBias",
+                             "Select bias exposures from bot_persistence acquistions",
                              "exposure.observation_type = 'bias' AND exposure.observation_reason = 'bot_persistence'",
                              eoSelectBotPersistanceBias)
 EoDataSelection.addSelection("fe55Bias",
+                             "Select bias exposures from Fe55 acquistions",
                              "exposure.observation_type = 'bias' AND exposure.observation_reason = 'fe55_flat'",
                              eoSelectFe55Bias)
 EoDataSelection.addSelection("darkDark",
+                             "Select dark exposures from dark acquistions",
                              "exposure.observation_type = 'dark' AND exposure.observation_reason = 'dark'",
                              eoSelectDarkDark)
 EoDataSelection.addSelection("botPersistenceDark",
+                             "Select dark exposures from bot_persistence acquistions",
                              "exposure.observation_type = 'dark' AND exposure.observation_reason = 'bot_persistence'",
                              eoSelectDarkDark)
 EoDataSelection.addSelection("flatFlat",
+                             "Select flat exposures from flat pair acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'flat'",
                              eoSelectDarkDark)
 EoDataSelection.addSelection("anySuperFlat",
+                             "Select flat exposures from any superflat acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'sflat'",
                              eoSelectAnySuperFlat)
 EoDataSelection.addSelection("superFlatLow",
+                             "Select flat exposures from low-intensity superflat acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'sflat' AND exposure.exposure_time < 30.",
                              eoSelectSuperFlatLow)
 EoDataSelection.addSelection("superFlatHigh",
+                             "Select flat exposures from high-intensity superflat acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'sflat' AND exposure.exposure_time >= 30.",
                              eoSelectSuperFlatHigh)
 EoDataSelection.addSelection("fe55Flat",
+                             "Select fe55 exposures acquistions",
                              "exposure.observation_type = 'fe55_flat' AND exposure.observation_reason = 'fe55'",
                              eoSelectFe55Flat)
 
