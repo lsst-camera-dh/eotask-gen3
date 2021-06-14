@@ -27,7 +27,7 @@ class EoOverscanTaskConfig(EoAmpExpCalibTaskConfig,
     def setDefaults(self):
         # pylint: disable=no-member
         self.connections.outputData = "eoOverscan"
-        self.isr.expectWcs = PFalse
+        self.isr.expectWcs = False
         self.isr.doSaturation = False
         self.isr.doSetBadRegions = False
         self.isr.doAssembleCcd = False

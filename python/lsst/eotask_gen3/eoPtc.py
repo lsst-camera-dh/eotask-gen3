@@ -107,6 +107,8 @@ class EoPtcTask(EoAmpPairCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        import pdb
+        pdb.set_trace()
         camera = kwargs['camera']
         det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()

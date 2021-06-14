@@ -272,6 +272,9 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
             Output data refs to persist.
         """
         inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)
+        if hasattr(inputRefs, 'photodiodeData'):
+            inputRefs.photodiodeData = self.dataSelection.selectData(inputRefs.photodiodeData)
+
         inputs = butlerQC.get(inputRefs)
         outputs = self.run(**inputs)
         butlerQC.put(outputs, outputRefs)        
@@ -384,6 +387,9 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
             Output data refs to persist.
         """
         inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)        
+        if hasattr(inputRefs, 'photodiodeData'):
+            inputRefs.photodiodeData = self.dataSelection.selectData(inputRefs.photodiodeData)
+        
         inputs = butlerQC.get(inputRefs)
 
         inputExps = inputs.pop('inputExps')
@@ -528,7 +534,6 @@ class EoDetExpCalibTask(pipeBase.PipelineTask):
 class EoDetRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read calibrated data """
-    output = copyConnect(OUTPUT_CONNECT)
 
 
 class EoDetRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
@@ -549,36 +554,12 @@ class EoDetRunCalibTask(pipeBase.PipelineTask):
     ConfigClass = EoDetRunCalibTaskConfig
     _DefaultName = "DoNotUse"
 
-    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
-        """ Run method
-
-        Parameters
-        ----------
-        stackedCalExp :
-            Input data
-
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
-
-        Returns
-        -------
-        outputData : `EoCalib`
-            Output data in formatted tables
-        """
-        outputData = self.makeOutputData()
-        self.analyzeDetRunData(stackedCalExp, outputData, **kwargs)
-        return pipeBase.Struct(outputData=outputData)
-
     def makeOutputData(self, **kwargs):
         raise NotImplementedError
 
-    def analyzeDetRunData(self, stackedCalExp, outputData, **kwargs):
-        """ Analyze data """
-
 
 class EoRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
-                                   dimensions=("instrument")):
+                                   dimensions=("instrument",)):
     """ Class snippet with connections needed to read calibrated data """
     output = copyConnect(OUTPUT_CONNECT)
 

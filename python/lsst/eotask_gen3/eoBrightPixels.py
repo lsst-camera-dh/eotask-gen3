@@ -100,7 +100,7 @@ class EoBrightPixelTask(EoDetRunCalibTask):
             print("Warning no EXPTIME: using 1.")
             exptime = 1.
         threshold = afwDetect.Threshold(self.config.ethresh * exptime)
-        fpSet = afwDetect.FootprintSet(stackedCalExp[amp].image, threshold)
+        fpSet = afwDetect.FootprintSet(stackedCalExp[amp.getBBox()].image, threshold)
         # 
         # Organize bright pixels by column.
         #

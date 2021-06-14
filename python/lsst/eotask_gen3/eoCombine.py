@@ -259,7 +259,6 @@ class EoCombineDarkTaskConnections(EoCombineCalibTaskConnections):
     perform minimal Isr on each amplifier """
 
     bias = copyConnect(BIAS_CONNECT)
-    defects = copyConnect(DEFECTS_CONNECT)
 
 
 class EoCombineDarkTaskConfig(EoCombineCalibTaskConfig,
@@ -267,14 +266,14 @@ class EoCombineDarkTaskConfig(EoCombineCalibTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.outputImage = "eo_dark"
+        self.connections.outputImage = "eoDark"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False
         self.isr.doAssembleCcd = False
         self.isr.doBias = True
         self.isr.doLinearize = False
-        self.isr.doDefect = True
+        self.isr.doDefect = False
         self.isr.doNanMasking = False
         self.isr.doWidenSaturationTrails = False
         self.isr.doDark = False
@@ -310,7 +309,7 @@ class EoCombineFlatTaskConfig(EoCombineCalibTaskConfig,
 
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.outputImage = "eo_flat"
+        self.connections.outputImage = "eoFlatLow"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
         self.isr.doSetBadRegions = False

@@ -63,7 +63,7 @@ tasks:
             connections.outputData: "eoDarkPixelStats"
             connections.defects: "eoDarkPixels"
     eoDefects:
-        class: lsst.eotask_gen3.eoDefects.EoDefects
+        class: lsst.eotask_gen3.eoDefects.EoDefectsTask
         config:
             connections.brightPixels: "eoBrightPixels"
             connections.darkPixels: "eoDarkPixels"

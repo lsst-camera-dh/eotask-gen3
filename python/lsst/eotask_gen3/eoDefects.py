@@ -10,14 +10,14 @@ from lsst.ip.isr import Defects
 
 from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,\
                           extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
-from .eoDefectsData import EoDefectsData
+
 
 __all__ = ["EoBrightPixelTask", "EoBrightPixelTaskConfig"]
 
 
 class EoDefectsTaskConnections(EoDetRunCalibTaskConnections):
 
-    brightPixels = cT.Output(
+    brightPixels = cT.Input(
         name="eoBrightPixels",
         doc="Electrial Optical Calibration Output",
         storageClass="Defects",
@@ -25,7 +25,7 @@ class EoDefectsTaskConnections(EoDetRunCalibTaskConnections):
         isCalibration=True,        
     )
 
-    darkPixels = cT.Output(
+    darkPixels = cT.Input(
         name="eoDarkPixels",
         doc="Electrial Optical Calibration Output",
         storageClass="Defects",
@@ -44,6 +44,7 @@ class EoDefectsTaskConnections(EoDetRunCalibTaskConnections):
 
 class EoDefectsTaskConfig(EoDetRunCalibTaskConfig,
                           pipelineConnections=EoDefectsTaskConnections):
+
        
     def setDefaults(self):
         self.connections.brightPixels = "eoBrightPixels"
@@ -53,10 +54,11 @@ class EoDefectsTaskConfig(EoDetRunCalibTaskConfig,
 
 class EoDefectsTask(EoDetRunCalibTask):
 
-    ConfigClass = EoBrightPixelTaskConfig
+    ConfigClass = EoDefectsTaskConfig
     _DefaultName = "eoDefects"
     
-    def run(self, brightPixels, darkPixels, **kwargs): """ Run method
+    def run(self, brightPixels, darkPixels, **kwargs): 
+        """ Run method
 
         Parameters
         ----------
@@ -72,7 +74,10 @@ class EoDefectsTask(EoDetRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        imageTypes = ["Bright", "Dark"]
+        inputDefectList = [brightPixels, darkPixels]
         import pdb
         pdb.set_trace()
+
 
         

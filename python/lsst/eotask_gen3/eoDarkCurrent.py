@@ -68,14 +68,16 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
         nAmp = len(amps)
         ampNames = [amp.getName() for amp in amps]
         outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp)
-        self.analyzeDetRunData(stackedCalExp, outputData, **kwargs)
+        for iAmp, amp in enumerate(amps):
+            ampExposure = extractAmpImage(stackedCalExp, amp)
+            self.analyzeAmpRunData(ampExposure, outputData, iAmp, amp)
         return pipeBase.Struct(outputData=outputData)
             
     def makeOutputData(self, amps, nAmp):  # pylint: disable=arguments-differ,no-self-use
         return EoDarkCurrentData(nAmp=nAmp)
 
     
-    def analyzeDetRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):
+    def analyzeAmpRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):
 
         try:
             exptime = ampExposure.getMetadata().toDict()['DARKTIME']

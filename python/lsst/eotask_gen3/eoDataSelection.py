@@ -49,51 +49,57 @@ class EoDataSelection:
     def choiceDict(cls):
         return {key: val.doc for key, val in cls._selectionDict.items()}
 
+
+def getRef(refOrDeferred):
+    try:
+        return refOrDeferred.datasetRef
+    except:
+        return refOrDeferred
     
 def eoSelectAny(deferredDatasetRef):
     return True
     
 def eoSelectAnyBias(deferredDatasetRef):
-    return deferredDatasetRef.datasetRef.dataId.records["exposure"].observation_type == 'bias'
+    return getRef(deferredDatasetRef).dataId.records["exposure"].observation_type == 'bias'
 
 def eoSelectBiasBias(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'bias' and exposure.observation_reason == 'bias'
 
 def eoSelectBotPersistanceBias(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'bias' and exposure.observation_reason == 'bot_persistence'
 
 def eoSelectFe55Bias(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'bias' and exposure.observation_reason == 'fe55_flat'
 
 def eoSelectDarkDark(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'dark' and exposure.observation_reason == 'dark'
 
-def eoSelectBotPersitenceDark(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+def eoSelectBotPersistenceDark(deferredDatasetRef):
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'dark' and exposure.observation_reason == 'bot_persistence'
 
 def eoSelectFlatFlat(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'flat' and exposure.observation_reason == 'flat'
 
 def eoSelectAnySuperFlat(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'flat' and exposure.observation_reason == 'sflat'
 
 def eoSelectSuperFlatLow(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'flat' and exposure.observation_reason == 'sflat' and exposure.exposure_time < 30.
 
 def eoSelectSuperFlatHigh(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'flat' and exposure.observation_reason == 'sflat' and exposure.exposure_time < 30.
 
 def eoSelectFe55Flat(deferredDatasetRef):
-    exposure = deferredDatasetRef.datasetRef.dataId.records["exposure"]
+    exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'fe55_flat' and exposure.observation_reason == 'fe55'
 
 
@@ -124,11 +130,11 @@ EoDataSelection.addSelection("darkDark",
 EoDataSelection.addSelection("botPersistenceDark",
                              "Select dark exposures from bot_persistence acquistions",
                              "exposure.observation_type = 'dark' AND exposure.observation_reason = 'bot_persistence'",
-                             eoSelectDarkDark)
+                             eoSelectBotPersistenceDark)
 EoDataSelection.addSelection("flatFlat",
                              "Select flat exposures from flat pair acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'flat'",
-                             eoSelectDarkDark)
+                             eoSelectFlatFlat)
 EoDataSelection.addSelection("anySuperFlat",
                              "Select flat exposures from any superflat acquistions",
                              "exposure.observation_type = 'flat' AND exposure.observation_reason = 'sflat'",
