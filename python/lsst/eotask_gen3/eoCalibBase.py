@@ -528,7 +528,6 @@ class EoDetExpCalibTask(pipeBase.PipelineTask):
 class EoDetRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector")):
     """ Class snippet with connections needed to read calibrated data """
-    stackedCalExp = copyConnect(INPUT_STACK_EXP_CONNECT)
     output = copyConnect(OUTPUT_CONNECT)
 
 
