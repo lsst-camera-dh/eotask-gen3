@@ -4,7 +4,7 @@ import lsst.afw.math as afwMath
 import lsst.pex.config as pexConfig
 import lsst.pipe.base.connectionTypes as cT
 
-from .eoCalibBase import EoAmpRunCalibTaskConfig, EoAmpRunCalibTaskConnections, EoAmpRunCalibTask
+from .eoCalibBase import EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask
 from .eoCtiData import EoCtiData
 from .eoCtiUtils import estimateCti
 
@@ -12,7 +12,15 @@ __all__ = ["EoCtiTask", "EoCtiTaskConfig"]
 
 
 
-class EoCtiTaskConnections(EoAmpRunCalibTaskConnections):
+class EoCtiTaskConnections(EoDetRunCalibTaskConnections):
+
+    stackedCalExp = cT.Input(
+        name="eoFlatHigh",
+        doc="Stacked Calibrated Input Frame",
+        storageClass="ExposureF",
+        dimensions=("instrument", "detector"),
+        isCalibration=True,
+    )
 
     outputData = cT.Output(
         name="eoCti",
@@ -21,7 +29,7 @@ class EoCtiTaskConnections(EoAmpRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
     )
 
-class EoCtiTaskConfig(EoAmpRunCalibTaskConfig,
+class EoCtiTaskConfig(EoDetRunCalibTaskConfig,
                       pipelineConnections=EoCtiTaskConnections):
 
     overscans = pexConfig.Field("Number of overscan rows/columns to use", int, default=2)
@@ -29,23 +37,48 @@ class EoCtiTaskConfig(EoAmpRunCalibTaskConfig,
     
     def setDefaults(self):
         # pylint: disable=no-member
-        self.connections.stackedCalExp = "eo_flat"
+        self.connections.stackedCalExp = "eoFlatHigh"
         self.connections.outputData = "eoCti"
 
 
-class EoCtiTask(EoAmpRunCalibTask):
+class EoCtiTask(EoDetRunCalibTask):
 
     ConfigClass = EoCtiTaskConfig
-    _DefaultName = "cti"
+    _DefaultName = "eoCti"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
-    
-    def makeOutputData(self, amps, nAmps):
-        return EoCtiData(amps=amps, nAmp=nAmps)
 
-    def analyzeAmpRunData(self, detExposure, outputData, iamp, amp, **kwargs):
+    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
+        """ Run method
+
+        Parameters
+        ----------
+        stackedCalExp :
+            Input data
+
+        Keywords
+        --------
+        camera : `lsst.obs.lsst.camera`
+
+        Returns
+        -------
+        outputData : `EoCalib`
+            Output data in formatted tables
+        """
+        det = stackedCalExp.getDetector()
+        amps = det.getAmplifiers()
+        nAmp = len(amps)
+        ampNames = [amp.getName() for amp in amps]
+        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp)
+        self.analyzeDetRunData(stackedCalExp, outputData, **kwargs)
+        return pipeBase.Struct(outputData=outputData)
+        
+    def makeOutputData(self, amps, nAmp, **kwargs):
+        return EoCtiData(amps=amps, nAmp=nAmp)
+
+    def analyzeDetRunData(self, detExposure, outputData, iamp, amp, **kwargs):
         ctiSerialEstim = estimateCti(detExposure, amp, 's', self.config.overscans, self.statCtrl)
         ctiParallelEstim = estimateCti(detExposure, amp, 'p', self.config.overscans, self.statCtrl)
 

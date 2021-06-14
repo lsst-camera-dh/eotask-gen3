@@ -4,10 +4,10 @@ Provides six bases classes for different iteration scenarios:
 
     1. EoAmpExpCalibTask : loops over amps, then over exposures
     2. EoAmpPairCalibTask : loops over amps, then over exposure pairs
-    3. EoAmpRunCalibTask : loops over amps for a single stacked image
-        (e.g., a stacked bias frame or stacked dark frame)
-    4. EoDetExpCalibTask : loops over exposures (analyzes entire detector)
-    5. EoDetRunCalibTask : analyzes a single stacked image
+    3. EoDetExpCalibTask : loops over exposures (analyzes entire detector)
+    4. EoDetRunCalibTask : analyzes run-level data (stacked image or table) for 1 detector
+    5. EoRunCalibTask : analyzes instrument-wide run-level data
+
 """
 
 import copy
@@ -22,9 +22,9 @@ from .eoDataSelection import EoDataSelection
 
 __all__ = ['EoAmpExpCalibTaskConnections', 'EoAmpExpCalibTaskConfig', 'EoAmpExpCalibTask',
            'EoAmpPairCalibTaskConnections', 'EoAmpPairCalibTaskConfig', 'EoAmpPairCalibTask',
-           'EoAmpRunCalibTaskConnections', 'EoAmpRunCalibTaskConfig', 'EoAmpRunCalibTask',
            'EoDetExpCalibTaskConnections', 'EoDetExpCalibTaskConfig', 'EoDetExpCalibTask',
            'EoDetRunCalibTaskConnections', 'EoDetRunCalibTaskConfig', 'EoDetRunCalibTask',
+           'EoRunCalibTaskConnections', 'EoRunCalibTaskConfig', 'EoRunCalibTask',           
            'CAMERA_CONNECT', 'BIAS_CONNECT', 'DARK_CONNECT', 'DEFECTS_CONNECT', 'GAINS_CONNECT',
            'INPUT_RAW_AMPS_CONNECT', 'OUTPUT_IMAGE_CONNECT', 'ISR_CONFIG', 'ASSEMBLE_CCD_CONFIG',
            'OUTPUT_DEFECTS_CONNECT', 'runIsrOnAmp', 'runIsrOnExp']
@@ -454,74 +454,6 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
     def analyzeDetRunData(self, outputData):
         """ Aggregate data from amps for detector """
 
-
-class EoAmpRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
-                                   dimensions=("instrument", "detector")):
-    """ Class snippet with connections needed to read calibrated data """
-
-    camera = copyConnect(CAMERA_CONNECT)
-    stackedCalExp = copyConnect(INPUT_STACK_EXP_CONNECT)
-
-
-class EoAmpRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
-                              pipelineConnections=EoAmpRunCalibTaskConnections):
-    """ Class snippet to use connections for stacked-calibrated exposure """
-
-
-class EoAmpRunCalibTask(pipeBase.PipelineTask):
-    """ Class snippet for tasks that loop over amps on stacked image
-
-    Implements three methods that can be overridden in sub-classes:
-
-        1. makeOutputData (required, called once)
-        2. analyzeAmpRunData (optional, called for each amp)
-        3. analyzeDetRunData (optional, called once after all amps)
-
-    """
-
-    ConfigClass = EoAmpRunCalibTaskConfig
-    _DefaultName = "DoNotUse"
-
-    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
-        """ Run method
-
-        Parameters
-        ----------
-        stackedCalExp :
-            Input data
-
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
-
-        Returns
-        -------
-        outputData : `EoCalib`
-            Output data in formatted tables
-        """
-        #camera = kwargs['camera']
-        #det = camera.get(stackedCalExp.getDetector().getId())
-        #amps = det.getAmplifiers()
-        amps = stackedCalExp.getDetector().getAmplifiers()
-        outputData = self.makeOutputData(amps=amps, nAmps=len(amps))
-        for iamp, amp in enumerate(amps):
-            #ampExposure = extractAmpImage(stackedCalExp, amp)
-            #ampAmp = ampExposure.getDetector().getAmplifiers()[0]
-            #self.analyzeAmpRunData(ampExposure, outputData, iamp, ampAmp, **kwargs)
-            self.analyzeAmpRunData(stackedCalExp, outputData, iamp, amp, **kwargs)            
-        self.analyzeDetRunData(outputData)
-        return pipeBase.Struct(outputData=outputData)
-
-    def makeOutputData(self, amps, nAmps):
-        raise NotImplementedError
-
-    def analyzeAmpRunData(self, ampExposure, outputData, iamp, amp, **kwargs):
-        """ Analyze data from on amp """
-
-    def analyzeDetRunData(self, outputData):
-        """ Aggregate data from amps for detector """
-
-
 class EoDetExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
                                    dimensions=("instrument", "detector", "exposure")):
     """ Class snippet with connections needed to read raw data
@@ -644,3 +576,57 @@ class EoDetRunCalibTask(pipeBase.PipelineTask):
 
     def analyzeDetRunData(self, stackedCalExp, outputData, **kwargs):
         """ Analyze data """
+
+
+class EoRunCalibTaskConnections(pipeBase.PipelineTaskConnections,
+                                   dimensions=("instrument")):
+    """ Class snippet with connections needed to read calibrated data """
+    output = copyConnect(OUTPUT_CONNECT)
+
+
+class EoRunCalibTaskConfig(pipeBase.PipelineTaskConfig,
+                              pipelineConnections=EoRunCalibTaskConnections):
+    """ Class snippet to use connections for stacked-calibrated exposure """
+
+
+class EoRunCalibTask(pipeBase.PipelineTask):
+    """ Class snippet for tasks that analyze a stacked image
+
+    Implements three methods that can be overridden in sub-classes:
+
+        1. makeOutputData (required, called once)
+        3. analyzeDetRunData (required, called once)
+
+    """
+
+    ConfigClass = EoRunCalibTaskConfig
+    _DefaultName = "DoNotUse"
+
+    def run(self, **kwargs):  # pylint: disable=arguments-differ
+        """ Run method
+
+        Parameters
+        ----------
+        stackedCalExp :
+            Input data
+
+        Keywords
+        --------
+        camera : `lsst.obs.lsst.camera`
+
+        Returns
+        -------
+        outputData : `EoCalib`
+            Output data in formatted tables
+        """
+        outputData = self.makeOutputData(**kwargs)
+        self.analyzeRunData(stackedCalExp, outputData, **kwargs)
+        return pipeBase.Struct(outputData=outputData)
+
+    def makeOutputData(self, **kwargs):
+        raise NotImplementedError
+
+    def analyzeRunData(self, outputData, **kwargs):
+        """ Analyze data """
+
+        

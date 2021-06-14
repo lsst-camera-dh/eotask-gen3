@@ -10,7 +10,7 @@ import lsst.afw.detection as afwDetect
 
 from lsst.ip.isr import Defects
 
-from .eoCalibBase import (EoAmpRunCalibTaskConfig, EoAmpRunCalibTaskConnections, EoAmpRunCalibTask,\
+from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,\
                           extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
 from .eoNonlinearityData import EoNonlinearityData
 
@@ -114,7 +114,7 @@ def correctNullPoint(profile_x, profile_y, profile_yerr, null_point):
 
 
 
-class EoNonlinearityTaskConnections(EoAmpRunCalibTaskConnections):
+class EoNonlinearityTaskConnections(EoDetRunCalibTaskConnections):
 
     ptcData = cT.Input(
         name="eoPtc",
@@ -128,15 +128,9 @@ class EoNonlinearityTaskConnections(EoAmpRunCalibTaskConnections):
         doc="Electrial Optical Calibration Output",
         storageClass="EoCalib",
         dimensions=("instrument", "detector"),
-    )
+    )    
 
-    def __init__(self, *, config=None):
-        super().__init__(config=config)        
-        self.inputs.discard('camera')
-        self.inputs.discard('stackedCalExp')
-    
-
-class EoNonlinearityTaskConfig(EoAmpRunCalibTaskConfig,
+class EoNonlinearityTaskConfig(EoDetRunCalibTaskConfig,
                                pipelineConnections=EoNonlinearityTaskConnections):
 
     nProfileBins = pexConfig.Field("Number of bins for Nonlinearity profile", int, default=30)
@@ -149,7 +143,7 @@ class EoNonlinearityTaskConfig(EoAmpRunCalibTaskConfig,
         self.connections.outputData = "eoNonlinearity"
     
 
-class EoNonlinearityTask(EoAmpRunCalibTask):
+class EoNonlinearityTask(EoDetRunCalibTask):
 
     ConfigClass = EoNonlinearityTaskConfig
     _DefaultName = "eoNonlinearity"

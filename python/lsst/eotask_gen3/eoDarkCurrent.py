@@ -8,15 +8,23 @@ import lsst.afw.detection as afwDetect
 
 from lsst.ip.isr import Defects
 
-from .eoCalibBase import (EoAmpRunCalibTaskConfig, EoAmpRunCalibTaskConnections, EoAmpRunCalibTask,
+from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,
                           extractAmpImage, copyConnect)
 from .eoDarkCurrentData import EoDarkCurrentData
 
 __all__ = ["EoDarkCurrentTask", "EoDarkCurrentTaskConfig"]
 
 
-class EoDarkCurrentTaskConnections(EoAmpRunCalibTaskConnections):
+class EoDarkCurrentTaskConnections(EoDetRunCalibTaskConnections):
 
+    stackedCalExp = cT.Input(
+        name="eoDark",
+        doc="Stacked Calibrated Input Frame",
+        storageClass="ExposureF",
+        dimensions=("instrument", "detector"),
+        isCalibration=True,
+    )
+    
     outputData = cT.Output(
         name="eoDarkCurrent",
         doc="Electrial Optical Calibration Output",
@@ -24,24 +32,50 @@ class EoDarkCurrentTaskConnections(EoAmpRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
     )
 
-class EoDarkCurrentTaskConfig(EoAmpRunCalibTaskConfig,
+class EoDarkCurrentTaskConfig(EoDetRunCalibTaskConfig,
                               pipelineConnections=EoDarkCurrentTaskConnections):
    
     def setDefaults(self):
         # pylint: disable=no-member        
-        self.connections.stackedCalExp = "eo_dark"
+        self.connections.stackedCalExp = "eoDark"
         self.connections.outputData = "eoDarkCurrent"
 
 
-class EoDarkCurrentTask(EoAmpRunCalibTask):
+class EoDarkCurrentTask(EoDetRunCalibTask):
 
     ConfigClass = EoDarkCurrentTaskConfig
     _DefaultName = "darkCurrent"
-    
-    def makeOutputData(self, amps, nAmps):  # pylint: disable=arguments-differ,no-self-use
-        return EoDarkCurrentData(nAmp=nAmps)
 
-    def analyzeAmpRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):
+    def run(self, stackedCalExp, **kwargs):  # pylint: disable=arguments-differ
+        """ Run method
+
+        Parameters
+        ----------
+        stackedCalExp :
+            Input data
+
+        Keywords
+        --------
+        camera : `lsst.obs.lsst.camera`
+
+        Returns
+        -------
+        outputData : `EoCalib`
+            Output data in formatted tables
+        """
+        det = stackedCalExp.getDetector()
+        amps = det.getAmplifiers()
+        nAmp = len(amps)
+        ampNames = [amp.getName() for amp in amps]
+        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp)
+        self.analyzeDetRunData(stackedCalExp, outputData, **kwargs)
+        return pipeBase.Struct(outputData=outputData)
+            
+    def makeOutputData(self, amps, nAmp):  # pylint: disable=arguments-differ,no-self-use
+        return EoDarkCurrentData(nAmp=nAmp)
+
+    
+    def analyzeDetRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):
 
         try:
             exptime = ampExposure.getMetadata().toDict()['DARKTIME']

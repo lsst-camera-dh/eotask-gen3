@@ -9,15 +9,23 @@ import lsst.afw.math as afwMath
 
 from lsst.ip.isr import Defects
 
-from .eoCalibBase import (EoAmpRunCalibTaskConfig, EoAmpRunCalibTaskConnections, EoAmpRunCalibTask,\
+from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,\
                           extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
 from .eoDarkPixelsData import EoDarkPixelsData
 
 __all__ = ["EoDarkPixelTask", "EoDarkPixelTaskConfig"]
 
 
-class EoDarkPixelsTaskConnections(EoAmpRunCalibTaskConnections):
+class EoDarkPixelsTaskConnections(EoDetRunCalibTaskConnections):
 
+    stackedCalExp = cT.Input(
+        name="eoFlatHigh",
+        doc="Stacked Calibrated Input Frame",
+        storageClass="ExposureF",
+        dimensions=("instrument", "detector"),
+        isCalibration=True,
+    )
+    
     outputData = cT.Output(
         name="eoDarkPixelsStats",
         doc="Electrial Optical Calibration Output",
@@ -34,22 +42,22 @@ class EoDarkPixelsTaskConnections(EoAmpRunCalibTaskConnections):
     )
 
 
-class EoDarkPixelTaskConfig(EoAmpRunCalibTaskConfig,
+class EoDarkPixelTaskConfig(EoDetRunCalibTaskConfig,
                               pipelineConnections=EoDarkPixelsTaskConnections):
    
     thresh = pexConfig.Field("Fractions threshold w.r.t. amp median", float, default=0.8)
     colthresh = pexConfig.Field("Dark column threshold in # bright pixels", int, default=20)
  
     def setDefaults(self):
-        self.connections.stackedCalExp = "eo_flat"
+        self.connections.stackedCalExp = "eoFlatHigh"
         self.connections.outputData = "eoDarkPixelStats"
-        self.connections.defects = "DarkPixel"
+        self.connections.defects = "eoDarkPixel"
  
 
-class EoDarkPixelTask(EoAmpRunCalibTask):
+class EoDarkPixelTask(EoDetRunCalibTask):
 
     ConfigClass = EoDarkPixelTaskConfig
-    _DefaultName = "darkPixel"
+    _DefaultName = "eoDarkPixel"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
