@@ -4,7 +4,7 @@ import argparse
 
 RUN="12622"
 TEST_REPO="test_repo"
-CALIB_COLL="LSSTCam/calib/unbounded"
+CALIB_COLL="u/echarles/run_12622/cpDefects,LSSTCam/calib/unbounded"
 PD_COLL="LSSTCam/photodiode/all"
 PIPE_YAML="eoPipe.yaml"
 
@@ -50,22 +50,17 @@ def main():
 
     for task in TASKS:
         formatDict['TASK'] = task
-        cmdStr = 'pipetask run -d "instrument =\'LSSTCam\' AND detector = 98" -b {REPO} --output-run {OUTPUT_COLL} -p {PIPE_YAML}#{TASK} --register-dataset-types --no-versions'.format(**formatDict)
+        cmdStr = 'pipetask run -d "instrument =\'LSSTCam\' AND detector = 98" -b {REPO} --output {OUTPUT_COLL} -p {PIPE_YAML}#{TASK} --register-dataset-types --no-versions'.format(**formatDict)
         if first:
             cmdStr += " -i {INPUT_COLL},{CALIB_COLL},{PD_COLL}".format(**formatDict)
             first = False
     
+        print(cmdStr)
 
 if __name__ == '__main__':
     main()
 
 
-
-
-    
-for task in TASKS:
-
-    cmdStr = f'pipetask run -d "instrument =\'LSSTCam\' AND detector = 98" -b {REPO} -i {INPUT_COLL},{CALIB_COLL},{PD_COLL} --output-run {OUTPUT_COLL} -p {PIPE_YAML}#eoBias --register-dataset-types --no-versions'
 
 
 
