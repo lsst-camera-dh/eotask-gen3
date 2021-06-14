@@ -49,6 +49,7 @@ class EoFe55TaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "fe55Flat"
 
 
 class EoFe55Task(EoAmpExpCalibTask):

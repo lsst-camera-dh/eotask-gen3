@@ -27,7 +27,7 @@ class EoOverscanTaskConfig(EoAmpExpCalibTaskConfig,
     def setDefaults(self):
         # pylint: disable=no-member
         self.connections.outputData = "eoOverscan"
-        self.isr.expectWcs = False
+        self.isr.expectWcs = PFalse
         self.isr.doSaturation = False
         self.isr.doSetBadRegions = False
         self.isr.doAssembleCcd = False
@@ -41,6 +41,7 @@ class EoOverscanTaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "flatFlat"
 
 
 class EoOverscanTask(EoAmpExpCalibTask):

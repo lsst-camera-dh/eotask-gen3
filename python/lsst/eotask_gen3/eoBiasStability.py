@@ -39,6 +39,7 @@ class EoBiasStabilityTaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "anyBias"
 
 
 class EoBiasStabilityTask(EoAmpExpCalibTask):

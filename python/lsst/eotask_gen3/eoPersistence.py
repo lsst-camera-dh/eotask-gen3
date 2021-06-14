@@ -38,8 +38,9 @@ class EoPersistenceTaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "botPersistenceDark"
 
-
+        
 class EoPersistenceTask(EoAmpExpCalibTask):
 
     ConfigClass = EoPersistenceTaskConfig

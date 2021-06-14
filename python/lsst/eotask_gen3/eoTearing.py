@@ -41,6 +41,7 @@ class EoTearingTaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "anySuperFlat"
 
 
 class EoTearingTask(EoAmpExpCalibTask):

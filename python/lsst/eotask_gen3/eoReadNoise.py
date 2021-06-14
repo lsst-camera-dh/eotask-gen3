@@ -73,6 +73,7 @@ class EoReadNoiseTaskConfig(EoAmpExpCalibTaskConfig,
         self.isr.doFringe = False
         self.isr.doInterpolate = False
         self.isr.doWrite = False
+        self.dataSelection = "biasBias"
 
 
 class EoReadNoiseTask(EoAmpExpCalibTask):
