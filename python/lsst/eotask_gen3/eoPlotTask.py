@@ -7,53 +7,18 @@ import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 
-__all__ = ['EoCalibFigureTaskConfig', 'EoCalibFigureTask',
-           'EoStaticPlotTaskConfig', 'EoStaticPlotTask']
+__all__ = ['EoStaticPlotTaskConfig', 'EoStaticPlotTask']
 
-
-class EoCalibFigureTaskConnections(pipeBase.PipelineTaskConnections,
-                                   dimensions=("instrument", "exposure"),
-                                   defaultTemplates={"eoCalibType": "calib", "plotName": "plot"}):
-    inputCalib = cT.Input(
-        name="{eoCalibType}",
-        doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
-        dimensions=("instrument", "detector"),
-    )
-
-    output = cT.Output(
-        name="{eoCalibType}_{plotName}"
-        doc="Figure with E.O. calibration data"
-        storageClass="Plot",
-        dimensions=("instrument", "detector"),
-    )
-
-
-class EoCalibFigureTaskConfig(pipeBase.PipelineTaskConfig,
-                              pipelineConnections=EoCalibFigureTaskConnections):
-
-    plotName = pexConfig.Field("Name of plot for this task", str, "None")
-
-
-class EoCalibFigureTask(pipeBase.PipelineTask):
-
-    ConfigClass = EoCalibFigureTaskConfig
-    _DefaultName = "calibFigure"
-
-    def run(self, inputCalib, **kwargs):
-        output = inputCalib.makePlot(self.config.plotName, **kwargs)
-        return pipeBase.Struct(output=output)
-
-    
 
 class EoStaticPlotTaskConnections(pipeBase.PipelineTaskConnections,
-                                  dimensions=("instrument", "exposure"),
-                                  defaultTemplates={"eoCalibType": "calib", "plotName": "plot"}):
-    inputFigure = cT.Input(
-        name="{eoCalibType}_{plotName}",
+                                  dimensions=("instrument",),
+                                  defaultTemplates={"eoCalibType": "calib"}):
+    inputData = cT.Input(
+        name="{eoCalibType}",
         doc="Figure with E.O. calibration data",
         storageClass="Plot",
         dimensions=("instrument", "detector"),
+        multiple=True,
     )
 
 
@@ -61,27 +26,45 @@ class EoStaticPlotTaskConfig(pipeBase.PipelineTaskConfig,
                              pipelineConnections=EoStaticPlotTaskConnections):
 
     dirName = pexConfig.Field("Directory to store plots", str, ".")
-    pathTemplate = pexConfig.Field("Name of plot for this task", str, "{eoCalibType}_{plotName}_{detector}")
+    baseName = pexConfig.Field("Basename for plots", str, ".")
 
 
 class EoStaticPlotTask(pipeBase.PipelineTask):
 
     ConfigClass = EoStaticPlotTaskConfig
-    _DefaultName = "staticPlot"
+    _DefaultName = "eoStaticPlot"
 
     def runQuantum(self, butlerQC, inputRefs, outputRefs):
-        savePath = self.formatPath(inputRefs)
+        cameraDict = OrderedDict()
         inputs = butlerQC.get(inputRefs)
-        inputs['savePath'] = savePath
-        outputs = self.run(**inputs)
+        refObj = None
+        for inputData, inputRef in zip(inputs['inputData'], inputRefs.inputData):
+            if refObj is None:
+                refObj = inputData
+            det = inputRef.dataId.records["detector"]
+            raftName = det['raftName']
+            slotName = det['slotName']
+            if raftName in cameraDict:
+                raftDict = cameraDict['raftName']
+            else:
+                raftDict = cameraDict.setdefault(raftName, OrderedDict())
+            raftDict[slotName] = inputData
+            
+        outputs = self.run(refObj=refObj, cameraDict=cameraDict)
         butlerQC.put(outputs, outputRefs)
 
-    def run(self, inputFigure, savePath):
-        inputFigure.savefig(savePath)
-    
-    def formatPath(self, inputRefs):        
-        fDict = dict(eoCalibType=self.config.eoCalibType,
-                     plotName=self.config.plotName,
-                     detector="%03i" % inputRefs['inputFigure'].dataId['detector'])
-        basename = self.config.pathTemplate.format(**fDict)
-        return os.path.join(self.config.dirName, basename)
+
+    def run(self, refObj, cameraDict)
+        cameraFigs = refObj.makeCameraFigures("%s_camera" % self.config.baseName, cameraDict)
+        refObj.writeFigures(self.config.dirName, cameraFigs)
+
+        for raftName, raftData in cameraDict.items():
+            raftFigs = refObj.makeRaftFigures("%s_%s" % (self.config.baseName, raftName), raftData)
+            refObj.writeFigures(self.config.dirName, raftFigs)
+
+            for slotName, slotData in raftData.items():
+                slotFigs = slotData.makeDetFigures("%s_%s_%s" % (self.config.baseName, raftName, slotName))
+                refObj.writeFigures(self.config.dirName, slotFigs)      
+         return pipeBase.Struct()
+
+

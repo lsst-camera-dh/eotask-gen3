@@ -374,6 +374,31 @@ class EoCalib:
             stream.write("##### SchemaClass: %s\n" % prevSchema.fullName())
             prevSchema.writeMarkdown(stream)
 
+    def (self, baseName):
+        """ Make a set of matplotlib figures for this detector """
+        return OrderedDict()
+
+    @classmethod
+    def makeRaftFigures(self, baseName, raftDataDict):
+        """ Make a set of matplotlib figures for a raft """
+        return OrderedDict()
+
+    @classmethod
+    def makeCameraFigures(self, baseName, cameraDataDict):
+        """ Make a set of matplotlib figures for the whole focal plane """
+        return OrderedDict()
+    
+    @staticmethod
+    def writeFigures(basePath, figureDict, fileType="png"):
+        """ Write all the figures to disk """
+        for key, val in figureDict.items():
+            fullPath = "%s%s.%s" % (basePath, key, fileType)
+            val.savefig(fullPath)
+
+
+    
+        
+    
 
 EO_CALIB_CLASS_DICT = OrderedDict()
 
