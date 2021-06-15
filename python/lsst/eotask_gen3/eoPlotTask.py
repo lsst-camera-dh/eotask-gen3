@@ -11,10 +11,9 @@ __all__ = ['EoStaticPlotTaskConfig', 'EoStaticPlotTask']
 
 
 class EoStaticPlotTaskConnections(pipeBase.PipelineTaskConnections,
-                                  dimensions=("instrument",),
-                                  defaultTemplates={"eoCalibType": "calib"}):
+                                  dimensions=("instrument",):
     inputData = cT.Input(
-        name="{eoCalibType}",
+        name="calib",
         doc="Figure with E.O. calibration data",
         storageClass="Plot",
         dimensions=("instrument", "detector"),
