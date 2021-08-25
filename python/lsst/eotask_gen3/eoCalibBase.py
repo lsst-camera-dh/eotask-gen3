@@ -44,7 +44,7 @@ BIAS_CONNECT = cT.Input(
     doc="Input bias calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
-    #isCalibration=True,
+    isCalibration=True,
 )
 
 DARK_CONNECT = cT.Input(
@@ -52,7 +52,7 @@ DARK_CONNECT = cT.Input(
     doc="Input dark calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
-    #isCalibration=True,
+    isCalibration=True,
 )
 
 DEFECTS_CONNECT = cT.Input(
@@ -60,7 +60,7 @@ DEFECTS_CONNECT = cT.Input(
     doc="Input defect tables.",
     storageClass="Defects",
     dimensions=("instrument", "detector"),
-    #isCalibration=True,
+    isCalibration=True,
 )
 
 GAINS_CONNECT = cT.Input(
@@ -68,7 +68,7 @@ GAINS_CONNECT = cT.Input(
     doc="Input per-amp gain calibrations.",
     storageClass="AmpGains",
     dimensions=("instrument", "detector"),
-    #isCalibration=True,
+    isCalibration=True,
 )
 
 INPUT_RAW_AMPS_CONNECT = cT.Input(
