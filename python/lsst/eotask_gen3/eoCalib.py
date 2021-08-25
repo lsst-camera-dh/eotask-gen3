@@ -374,7 +374,7 @@ class EoCalib:
             stream.write("##### SchemaClass: %s\n" % prevSchema.fullName())
             prevSchema.writeMarkdown(stream)
 
-    def (self, baseName):
+    def makeFigures(self, baseName):
         """ Make a set of matplotlib figures for this detector """
         return OrderedDict()
 
