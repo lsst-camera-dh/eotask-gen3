@@ -39,36 +39,36 @@ CAMERA_CONNECT = cT.PrerequisiteInput(
     isCalibration=True,
 )
 
-BIAS_CONNECT = cT.PrerequisiteInput(
+BIAS_CONNECT = cT.Input(
     name="eo_bias",
     doc="Input bias calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
-    isCalibration=True,
+    #isCalibration=True,
 )
 
-DARK_CONNECT = cT.PrerequisiteInput(
+DARK_CONNECT = cT.Input(
     name="eo_dark",
     doc="Input dark calibration.",
     storageClass="ExposureF",
     dimensions=("instrument", "detector"),
-    isCalibration=True,
+    #isCalibration=True,
 )
 
-DEFECTS_CONNECT = cT.PrerequisiteInput(
+DEFECTS_CONNECT = cT.Input(
     name='defects',
     doc="Input defect tables.",
     storageClass="Defects",
     dimensions=("instrument", "detector"),
-    isCalibration=True,
+    #isCalibration=True,
 )
 
-GAINS_CONNECT = cT.PrerequisiteInput(
+GAINS_CONNECT = cT.Input(
     name='gains',
     doc="Input per-amp gain calibrations.",
     storageClass="AmpGains",
     dimensions=("instrument", "detector"),
-    isCalibration=True,
+    #isCalibration=True,
 )
 
 INPUT_RAW_AMPS_CONNECT = cT.Input(
