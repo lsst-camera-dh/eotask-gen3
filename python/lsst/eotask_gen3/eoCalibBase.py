@@ -39,6 +39,16 @@ CAMERA_CONNECT = cT.PrerequisiteInput(
     isCalibration=True,
 )
 
+PHOTODIODE_CONNECT = cT.PrerequisiteInput(
+    name="photodiode",
+    doc="Input photodiode data",
+    storageClass="AstropyTable",
+    dimensions=("instrument", "exposure"),
+    multiple=True,
+    minimum=0,
+    deferLoad=True
+)
+
 BIAS_CONNECT = cT.Input(
     name="eo_bias",
     doc="Input bias calibration.",
@@ -211,6 +221,29 @@ def arrangeFlatsByExpId(exposureList, exposureIdList):
                 pass
 
     return flatsAtExpId
+
+
+class EoPdTaskConnections(pipeBase.PipelineTaskConnections,
+                          dimensions=("instrument", "detector")):
+
+    photodiodeData = copyConnect(PHOTODIODE_CONNECT)
+
+class EoPdTaskConfig(pipeBase.PipelineTaskConfig,
+                     pipelineConnections=EoPdTaskConnections):
+    """ Class snippet to define IsrTask as a sub-task and attach the                                                                    
+    correct connections """
+    pass
+
+
+class EoPdTask(pipeBase.PipelineTask):
+
+    ConfigClass = EoPdTaskConfig
+    _DefaultName = "eoPhotodiode"
+
+    def run(self, photodiodeData, **kwargs):  # pylint: disable=arguments-differ      
+        """ Run method"""
+        print(photodiodeData)
+        return pipeBase.Struct()
 
 
 class EoAmpExpCalibTaskConnections(pipeBase.PipelineTaskConnections,
@@ -407,7 +440,7 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
 
         inputs['inputPairs'] = inputPairs
         if pdPairs is not None:
-            inputs['photodiodeDict'] = pdPairs
+            inputs['photodiodePairs'] = pdPairs
         
         outputs = self.run(**inputs)
         butlerQC.put(outputs, outputRefs)        
