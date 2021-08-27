@@ -13,14 +13,6 @@ __all__ = ["EoFe55Task", "EoFe55TaskConfig"]
 
 class EoFe55TaskConnections(EoAmpExpCalibTaskConnections):
 
-    photodiodeData = cT.Input(
-        name="photodiode",
-        doc="Input photodiode data",
-        storageClass="AstropyTable",
-        dimensions=("instrument", "exposure"),
-        multiple=True,
-    )
-
     outputData = cT.Output(
         name="eoFe55",
         doc="Electrial Optical Calibration Output",
@@ -88,7 +80,6 @@ class EoFe55Task(EoAmpExpCalibTask):
         ampNames = [amp.getName() for amp in amps]
         outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps))
 
-        self.analyzePdData(photodiodeData, outputData)
         for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)                                    
             for iExp, inputExp in enumerate(inputExps):
@@ -103,14 +94,6 @@ class EoFe55Task(EoAmpExpCalibTask):
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         stats = afwMath.makeStatistics(calibExp.image, afwMath.MEDIAN, self.statCtrl)
         outTable.signal[iExp] = stats.getValue(afwMath.MEDIAN)
-
-    def analyzePdData(self, photodiodeData, outputData):
-        outTable = outputData.detExp['detExp']
-        for iExp, pdData in enumerate(photodiodeData):
-            flux = self.getFlux(pdData)
-            outTable.flux[iExp] = flux
-            outTable.seqnum[iExp] = 0 #pdData.seqnum
-            outTable.mjd[iExp] = 0 #pdData.dayobs
 
     @staticmethod
     def getFlux(pdData, factor=5):

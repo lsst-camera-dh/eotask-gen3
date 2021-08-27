@@ -8,7 +8,8 @@ import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 
 from .eoCalibBase import (EoAmpPairCalibTaskConfig, EoAmpPairCalibTaskConnections,
-                          EoAmpPairCalibTask, runIsrOnAmp, extractAmpCalibs)
+                          EoAmpPairCalibTask, runIsrOnAmp, extractAmpCalibs,
+                          copyConnect, PHOTODIODE_CONNECT)
 from .eoFlatPairData import EoFlatPairData
 from .eoFlatPairUtils import DetectorResponse
 
@@ -17,14 +18,7 @@ __all__ = ["EoFlatPairTask", "EoFlatPairTaskConfig"]
 
 class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
 
-    photodiodeData = cT.Input(
-        name="photodiode",
-        doc="Input photodiode data",
-        storageClass="AstropyTable",
-        dimensions=("instrument", "exposure"),
-        multiple=True,
-        deferLoad=True
-    )
+    photodiodeData = copyConnect(PHOTODIODE_CONNECT)
     
     outputData = cT.Output(
         name="eoFlatPair",

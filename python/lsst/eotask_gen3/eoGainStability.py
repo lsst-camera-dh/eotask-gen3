@@ -5,7 +5,7 @@ import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 
 from .eoCalibBase import (EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask,
-                          runIsrOnAmp, extractAmpCalibs)
+                          runIsrOnAmp, extractAmpCalibs, copyConnect, PHOTODIODE_CONNECT)
 from .eoGainStabilityData import EoGainStabilityData
 
 __all__ = ["EoGainStabilityTask", "EoGainStabilityTaskConfig"]
@@ -13,13 +13,7 @@ __all__ = ["EoGainStabilityTask", "EoGainStabilityTaskConfig"]
 
 class EoGainStabilityTaskConnections(EoAmpExpCalibTaskConnections):
 
-    photodiodeData = cT.Input(
-        name="photodiode",
-        doc="Input photodiode data",
-        storageClass="AstropyTable",
-        dimensions=("instrument", "exposure"),
-        multiple=True,
-    )
+    photodiodeData = copyConnect(PHOTODIODE_CONNECT)
 
     outputData = cT.Output(
         name="eoGainStability",

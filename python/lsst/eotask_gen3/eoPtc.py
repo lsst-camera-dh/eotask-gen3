@@ -11,7 +11,8 @@ import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
 
 from .eoCalibBase import (EoAmpPairCalibTaskConfig, EoAmpPairCalibTaskConnections,
-                          EoAmpPairCalibTask, runIsrOnAmp, extractAmpCalibs)
+                          EoAmpPairCalibTask, runIsrOnAmp, extractAmpCalibs,
+                          copyConnect, PHOTODIODE_CONNECT)
 from .eoPtcData import EoPtcData
 
 __all__ = ["EoPtcTask", "EoPtcTaskConfig"]
@@ -35,14 +36,7 @@ def residuals(pars, mean, var):
 
 class EoPtcTaskConnections(EoAmpPairCalibTaskConnections):
 
-    photodiodeData = cT.Input(
-        name="photodiode",
-        doc="Input photodiode data",
-        storageClass="AstropyTable",
-        dimensions=("instrument", "exposure"),
-        multiple=True,
-        deferLoad=True,
-    )
+    photodiodeData = copyConnect(PHOTODIODE_CONNECT)
 
     outputData = cT.Output(
         name="eoPtc",
@@ -107,8 +101,6 @@ class EoPtcTask(EoAmpPairCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
-        import pdb
-        pdb.set_trace()
         camera = kwargs['camera']
         det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()
