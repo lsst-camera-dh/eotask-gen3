@@ -335,7 +335,12 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputExps[0].dataId['detector'])
+        numExps = len(inputExps)
+        if numExps < 1:
+            raise RuntimeError("No valid input data")
+
+        #det = camera.get(inputExps[0].dataId['detector'])
+        det = inputExps[0].get().getDetector()
         nAmps = len(det.getAmplifiers())
         outputData = self.makeOutputData(amps=det.getAmplifiers(), nAmps=nAmps, nExposure=len(inputExps))
 
@@ -343,8 +348,9 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iExp, inputExp in enumerate(inputExps):
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
-                self.analyzeAmpExpData(calibExp, outputData, iamp, amp, iExp)
-            self.analyzeAmpRunData(outputData, iamp, amp)
+                amp2 = calibExp.getDetector().getAmplifiers()[0]
+                self.analyzeAmpExpData(calibExp, outputData, iamp, amp2, iExp)
+            self.analyzeAmpRunData(outputData, iamp, amp2)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 
@@ -467,10 +473,18 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputPairs[0][0][0].dataId['detector'])
+        cam_det = camera.get(inputPairs[0][0][0].dataId['detector'])
+        nPair = len(inputPairs)
+        if nPair < 1:
+            raise RuntimeError("No valid input data")
+
+        det = inputPairs[0][0][0].get().getDetector()
+        
         amps = det.getAmplifiers()
         outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
+
         for iamp, amp in enumerate(amps):
+
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
@@ -478,8 +492,10 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
                     continue
                 calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
                 calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
-                self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
-            self.analyzeAmpRunData(outputData, iamp, amp)
+                amp2 = calibExp1.getDetector().getAmplifiers()[0]
+
+                self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp2, iPair)
+            self.analyzeAmpRunData(outputData, iamp, amp2)
         self.analyzeDetRunData(outputData)
         return pipeBase.Struct(outputData=outputData)
 

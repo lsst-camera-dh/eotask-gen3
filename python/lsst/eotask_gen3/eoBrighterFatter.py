@@ -72,8 +72,8 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
     def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
 
-        preppedImage1, median1 = self.prepImage(calibExp1, amp)
-        preppedImage2, median2 = self.prepImage(calibExp2, amp)
+        preppedImage1, median1 = self.prepImage(calibExp1)
+        preppedImage2, median2 = self.prepImage(calibExp2)
 
         outTable.mean[iPair] = (median1 + median2)/2.
         outTable.covarience[iPair], outTable.covarienceError[iPair] =\
@@ -97,7 +97,7 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
         outTable.bfYSlope[iamp], outTable.bfYSlopeErr[iamp] =\
             self.fitSlopes(inTable.mean, inTable.covarience[:, 1, 0])
 
-    def prepImage(self, calibExp, amp):
+    def prepImage(self, calibExp):
         """
         Crop the image to avoid edge effects based on the Config border
         parameter. Additionally, if there is a dark image, subtract.
@@ -110,8 +110,11 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
         border = self.config.nPixBorder
 
         # Crop the image within a border region.
-        bbox = amp.getRawDataBBox()
+        #bbox = amp.getRawDataBBox()
+        #bbox.grow(-border)
+        bbox = localExp.getDetector().getAmplifiers()[0].getRawDataBBox()
         bbox.grow(-border)
+
         localExp = localExp[bbox]
 
         # Calculate the median of the image.
