@@ -147,7 +147,7 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             Stacked and assembled output
         """
         camera = kwargs['camera']
-        det = camera.get(inputExps[0].dataId['detector'])
+        #det = camera.get(inputExps[0].dataId['detector'])
         ampDict = OrderedDict()
 
         stats = afwMath.StatisticsControl(self.config.clip, self.config.nIter,
@@ -157,14 +157,18 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             raise RuntimeError("No valid input data")
         if numExps < self.config.maxVisitsToCalcErrorFromInputVariance:
             stats.setCalcErrorFromInputVariance(True)
+            
+        det = inputExps[0].get().getDetector()
 
+        #for iamp, (amp, amp2) in enumerate(zip(det.getAmplifiers(), det2.getAmplifiers())):
         for iamp, amp in enumerate(det.getAmplifiers()):
             toStack = []
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for inputExp in inputExps:
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
                 toStack.append(calibExp.getMaskedImage())
-            combined = afwImage.MaskedImageF(amp.getRawBBox().getWidth(), amp.getRawBBox().getHeight())
+            #combined = afwImage.MaskedImageF(amp2.getRawBBox().getWidth(), amp2.getRawBBox().getHeight())
+            combined = afwImage.MaskedImageF(amp.getRawBBox())
             combinedExp = afwImage.makeExposure(combined)  # pylint: disable=no-member
             combineType = afwMath.stringToStatisticsProperty(self.config.combine)  # pylint: disable=no-member
             afwMath.statisticsStack(combined, toStack, combineType, stats)  # pylint: disable=no-member

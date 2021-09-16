@@ -84,7 +84,12 @@ class EoFlatPairTask(EoAmpPairCalibTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputPairs[0][0][0].dataId['detector'])
+        nPair = len(inputPairs)
+        if nPair < 1:
+            raise RuntimeError("No valid input data")
+
+        det = inputPairs[0][0][0].get().getDetector()
+        #det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()
         ampNames = [amp.getName() for amp in amps]
         outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nPair=len(inputPairs))
@@ -99,8 +104,9 @@ class EoFlatPairTask(EoAmpPairCalibTask):
                     continue
                 calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
                 calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
-                self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp, iPair)
-            self.analyzeAmpRunData(outputData, iamp, amp)
+                amp2 = calibExp1.getDetector().getAmplifiers()[0]
+                self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp2, iPair)
+            self.analyzeAmpRunData(outputData, iamp, amp2)
         return pipeBase.Struct(outputData=outputData)
     
     def makeOutputData(self, amps, nAmps, nPair, **kwargs):  # pylint: disable=arguments-differ,no-self-use

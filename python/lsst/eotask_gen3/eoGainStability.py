@@ -76,7 +76,12 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        det = camera.get(inputExps[0].dataId['detector'])
+
+        numExps = len(inputExps)
+        if numExps < 1:
+            raise RuntimeError("No valid input data")
+        
+        det = inputExps[0].get().getDetector()
         amps = det.getAmplifiers()
 
         ampNames = [amp.getName() for amp in amps]
