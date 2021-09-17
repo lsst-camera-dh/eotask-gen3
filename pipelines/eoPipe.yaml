@@ -40,7 +40,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "prereq_defects"
             connections.outputImage: "eoFlatLow"
     eoFlatHigh:
         class: lsst.eotask_gen3.eoCombine.EoCombineFlatTask
@@ -51,7 +51,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "prereq_defects"
             connections.outputImage: "eoFlatHigh"
     eoBrightPixels:
         class: lsst.eotask_gen3.eoBrightPixels.EoBrightPixelTask
@@ -78,7 +78,7 @@ tasks:
             dataSelection: "fe55Flat"
             connections.inputExps: "raw"
             connections.bias: "eoBias"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.dark: "eoDark"
             connections.outputData: "eoFe55"
     eoPtc:
@@ -88,7 +88,7 @@ tasks:
             dataSelection: "flatFlat"
             connections.inputExps: "raw"
             connections.bias: "eoBias"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.dark: "eoDark"
             connections.outputData: "eoPtc"
     eoNonlinearity:
@@ -104,7 +104,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoReadNoise"
     eoBiasStability:
         class: lsst.eotask_gen3.eoBiasStability.EoBiasStabilityTask
@@ -114,7 +114,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoBiasStability"
     eoDarkCurrent:
         class: lsst.eotask_gen3.eoDarkCurrent.EoDarkCurrentTask
@@ -129,7 +129,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoOverscan"
     eoFlatPair:
         class: lsst.eotask_gen3.eoFlatPair.EoFlatPairTask
@@ -139,8 +139,8 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
-            connections.outputData: "eoFlatPair_temp"
+            connections.defects: "eoDefects"
+            connections.outputData: "eoFlatPair"
     eoGainStability:
         class: lsst.eotask_gen3.eoGainStability.EoGainStabilityTask
         config:
@@ -149,7 +149,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoGainStability"
     eoBrighterFatter:
         class: lsst.eotask_gen3.eoBrighterFatter.EoBrighterFatterTask
@@ -159,7 +159,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoBrighterFatter"
     eoPersistence:
         class: lsst.eotask_gen3.eoPersistence.EoPersistenceTask
@@ -169,7 +169,7 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoPersistenceBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoPeristence"
     eoTearing:
         class: lsst.eotask_gen3.eoTearing.EoTearingTask
@@ -179,5 +179,40 @@ tasks:
             connections.inputExps: "raw"
             connections.bias: "eoBias"
             connections.dark: "eoDark"
-            connections.defects: "defects"
+            connections.defects: "eoDefects"
             connections.outputData: "eoTearing"
+subsets:
+    protocalRun:
+        subset:
+            - eoBias
+            - eoDark
+            - eoFlatLow
+            - eoFlatHigh
+            - eoBrightPixels
+            - eoDarkPixels
+            - eoDefects
+            - eoPtc
+            - eoNonlinearity
+            - eoReadNoise
+            - eoBiasStability
+            - eoDarkCurrent
+            - eoOverscan
+            - eoFlatPair
+            - eoGainStability
+            - eoBrighterFatter
+            - eoTearing
+        description: >
+            Analysis for ABC-protocal runs
+    persistenceRun:
+        subset:
+            - eoPersistenceBias
+            - eoPersistence
+        description: >
+            Analysis for BOT persistence runs
+    Fe55Run:
+        subset:
+            - eoFe55Bias
+            - eoFe55
+        description: >
+            Analysis for Fe55 persistence runs
+

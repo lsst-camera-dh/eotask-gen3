@@ -177,7 +177,7 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
         return xcorr, xcorr_err
 
     @staticmethod
-    def fitSlopes(xcorr, mean, adu_max=1e5):
+    def fitSlopes(mean, xcorr, adu_max=1e5):
         xcorr = np.squeeze(xcorr)
         mean = np.squeeze(mean)
         xcorr = xcorr[mean < adu_max]

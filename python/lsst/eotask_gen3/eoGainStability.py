@@ -106,7 +106,10 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
     def analyzePdData(self, photodiodeData, outputData):
         outTable = outputData.detExp['detExp']
         for iExp, pdData in enumerate(photodiodeData):
-            flux = self.getFlux(pdData)
+            # FIXME, kludge for testing under we sort out the photodiode selection stuff
+            if iExp >= len(outTable.flux):
+                continue
+            flux = self.getFlux(pdData.get())            
             outTable.flux[iExp] = flux
             outTable.seqnum[iExp] = 0 #pdData.seqnum
             outTable.mjd[iExp] = 0 #pdData.dayobs

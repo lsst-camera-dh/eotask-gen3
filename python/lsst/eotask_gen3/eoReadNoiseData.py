@@ -46,9 +46,9 @@ class EoReadNoiseAmpRunData(EoCalibTable):
 
 class EoReadNoiseDataSchemaV0(EoCalibSchema):
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoReadNoiseAmpExpData,
-                                     multiKey="amps")
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoReadNoiseAmpExpData,
+                                multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoReadNoiseAmpRunData)
@@ -64,7 +64,7 @@ class EoReadNoiseData(EoCalib):
 
     def __init__(self, **kwargs):
         super(EoReadNoiseData, self).__init__(**kwargs)
-        self.ampExposure = self['ampExposure']
+        self.ampExp = self['ampExp']
         self.amps = self['amps']
 
 

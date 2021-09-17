@@ -10,7 +10,7 @@ from lsst.ip.isr import IsrTask, AssembleCcdTask
 from astro_metadata_translator import merge_headers, ObservationGroup
 from astro_metadata_translator.serialize import dates_to_fits
 
-from .eoCalibBase import CAMERA_CONNECT, BIAS_CONNECT, DARK_CONNECT, DEFECTS_CONNECT,\
+from .eoCalibBase import CAMERA_CONNECT, BIAS_CONNECT, DARK_CONNECT, DEFECTS_PREREQ_CONNECT,\
                           GAINS_CONNECT, INPUT_RAW_AMPS_CONNECT, OUTPUT_IMAGE_CONNECT,\
                           copyConnect, runIsrOnAmp, extractAmpCalibs
 
@@ -301,7 +301,7 @@ class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
     perform minimal Isr on each amplifier """
 
     bias = copyConnect(BIAS_CONNECT)
-    defects = copyConnect(DEFECTS_CONNECT)
+    defects = copyConnect(DEFECTS_PREREQ_CONNECT)
     dark = copyConnect(DARK_CONNECT)
     #gains = copyConnect(GAINS_CONNECT)
 
