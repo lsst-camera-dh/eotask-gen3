@@ -19,7 +19,7 @@ class EoBrighterFatterTaskConnections(EoAmpPairCalibTaskConnections):
     outputData = cT.Output(
         name="eoBrighterFatter",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 

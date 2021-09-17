@@ -23,7 +23,7 @@ class EoTrapsTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoTrapsStats",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -93,7 +93,7 @@ class EoTrapsTask(EoAmpExpCalibTask):
         camera = kwargs['camera']
         det = camera.get(inputExps[0].dataId['detector'])
         amps = det.getAmplifiers()
-        outputData = self.makeOutputData(nAmps=len(amps))
+        outputData = self.makeOutputData(nAmps=len(amps), camera=camera, detector=det)
         fpMap = {}
         for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
@@ -107,8 +107,8 @@ class EoTrapsTask(EoAmpExpCalibTask):
         defectsOut = Defects(defectList=fpCcd)
         return pipeBase.Struct(outputData=outputData, defectsOut=defectsOut)        
 
-    def makeOutputData(self, nAmps):  # pylint: disable=arguments-differ,no-self-use
-        return EoTrapsData(nAmps=nAmps)
+    def makeOutputData(self, nAmps, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        return EoTrapsData(nAmps=nAmps, **kwargs)
 
     def findTraps(self, ampExp, amp):
 

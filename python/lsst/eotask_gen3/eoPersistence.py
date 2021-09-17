@@ -14,7 +14,7 @@ class EoPersistanceTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoBiasStability",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 

@@ -103,7 +103,7 @@ INPUT_STACK_EXP_CONNECT = cT.Input(
 OUTPUT_CONNECT = cT.Output(
     name="calibOutput",
     doc="Electrial Optical Calibration Output",
-    storageClass="EoCalib",
+    storageClass="IsrCalib",
     dimensions=("instrument", "detector"),
 )
 
@@ -339,10 +339,10 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
         if numExps < 1:
             raise RuntimeError("No valid input data")
 
-        #det = camera.get(inputExps[0].dataId['detector'])
         det = inputExps[0].get().getDetector()
         nAmps = len(det.getAmplifiers())
-        outputData = self.makeOutputData(amps=det.getAmplifiers(), nAmps=nAmps, nExposure=len(inputExps))
+        outputData = self.makeOutputData(amps=det.getAmplifiers(), nAmps=nAmps, nExposure=len(inputExps),
+                                         camera=camera, detector=det)
 
         for iamp, amp in enumerate(det.getAmplifiers()):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
@@ -473,7 +473,6 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        cam_det = camera.get(inputPairs[0][0][0].dataId['detector'])
         nPair = len(inputPairs)
         if nPair < 1:
             raise RuntimeError("No valid input data")
@@ -481,8 +480,8 @@ class EoAmpPairCalibTask(pipeBase.PipelineTask):
         det = inputPairs[0][0][0].get().getDetector()
         
         amps = det.getAmplifiers()
-        outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs))
-
+        outputData = self.makeOutputData(amps=amps, nAmps=len(amps), nPair=len(inputPairs),
+                                         camera=camera, detector=det)
         for iamp, amp in enumerate(amps):
 
             ampCalibs = extractAmpCalibs(amp, **kwargs)
@@ -565,6 +564,9 @@ class EoDetExpCalibTask(pipeBase.PipelineTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        camera = kwargs['camera']
+        #det = camera.get(inputExps[0].dataId['detector'])
+        det = inputExps[0].get().getDetector()
         outputData = self.makeOutputData(nExposure=len(inputExps))
         for iExp, inputExp in enumerate(inputExps):
             calibExp = runIsrOnExp(self, inputExp.get(), **kwargs)

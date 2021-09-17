@@ -28,7 +28,7 @@ class EoDarkCurrentTaskConnections(EoDetRunCalibTaskConnections):
     outputData = cT.Output(
         name="eoDarkCurrent",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -63,18 +63,19 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        camera = kwargs.get('camera')
         det = stackedCalExp.getDetector()
         amps = det.getAmplifiers()
         nAmp = len(amps)
         ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp)
+        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp, camera=camera, detector=det)
         for iAmp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
             self.analyzeAmpRunData(ampExposure, outputData, iAmp, amp)
         return pipeBase.Struct(outputData=outputData)
             
-    def makeOutputData(self, amps, nAmp):  # pylint: disable=arguments-differ,no-self-use
-        return EoDarkCurrentData(nAmp=nAmp)
+    def makeOutputData(self, amps, nAmp, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        return EoDarkCurrentData(nAmp=nAmp, **kwargs)
 
     
     def analyzeAmpRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):

@@ -119,14 +119,14 @@ class EoNonlinearityTaskConnections(EoDetRunCalibTaskConnections):
     ptcData = cT.Input(
         name="eoPtc",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
     
     outputData = cT.Output(
         name="eoNonlinearity",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )    
 
@@ -165,8 +165,14 @@ class EoNonlinearityTask(EoDetRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        camera = kwargs.get('camera')
+        if camera is not None:
+            det = camera.get(ptcData._detectorId)
+        else:
+            det = None
         inputAmpTables = ptcData.ampExp
-        outputData = self.makeOutputData(nAmp=len(inputAmpTables), nProf=self.config.nProfileBins)
+        outputData = self.makeOutputData(nAmp=len(inputAmpTables), nProf=self.config.nProfileBins,
+                                         camera=camera, detector=det)
         outputTable = outputData.amps['amps']
         for iamp, (ampName, ampData) in enumerate(inputAmpTables.items()):
             ampMean = ampData.mean

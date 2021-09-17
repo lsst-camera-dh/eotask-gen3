@@ -71,13 +71,15 @@ class EoDefectsTask(EoDetRunCalibTask):
 
         Returns
         -------
-        outputData : `EoCalib`
-            Output data in formatted tables
+        defects : `ip.isr.Defects`
+            Output defect list
         """
-        imageTypes = ["Bright", "Dark"]
-        inputDefectList = [brightPixels, darkPixels]
-        import pdb
-        pdb.set_trace()
+        outDefects = Defects()
+        with outDefects.bulk_update():
+            for inputDefects in [brightPixels, darkPixels]:
+                for d in inputDefects:
+                    outDefects.append(d)
+        return pipeBase.Struct(defects=outDefects)
 
 
         

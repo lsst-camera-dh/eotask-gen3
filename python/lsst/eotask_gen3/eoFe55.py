@@ -16,7 +16,7 @@ class EoFe55TaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoFe55",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -78,7 +78,8 @@ class EoFe55Task(EoAmpExpCalibTask):
         amps = det.getAmplifiers()
 
         ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps))
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps),
+                                         camera=camera, detector=det)
 
         for iamp, amp in enumerate(amps):
             ampCalibs = extractAmpCalibs(amp, **kwargs)                                    
@@ -87,8 +88,8 @@ class EoFe55Task(EoAmpExpCalibTask):
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
         return pipeBase.Struct(outputData=outputData)
             
-    def makeOutputData(self, amps, nAmps, nExposure):  # pylint: disable=arguments-differ
-        return EoFe55Data(amps=amps, nAmps=nAmps, nExposure=nExposure)
+    def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
+        return EoFe55Data(amps=amps, nAmps=nAmps, nExposure=nExposure, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]

@@ -25,7 +25,7 @@ class EoCtiTaskConnections(EoDetRunCalibTaskConnections):
     outputData = cT.Output(
         name="eoCti",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -67,16 +67,17 @@ class EoCtiTask(EoDetRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        camera = kwargs.get('camera')
         det = stackedCalExp.getDetector()
         amps = det.getAmplifiers()
         nAmp = len(amps)
         ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp)
+        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp, camera=camera, detector=det)
         self.analyzeDetRunData(stackedCalExp, outputData, **kwargs)
         return pipeBase.Struct(outputData=outputData)
         
     def makeOutputData(self, amps, nAmp, **kwargs):
-        return EoCtiData(amps=amps, nAmp=nAmp)
+        return EoCtiData(amps=amps, nAmp=nAmp, **kwargs)
 
     def analyzeDetRunData(self, detExposure, outputData, iamp, amp, **kwargs):
         ctiSerialEstim = estimateCti(detExposure, amp, 's', self.config.overscans, self.statCtrl)

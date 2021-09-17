@@ -16,7 +16,7 @@ class EoOverscanTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoOverscan",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 

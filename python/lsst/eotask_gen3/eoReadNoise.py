@@ -45,7 +45,7 @@ class EoReadNoiseTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoReadNoise",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -81,9 +81,9 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
     ConfigClass = EoReadNoiseTaskConfig
     _DefaultName = "readNoise"
 
-    def makeOutputData(self, amps, nAmps, nExposure):  # pylint: disable=arguments-differ
+    def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
 
-        return EoReadNoiseData(amps=amps, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp)
+        return EoReadNoiseData(amps=amps, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
 

@@ -140,7 +140,7 @@ tasks:
             connections.bias: "eoBias"
             connections.dark: "eoDark"
             connections.defects: "defects"
-            connections.outputData: "eoFlatPair"
+            connections.outputData: "eoFlatPair_temp"
     eoGainStability:
         class: lsst.eotask_gen3.eoGainStability.EoGainStabilityTask
         config:

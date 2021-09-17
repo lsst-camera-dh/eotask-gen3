@@ -23,7 +23,7 @@ class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
     outputData = cT.Output(
         name="eoFlatPair",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -89,10 +89,10 @@ class EoFlatPairTask(EoAmpPairCalibTask):
             raise RuntimeError("No valid input data")
 
         det = inputPairs[0][0][0].get().getDetector()
-        #det = camera.get(inputPairs[0][0][0].dataId['detector'])
         amps = det.getAmplifiers()
         ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nPair=len(inputPairs))
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nPair=len(inputPairs),
+                                         camera=camera, detector=det)
         photodiodePairs = kwargs.get('photodiodePairs', None)
         if photodiodePairs is not None:
             self.analyzePdData(photodiodePairs, outputData)
