@@ -14,6 +14,7 @@ from astropy.io import fits
 from astropy.utils.diff import report_diff_values
 from lsst.utils import doImport
 from lsst.daf.butler.core.utils import getFullTypeName
+from lsst.ip.isr import IsrCalib
 
 from .eoCalibTable import EoCalibTableHandle
 
@@ -152,7 +153,7 @@ class EoCalibSchema:
             val.schema.writeMarkdown(key, stream)
 
 
-class EoCalib:
+class EoCalib(IsrCalib):
     """ Provides interface between `list` of `astropy.table.Table` and
     `EoCalibSchema`
 
@@ -201,6 +202,9 @@ class EoCalib:
             If provided will override schema class
         """
         kwcopy = kwargs.copy()
+        camera = kwcopy.pop('camera', None)
+        detector = kwcopy.pop('detector', None)
+        IsrCalib.__init__(self, camera=camera, detector=detector)
         self._schemaDict = OrderedDict([(val.fullName(), val) for val in self.PREVIOUS_SCHEMAS])
         self._schemaDict[self.SCHEMA_CLASS.fullName()] = self.SCHEMA_CLASS
         self._schema = kwcopy.pop('schema', self.SCHEMA_CLASS())
@@ -251,6 +255,17 @@ class EoCalib:
     def updateMetadata(self, setDate=False, **kwargs):
         """ FIXME, replace once this inherits from IsrCalib """
 
+    def fromDetector(self, detector):
+        """Modify the calibration parameters to match the supplied detector.
+
+        Parameters
+        ----------
+        detector : `lsst.afw.cameraGeom.Detector`
+            Detector to use to set parameters from.
+
+        """
+        pass        
+
     @classmethod
     def fromDict(cls, dictionary, **kwargs):
         """ Construct from dictionary """
@@ -271,48 +286,6 @@ class EoCalib:
         Actually just returns the undering list of tables """
         return self._tableList
 
-    @classmethod
-    def readFits(cls, filename, **kwargs):
-        """ FIXME, temp function copied for IsrCalib
-
-        Remove once this class inherits from IsrCalib
-        """
-        with fits.open(filename) as fFits:
-            try:
-                typeName = fFits[0].header['typename']  # pylint: disable=no-member  # noqa
-            except KeyError:  # pragma: no cover
-                typeName = fFits[0].header['TYPENAME']  # pylint: disable=no-member  # noqa
-
-            try:
-                schemaName = fFits[0].header['schema']  # pylint: disable=no-member  # noqa
-            except KeyError:  # pragma: no cover
-                schemaName = fFits[0].header['SCHEMA']  # pylint: disable=no-member  # noqa
-            
-        subCls = doImport(typeName)
-        schema = subCls.schemaDict()[schemaName]()
-
-        tableList = []
-        tableList.append(Table.read(filename, hdu=1))
-        extNum = 2  # Fits indices start at 1, we've read one already.
-        keepTrying = True
-
-        while keepTrying:
-            with warnings.catch_warnings():
-                warnings.simplefilter("error")
-                try:
-                    newTable = Table.read(filename, hdu=extNum)
-                    tableList.append(newTable)
-                    extNum += 1
-                except Exception:
-                    keepTrying = False
-
-        for table in tableList:
-            for k, v in table.meta.items():
-                if isinstance(v, fits.card.Undefined):
-                    table.meta[k] = None  # pragma: no cover
-
-        return subCls.fromTable(tableList, schema=schema, **kwargs)
-
     def writeFits(self, filename):
         """ FIXME, temp function copied for IsrCalib
 
@@ -325,8 +298,8 @@ class EoCalib:
 
             primaryHdu = fits.PrimaryHDU()
             typeName = getFullTypeName(self)
-            primaryHdu.header['typename'] = typeName            
-            primaryHdu.header['schema'] = self._schema.fullName()
+            primaryHdu.header['CALIBCLS'] = typeName            
+            primaryHdu.header['SCHEMA'] = self._schema.fullName()
             astropyList.insert(0, primaryHdu)
 
             writer = fits.HDUList(astropyList)

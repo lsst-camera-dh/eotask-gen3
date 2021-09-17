@@ -18,7 +18,7 @@ class EoGainStabilityTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoGainStability",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -76,7 +76,6 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
             Output data in formatted tables
         """
         camera = kwargs['camera']
-
         numExps = len(inputExps)
         if numExps < 1:
             raise RuntimeError("No valid input data")
@@ -85,7 +84,8 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
         amps = det.getAmplifiers()
 
         ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps))
+        outputData = self.makeOutputData(amps=ampNames, nAmps=len(amps), nExposure=len(inputExps),
+                                         camera=camera, detector=det)
 
         self.analyzePdData(photodiodeData, outputData)
         for iamp, amp in enumerate(amps):
@@ -95,8 +95,8 @@ class EoGainStabilityTask(EoAmpExpCalibTask):
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
         return pipeBase.Struct(outputData=outputData)
             
-    def makeOutputData(self, amps, nAmps, nExposure):  # pylint: disable=arguments-differ
-        return EoGainStabilityData(amps=amps, nAmps=nAmps, nExposure=nExposure)
+    def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
+        return EoGainStabilityData(amps=amps, nAmps=nAmps, nExposure=nExposure, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, amp, iExp):
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]

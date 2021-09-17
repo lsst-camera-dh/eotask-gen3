@@ -28,7 +28,7 @@ class EoBrightPixelsTaskConnections(EoDetRunCalibTaskConnections):
     outputData = cT.Output(
         name="eoBrightPixelsStats",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 
@@ -75,10 +75,11 @@ class EoBrightPixelTask(EoDetRunCalibTask):
         outputData : `EoCalib`
             Output data in formatted tables
         """
+        camera = kwargs.get('camera')
         det = stackedCalExp.getDetector()
         amps = det.getAmplifiers()
         nAmp = len(amps)
-        outputData = self.makeOutputData(nAmp=nAmp)
+        outputData = self.makeOutputData(nAmp=nAmp, camera=camera, detector=det)
         outputTable = outputData.amps['amps']
         fpMap = {}
         for iamp, amp in enumerate(amps):

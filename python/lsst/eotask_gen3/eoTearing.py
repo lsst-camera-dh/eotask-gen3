@@ -16,7 +16,7 @@ class EoTearingTaskConnections(EoAmpExpCalibTaskConnections):
     outputData = cT.Output(
         name="eoTearing",
         doc="Electrial Optical Calibration Output",
-        storageClass="EoCalib",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
 

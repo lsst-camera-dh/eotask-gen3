@@ -157,7 +157,6 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             raise RuntimeError("No valid input data")
         if numExps < self.config.maxVisitsToCalcErrorFromInputVariance:
             stats.setCalcErrorFromInputVariance(True)
-            
         det = inputExps[0].get().getDetector()
 
         #for iamp, (amp, amp2) in enumerate(zip(det.getAmplifiers(), det2.getAmplifiers())):
@@ -167,7 +166,6 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             for inputExp in inputExps:
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={"amp": iamp}), **ampCalibs)
                 toStack.append(calibExp.getMaskedImage())
-            #combined = afwImage.MaskedImageF(amp2.getRawBBox().getWidth(), amp2.getRawBBox().getHeight())
             combined = afwImage.MaskedImageF(amp.getRawBBox())
             combinedExp = afwImage.makeExposure(combined)  # pylint: disable=no-member
             combineType = afwMath.stringToStatisticsProperty(self.config.combine)  # pylint: disable=no-member
