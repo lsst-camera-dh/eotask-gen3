@@ -35,7 +35,8 @@ class SubRegionSampler:
         samples = []
         for x, y in zip(self.xarr, self.yarr):
             subim = self.subim(image, x + bbox.getMinX(), y + bbox.getMinY())
-            stdev = afwMath.makeStatistics(subim, afwMath.STDEV, statCtrl).getValue()  # pylint: disable=no-member
+            stdev = afwMath.makeStatistics(subim.image.array.flatten(),
+                                           afwMath.STDEV, statCtrl).getValue()  # pylint: disable=no-member
         samples.append(stdev)
         return np.array(samples)
 
@@ -83,11 +84,12 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
 
     def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
 
-        return EoReadNoiseData(amps=amps, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp, **kwargs)
+        ampNames = [amp.getName() for amp in amps]
+        return EoReadNoiseData(amps=ampNames, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
 
-        imaging = calibExp.getDetector().getAmplifiers()[0].getBBox() # FIXME
+        imaging = calibExp.getDetector().getAmplifiers()[0].getRawBBox() # FIXME
         dx = self.config.dx
         dy = self.config.dy
         nsamp = self.config.nsamp
@@ -97,7 +99,7 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
 
     def analyzeAmpRunData(self, outputData, iamp, amp):
 
-        totalNoise = afwMath.makeStatistics(outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise,
+        totalNoise = afwMath.makeStatistics(outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise.flatten(),
                                             afwMath.MEDIAN).getValue()
         systemNoise = 0.  # FIXME
         if totalNoise >= systemNoise:
@@ -106,4 +108,4 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
             readNoise = -1
         outputData.amps["amps"].totalNoise[iamp] = totalNoise
         outputData.amps["amps"].systemNoise[iamp] = systemNoise
-        outputData.amps["amps"].readNoiseNoise[iamp] = readNoise
+        outputData.amps["amps"].readNoise[iamp] = readNoise

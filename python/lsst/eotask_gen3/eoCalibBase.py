@@ -65,8 +65,16 @@ DARK_CONNECT = cT.Input(
     isCalibration=True,
 )
 
-DEFECTS_CONNECT = cT.PrerequisiteInput(
+DEFECTS_CONNECT = cT.Input(
     name='defects',
+    doc="Input defect tables.",
+    storageClass="Defects",
+    dimensions=("instrument", "detector"),
+    isCalibration=True,
+)
+
+DEFECTS_PREREQ_CONNECT = cT.PrerequisiteInput(
+    name='prereq_defects',
     doc="Input defect tables.",
     storageClass="Defects",
     dimensions=("instrument", "detector"),
@@ -309,6 +317,11 @@ class EoAmpExpCalibTask(pipeBase.PipelineTask):
         inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)
         if hasattr(inputRefs, 'photodiodeData'):
             inputRefs.photodiodeData = self.dataSelection.selectData(inputRefs.photodiodeData)
+            if len(inputRefs.inputExps) != len(inputRefs.photodiodeData):
+                #raise ValueError("Number of input exposures (%i) does not equal number of photodiode data (%i)"\
+                #                 % (len(inputRefs.inputExps),len(inputRefs.photodiodeData)))
+                print("Warning: Number of input exposures (%i) does not equal number of photodiode data (%i)"\
+                      % (len(inputRefs.inputExps),len(inputRefs.photodiodeData)))
 
         inputs = butlerQC.get(inputRefs)
         outputs = self.run(**inputs)
