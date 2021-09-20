@@ -49,3 +49,5 @@ from .eoPtc import *
 from .eoReadNoise import *
 from .eoTearing import *
 
+# static html reports
+from .eoReportUtils import *

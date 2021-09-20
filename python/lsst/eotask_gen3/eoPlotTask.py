@@ -1,6 +1,8 @@
 """ Class to make plots from EoCalibData objects
 """
 
+import os
+from collections import OrderedDict
 import copy
 
 import lsst.pex.config as pexConfig
@@ -11,11 +13,11 @@ __all__ = ['EoStaticPlotTaskConfig', 'EoStaticPlotTask']
 
 
 class EoStaticPlotTaskConnections(pipeBase.PipelineTaskConnections,
-                                  dimensions=("instrument",):
+                                  dimensions=("instrument",)):
     inputData = cT.Input(
         name="calib",
-        doc="Figure with E.O. calibration data",
-        storageClass="Plot",
+        doc="Object with E.O. calibration data",
+        storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
         multiple=True,
     )
@@ -40,9 +42,9 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         for inputData, inputRef in zip(inputs['inputData'], inputRefs.inputData):
             if refObj is None:
                 refObj = inputData
-            det = inputRef.dataId.records["detector"]
-            raftName = det['raftName']
-            slotName = det['slotName']
+            det = inputRef.dataId.records["detector"].toDict()
+            raftName = det['raft']
+            slotName = det['name_in_raft']
             if raftName in cameraDict:
                 raftDict = cameraDict['raftName']
             else:
@@ -53,17 +55,32 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         butlerQC.put(outputs, outputRefs)
 
 
-    def run(self, refObj, cameraDict)
+    def run(self, refObj, cameraDict):
         cameraFigs = refObj.makeCameraFigures("%s_camera" % self.config.baseName, cameraDict)
-        refObj.writeFigures(self.config.dirName, cameraFigs)
+        cameraDir = os.path.join(self.config.dirName, 'camera')
+        try:
+            os.makedirs(cameraDir)
+        except:
+            pass
+        refObj.writeFigures(cameraDir, cameraFigs)
 
         for raftName, raftData in cameraDict.items():
+            raftDir = os.path.join(self.config.dirName, 'camera', raftName)
+            try:
+                os.makedirs(raftDir)
+            except:
+                pass
             raftFigs = refObj.makeRaftFigures("%s_%s" % (self.config.baseName, raftName), raftData)
-            refObj.writeFigures(self.config.dirName, raftFigs)
+            refObj.writeFigures(raftDir, raftFigs)
 
             for slotName, slotData in raftData.items():
-                slotFigs = slotData.makeDetFigures("%s_%s_%s" % (self.config.baseName, raftName, slotName))
-                refObj.writeFigures(self.config.dirName, slotFigs)      
-         return pipeBase.Struct()
+                slotDir = os.path.join(self.config.dirName, 'camera', raftName, slotName)
+                try:
+                    os.makedirs(slotDir)
+                except:
+                    pass
+                slotFigs = slotData.makeFigures("%s_%s_%s" % (self.config.baseName, raftName, slotName))
+                refObj.writeFigures(slotDir, slotFigs)      
+        return pipeBase.Struct()
 
 
