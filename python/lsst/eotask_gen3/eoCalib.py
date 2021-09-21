@@ -9,6 +9,9 @@ from typing import Mapping
 
 from collections import OrderedDict
 
+import matplotlib
+import matplotlib.pyplot as plt
+
 from astropy.table import Table
 from astropy.io import fits
 from astropy.utils.diff import report_diff_values
@@ -347,25 +350,32 @@ class EoCalib(IsrCalib):
             stream.write("##### SchemaClass: %s\n" % prevSchema.fullName())
             prevSchema.writeMarkdown(stream)
 
+    @staticmethod
+    def nullFigure():
+        """ Make an empty placeholder figure """
+        fig = plt.figure()
+        return fig
+
     def makeFigures(self, baseName):
         """ Make a set of matplotlib figures for this detector """
-        return OrderedDict()
+        return OrderedDict([('%s_null' % baseName, self.nullFigure())])
 
     @classmethod
     def makeRaftFigures(self, baseName, raftDataDict):
         """ Make a set of matplotlib figures for a raft """
-        return OrderedDict()
+        return OrderedDict([('%s_null' % baseName, self.nullFigure())])
 
     @classmethod
     def makeCameraFigures(self, baseName, cameraDataDict):
         """ Make a set of matplotlib figures for the whole focal plane """
-        return OrderedDict()
+        return OrderedDict([('%s_null' % baseName, self.nullFigure())])
     
     @staticmethod
     def writeFigures(basePath, figureDict, fileType="png"):
         """ Write all the figures to disk """
         for key, val in figureDict.items():
-            fullPath = "%s%s.%s" % (basePath, key, fileType)
+            fullPath = os.path.join(basePath, "%s.%s" % (key, fileType))
+            print("Writing %s" % fullPath)
             val.savefig(fullPath)
 
 

@@ -1,0 +1,115 @@
+description: >
+    Pipelines for electrical-optical testing plotting
+tasks:
+    eoBrightPixelsPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoBrightPixelStats"
+            dirName: "."
+            baseName: "brightPixels"
+    eoDarkPixelsPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoDarkPixelStats"
+            dirName: "."
+            baseName: "darkPixels"
+    eoFe55Plots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoFe55"
+            dirName: "."
+            baseName: "fe55"
+    eoPtcPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoPtc"
+            dirName: "."
+            baseName: "ptc"
+    eoNonlinearityPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoNonlinearity"
+            dirName: "."
+            baseName: "nonlinearity"
+    eoReadNoisePlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoReadNoise"
+            dirName: "."
+            baseName: "readNoise"
+    eoBiasStabilityPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoBiasStability"
+            dirName: "."
+            baseName: "biasStability"
+    eoDarkCurrentPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoDarkCurrent"
+            dirName: "."
+            baseName: "darkCurrent"
+    eoOverscanPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoOverscan"
+            dirName: "."
+            baseName: "overscan"
+    eoFlatPairPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoFlatPair"
+            dirName: "."
+            baseName: "flatPair"
+    eoGainStabilityPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoGainStability"
+            dirName: "."
+            baseName: "gainStability"
+    eoBrighterFatterPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoBrighterFatter"
+            dirName: "."
+            baseName: "brighterFatter"
+    eoPersistencePlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoPeristence"
+            dirName: "."
+            baseName: "peristence"
+    eoTearingPlots:
+        class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
+        config:
+            connections.inputData: "eoTearing"
+            dirName: "."
+            baseName: "tearing"
+subsets:
+    protocalRunPlots:
+        subset:
+            - eoBrightPixelsPlots
+            - eoDarkPixelsPlots
+            - eoPtcPlots
+            - eoNonlinearityPlots
+            - eoReadNoisePlots
+            - eoBiasStabilityPlots
+            - eoDarkCurrentPlots
+            - eoOverscanPlots
+            - eoFlatPairPlots
+            - eoGainStabilityPlots
+            - eoBrighterFatterPlots
+            - eoTearingPlots
+        description: >
+            Plots for ABC-protocal runs
+    persistenceRunPlots:
+        subset:
+            - eoPersistencePlots
+        description: >
+            Plots for BOT persistence runs
+    Fe55Run:
+        subset:
+            - eoFe55Plots
+        description: >
+            Plots for Fe55 persistence runs
+
