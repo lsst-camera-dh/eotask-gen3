@@ -182,7 +182,7 @@ tasks:
             connections.defects: "eoDefects"
             connections.outputData: "eoTearing"
 subsets:
-    protocalRun:
+    protocalRunNoPd:
         subset:
             - eoBias
             - eoDark
@@ -191,16 +191,20 @@ subsets:
             - eoBrightPixels
             - eoDarkPixels
             - eoDefects
-            - eoPtc
-            - eoNonlinearity
             - eoReadNoise
             - eoBiasStability
             - eoDarkCurrent
             - eoOverscan
-            - eoFlatPair
-            - eoGainStability
             - eoBrighterFatter
             - eoTearing
+        description: >
+            Analysis for ABC-protocal runs
+    protocalRunPd:
+        subset:
+            - eoPtc
+            - eoNonlinearity
+            - eoGainStability
+            - eoFlatPair
         description: >
             Analysis for ABC-protocal runs
     persistenceRun:

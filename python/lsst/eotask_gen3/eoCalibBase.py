@@ -157,7 +157,8 @@ def extractAmpImage(detImage, amp):
     return AmplifierIsolator.apply(detImage, amp)
 
 def extractAmpDefects(detDefects, amp):
-    return detDefects.getAmpDefects(amp)
+    return Defects()
+    #return detDefects.getAmpDefects(amp)
 
 def extractAmpNonlinearity(detNlc, amp):
     return detNlc[amp]

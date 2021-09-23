@@ -135,8 +135,8 @@ class EoPtcTask(EoAmpPairCalibTask):
     def analyzePdData(self, photodiodeDataPairs, outputData):
         outTable = outputData.detExp['detExp']
         for iPair, pdData in enumerate(photodiodeDataPairs):
-            pd1 = self.getFlux(pdData[0])
-            pd2 = self.getFlux(pdData[1])
+            pd1 = self.getFlux(pdData[0].get())
+            pd2 = self.getFlux(pdData[1].get())
             if np.abs((pd1 - pd2)/((pd1 + pd2)/2.)) > self.config.maxPDFracDev:
                 flux = np.nan
             else:
@@ -244,7 +244,7 @@ class EoPtcTask(EoAmpPairCalibTask):
                 ptcNoiseError, ptcTurnoff)
 
     @staticmethod
-    def getFlux(pdData):
+    def getFlux(pdData, factor=5):
         x = pdData['Time']
         y = pdData['Current']
         ythresh = (max(y) - min(y))/factor + min(y)
