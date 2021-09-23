@@ -673,9 +673,6 @@ def write_run_report(run, inputbase, outbase, **kwargs):
     dataid = dict(run=run)
     kwcopy['dataid'] = dataid
 
-    import pdb
-    pdb.set_trace()
-
     if outbase is None:
         outdir = None
         html_file = None

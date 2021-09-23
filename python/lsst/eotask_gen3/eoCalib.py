@@ -226,6 +226,9 @@ class EoCalib(IsrCalib):
                     self._tableList.append(val2.table)
         else:  # pragma: no cover
             raise TypeError("EoCalib input data must be None, Table or dict, not %s" % (type(data)))
+        if self._tableList:
+            self._tableList[0].meta['CALIBCLS'] = getFullTypeName(self)
+            self._tableList[0].meta['CALIBSCH'] = self._schema.fullName
 
     @classmethod
     def allSchemaClasses(cls):
@@ -281,6 +284,9 @@ class EoCalib(IsrCalib):
     @classmethod
     def fromTable(cls, tableList, **kwargs):
         """ Construct from a list of `astropy.io.table` """
+        schemaName = tableList[0].meta.get('CALIBSCH', None)
+        if schemaName is not None:
+            kwargs['schema'] = storedClass.schemaDict()[schemaName]()
         return cls(data=tableList, **kwargs)
 
     def toTable(self):
@@ -288,26 +294,6 @@ class EoCalib(IsrCalib):
 
         Actually just returns the undering list of tables """
         return self._tableList
-
-    def writeFits(self, filename):
-        """ FIXME, temp function copied for IsrCalib
-
-        Remove once this class inherits from IsrCalib
-        """
-        tableList = self.toTable()
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=Warning, module="astropy.io")
-            astropyList = [fits.table_to_hdu(table) for table in tableList]
-
-            primaryHdu = fits.PrimaryHDU()
-            typeName = getFullTypeName(self)
-            primaryHdu.header['CALIBCLS'] = typeName            
-            primaryHdu.header['SCHEMA'] = self._schema.fullName()
-            astropyList.insert(0, primaryHdu)
-
-            writer = fits.HDUList(astropyList)
-            writer.writeto(filename, overwrite=True)
-        return filename
 
     def reportDiffValues(self, otherCalib, fileObj=sys.stdout):
         """ Report on all differing values between two `EoCalib` objects

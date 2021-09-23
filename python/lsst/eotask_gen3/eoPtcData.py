@@ -61,7 +61,7 @@ class EoPtcDetPairDataSchemaV0(EoCalibTableSchema):
 
     TABLELENGTH = 'nPair'
 
-    exposure = EoCalibField(name="EXPOSURE", dtype=float)
+    flux = EoCalibField(name="FLUX", dtype=float)
     seqnum = EoCalibField(name="SEQNUM", dtype=int)
     dayobs = EoCalibField(name="DAYOBS", dtype=int)
 
@@ -72,7 +72,7 @@ class EoPtcDetPairData(EoCalibTable):
 
     def __init__(self, data=None, **kwargs):
         super(EoPtcDetPairData, self).__init__(data=None, **kwargs)
-        self.exposure = self.table[self.SCHEMA_CLASS.exposure.name]
+        self.flux = self.table[self.SCHEMA_CLASS.flux.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
         self.dayobs = self.table[self.SCHEMA_CLASS.dayobs.name]
 
@@ -87,7 +87,7 @@ class EoPtcDataSchemaV0(EoCalibSchema):
                               tableClass=EoPtcAmpRunData)
 
     detExp = EoCalibTableHandle(tableName="detExp",
-                                    tableClass=EoPtcDetPairData)
+                                tableClass=EoPtcDetPairData)
     
 
 class EoPtcData(EoCalib):
