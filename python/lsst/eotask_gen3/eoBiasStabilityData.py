@@ -1,7 +1,12 @@
 # from lsst.ip.isr import IsrCalib
 
+import numpy as np
+
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, nullFigure
+
+import matplotlib.pyplot as plt
 
 __all__ = ["EoBiasStabilityAmpExpData",
            "EoBiasStabilityDetExpData",
@@ -70,28 +75,33 @@ class EoBiasStabilityData(EoCalib):
         super(EoBiasStabilityData, self).__init__(**kwargs)
         self.ampExposure = self['ampExposure']
         self.detExposure = self['detExposure']
-
-    def makeDetFigures(self, baseName):
-        """ Make a set of matplotlib figures for this detector """
-        oDict = OrderedDict()
-        oDict['%s_bias_serial_profiles' % baseName] = self.plotDetBiasStabilty()
         
-    def plotDetBiasStabilty(self):
-        fig = plt.figure(figsize=(16, 16))
-        xlabelAmps = (13, 14, 15, 16)
-        ylabelAmps = (1, 5, 9, 13)
-        ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
-        title = 'median signal (ADU) vs column'
-        plt.suptitle(title)
-        plt.tight_layout(rect=(0, 0, 1, 0.95))
-        ampExpData = self.ampExpsoure
-        for iamp, ampData in enumerate(ampExpData.values()):
-            imarr = ampData.rowMedian
-            ax[amp].plot(range(imarr.shape[1]), np.median(imarr, axis=0))            
-            ax[amp].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
-        return fig
-            
 
+@EoSlotPlotMethod(EoBiasStabilityData, "serial_profiles", "Bias frame amp-wise mean vs time")
+def plotDetBiasStabilty(obj):
+    fig = plt.figure(figsize=(10, 10))
+    xlabelAmps = (13, 14, 15, 16)
+    ylabelAmps = (1, 5, 9, 13)
+    ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
+    title = 'median signal (ADU) vs column'
+    plt.suptitle(title)
+    plt.tight_layout(rect=(0, 0, 1, 0.95))
+    ampExpData = obj.ampExposure
+    for iamp, ampData in enumerate(ampExpData.values()):
+        imarr = ampData.rowMedian
+        ax[iamp+1].plot(range(imarr.shape[1]), np.median(imarr, axis=0))            
+        ax[iamp+1].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
+    return fig
+
+@EoRaftPlotMethod(EoBiasStabilityData, "mean", "Bias frame amp-wise mean vs time")
+def plotDetBiasStabiltyMean(raftDataDict):
+    return nullFigure()
+
+@EoRaftPlotMethod(EoBiasStabilityData, "stdev", "Bias frame amp-wise stdev vs time")
+def plotDetBiasStabiltyStdev(raftDataDict):
+    return nullFigure()
+
+            
 RegisterEoCalibSchema(EoBiasStabilityData)
 
 

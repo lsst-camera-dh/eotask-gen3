@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoDarkCurrentAmpRunData",
            "EoDarkCurrentData"]
@@ -43,6 +44,18 @@ class EoDarkCurrentData(EoCalib):
         super(EoDarkCurrentData, self).__init__(**kwargs)
         self.amps = self['amps']
 
+
+@EoSlotPlotMethod(EoDarkCurrentData, "noise", "Dark Current")
+def plotSlotNoise(obj):
+    return nullFigure()
+
+@EoRaftPlotMethod(EoDarkCurrentData, "noise", "Dark Current")
+def plotRaftNoise(raftDataDict):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoDarkCurrentData, "95CL", "Dark Current")
+def plotCamera95CL(cameraDataDict):
+    return nullFigure()
 
 RegisterEoCalibSchema(EoDarkCurrentData)
 

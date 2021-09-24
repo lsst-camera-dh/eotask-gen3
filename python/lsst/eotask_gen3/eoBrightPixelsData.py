@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoBrightPixelsAmpRunData",
            "EoBrightPixelsData"]
@@ -42,6 +43,23 @@ class EoBrightPixelsData(EoCalib):
     def __init__(self, **kwargs):
         super(EoBrightPixelsData, self).__init__(**kwargs)
         self.amps = self['amps']
+
+
+@EoCameraPlotMethod(EoBrightPixelsData, "pixels_mosaic", "Bright pixels per AMP")
+def plotBrightPixelMosaic(cameraDataDict):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoBrightPixelsData, "column_mosaic", "Bright columns per AMP")
+def plotBrightColumnMosaic(cameraDataDict):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoBrightPixelsData, "pixels_hist", "Bright pixels per AMP")
+def plotBrightPixelHist(cameraDataDict):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoBrightPixelsData, "column_hist", "Bright columns per AMP")
+def plotBrightColumnHist(cameraDataDict):
+    return nullFigure()
 
 
 RegisterEoCalibSchema(EoBrightPixelsData)

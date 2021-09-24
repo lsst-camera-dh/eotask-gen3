@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoGainStabilityAmpExpData",
            "EoGainStabilityDetExpData",
@@ -66,6 +67,11 @@ class EoGainStabilityData(EoCalib):
         super(EoGainStabilityData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.detExp = self['detExp']
+
+
+@EoCameraPlotMethod(EoGainStabilityData, "curves", "Flat Gain Stability")
+def plotGainStability(cameraDataDict):
+    return nullFigure()
 
 
 RegisterEoCalibSchema(EoGainStabilityData)

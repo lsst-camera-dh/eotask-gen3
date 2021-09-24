@@ -1,198 +1,196 @@
-defaults :
-  action : copy
-  header_row_class : header_row
-  table_row_class : table_row
-  row_class : plot_row
-  table_col_class : table_col
-  col_desc_class : plot_col_desc
-  col_fig_class : plot_col_fig
-  col_img_class : plot
-
-slot_plot_tables :
-  brightPixels : 
-    header_text : "Bright Pixels Data"
-    rows :
-      - text : "Bright Pixels Placeholder."
-        figure : 'camera/{raft}/{slot}/brightPixels_{raft}_{slot}_null.png'
-  darkPixels : 
-    header_text : "Dark Pixels Data"
-    rows :
-      - text : "Dark Pixels Placeholder."
-        figure : 'camera/{raft}/{slot}/darkPixels_{raft}_{slot}_null.png'
-  ptc : 
-    header_text : "PTC Data"
-    rows :
-      - text : "PTC Placeholder."
-        figure : 'camera/{raft}/{slot}/ptc_{raft}_{slot}_null.png'
-  nonlinearity : 
-    header_text : "Nonlinearity Data"
-    rows :
-      - text : "Nonlinearity Placeholder."
-        figure : 'camera/{raft}/{slot}/nonlinearity_{raft}_{slot}_null.png'
-  readNoise : 
-    header_text : "Read Noise Data"
-    rows :
-      - text : "Read Noise Placeholder."
-        figure : 'camera/{raft}/{slot}/readNoise_{raft}_{slot}_null.png'
-  biasStability : 
-    header_text : "Bias Stability Data"
-    rows :
-      - text : "Bias Stability Placeholder."
-        figure : 'camera/{raft}/{slot}/biasStability_{raft}_{slot}_null.png'
-  darkCurrent : 
-    header_text : "Dark Current Data"
-    rows :
-      - text : "Dark Current Placeholder."
-        figure : 'camera/{raft}/{slot}/darkCurrent_{raft}_{slot}_null.png'
-  overscan : 
-    header_text : "Overscan Data"
-    rows :
-      - text : "Overscan Placeholder."
-        figure : 'camera/{raft}/{slot}/overscan_{raft}_{slot}_null.png'
-  flatPair : 
-    header_text : "Flat Pair Data"
-    rows :
-      - text : "Flat Pair Placeholder."
-        figure : 'camera/{raft}/{slot}/flatPair_{raft}_{slot}_null.png'
-  gainStability : 
-    header_text : "Gain Stability Data"
-    rows :
-      - text : "Gain Stability Placeholder."
-        figure : 'camera/{raft}/{slot}/gainStability_{raft}_{slot}_null.png'
-  brigherFatter : 
-    header_text : "Brighter Fatter Data"
-    rows :
-      - text : "Brighter Fatter Placeholder."
-        figure : 'camera/{raft}/{slot}/brighterFatter_{raft}_{slot}_null.png'
-  tearing : 
-    header_text : "Tearing Data"
-    rows :
-      - text : "Tearing Placeholder."
-        figure : 'camera/{raft}/{slot}/tearing_{raft}_{slot}_null.png'
-
-raft_plot_tables :
-  brightPixels : 
-    header_text : "Bright Pixels Data"
-    rows :
-      - text : "Bright Pixels Placeholder."
-        figure : 'camera/{raft}/brightPixels_{raft}_null.png'
-  darkPixels : 
-    header_text : "Dark Pixels Data"
-    rows :
-      - text : "Dark Pixels Placeholder."
-        figure : 'camera/{raft}/darkPixels_{raft}_null.png'
-  ptc : 
-    header_text : "PTC Data"
-    rows :
-      - text : "PTC Placeholder."
-        figure : 'camera/{raft}/ptc_{raft}_null.png'
-  nonlinearity : 
-    header_text : "Nonlinearity Data"
-    rows :
-      - text : "Nonlinearity Placeholder."
-        figure : 'camera/{raft}/nonlinearity_{raft}_null.png'
-  readNoise : 
-    header_text : "Read Noise Data"
-    rows :
-      - text : "Read Noise Placeholder."
-        figure : 'camera/{raft}/readNoise_{raft}_null.png'
-  biasStability : 
-    header_text : "Bias Stability Data"
-    rows :
-      - text : "Bias Stability Placeholder."
-        figure : 'camera/{raft}/biasStability_{raft}_null.png'
-  darkCurrent : 
-    header_text : "Dark Current Data"
-    rows :
-      - text : "Dark Current Placeholder."
-        figure : 'camera/{raft}/darkCurrent_{raft}_null.png'
-  overscan : 
-    header_text : "Overscan Data"
-    rows :
-      - text : "Overscan Placeholder."
-        figure : 'camera/{raft}/overscan_{raft}_null.png'
-  flatPair : 
-    header_text : "Flat Pair Data"
-    rows :
-      - text : "Flat Pair Placeholder."
-        figure : 'camera/{raft}/flatPair_{raft}_null.png'
-  gainStability : 
-    header_text : "Gain Stability Data"
-    rows :
-      - text : "Gain Stability Placeholder."
-        figure : 'camera/{raft}/gainStability_{raft}_null.png'
-  brigherFatter : 
-    header_text : "Brighter Fatter Data"
-    rows :
-      - text : "Brighter Fatter Placeholder."
-        figure : 'camera/{raft}/brighterFatter_{raft}_null.png'
-  tearing : 
-    header_text : "Tearing Data"
-    rows :
-      - text : "Tearing Placeholder."
-        figure : 'camera/{raft}/tearing_{raft}_null.png'
-
-run_plot_tables :
-  brightPixels : 
-    header_text : "Bright Pixels Data"
-    rows :
-      - text : "Bright Pixels Placeholder."
-        figure : 'camera/brightPixels_camera_null.png'
-  darkPixels : 
-    header_text : "Dark Pixels Data"
-    rows :
-      - text : "Dark Pixels Placeholder."
-        figure : 'camera/darkPixels_camera_null.png'
-  ptc : 
-    header_text : "PTC Data"
-    rows :
-      - text : "PTC Placeholder."
-        figure : 'camera/ptc_camera_null.png'
-  nonlinearity : 
-    header_text : "Nonlinearity Data"
-    rows :
-      - text : "Nonlinearity Placeholder."
-        figure : 'camera/nonlinearity_camera_null.png'
-  readNoise : 
-    header_text : "Read Noise Data"
-    rows :
-      - text : "Read Noise Placeholder."
-        figure : 'camera/readNoise_camera_null.png'
-  biasStability : 
-    header_text : "Bias Stability Data"
-    rows :
-      - text : "Bias Stability Placeholder."
-        figure : 'camera/biasStability_camera_null.png'
-  darkCurrent : 
-    header_text : "Dark Current Data"
-    rows :
-      - text : "Dark Current Placeholder."
-        figure : 'camera/darkCurrent_camera_null.png'
-  overscan : 
-    header_text : "Overscan Data"
-    rows :
-      - text : "Overscan Placeholder."
-        figure : 'camera/overscan_camera_null.png'
-  flatPair : 
-    header_text : "Flat Pair Data"
-    rows :
-      - text : "Flat Pair Placeholder."
-        figure : 'camera/flatPair_camera_null.png'
-  gainStability : 
-    header_text : "Gain Stability Data"
-    rows :
-      - text : "Gain Stability Placeholder."
-        figure : 'camera/gainStability_camera_null.png'
-  brigherFatter : 
-    header_text : "Brighter Fatter Data"
-    rows :
-      - text : "Brighter Fatter Placeholder."
-        figure : 'camera/brighterFatter_camera_null.png'
-  tearing : 
-    header_text : "Tearing Data"
-    rows :
-      - text : "Tearing Placeholder."
-        figure : 'camera/tearing_camera_null.png'
-
-
-
+defaults:
+  action: copy
+  col_desc_class: plot_col_desc
+  col_fig_class: plot_col_fig
+  col_img_class: plot
+  header_row_class: header_row
+  row_class: plot_row
+  table_col_class: table_col
+  table_row_class: table_row
+raft_plot_tables:
+  BiasStability:
+    header_text: BiasStability
+    rows:
+    - figure: camera/{raft}/BiasStability_{raft}_mean.png
+      text: Bias frame amp-wise mean vs time
+    - figure: camera/{raft}/BiasStability_{raft}_stdev.png
+      text: Bias frame amp-wise stdev vs time
+  Cti:
+    header_text: Cti
+    rows:
+    - figure: camera/{raft}/Cti_{raft}__serial_cti.png
+      text: Serial CTI
+    - figure: camera/{raft}/Cti_{raft}__parallel_cti.png
+      text: Parallel CTI
+  DarkCurrent:
+    header_text: DarkCurrent
+    rows:
+    - figure: camera/{raft}/DarkCurrent_{raft}_noise.png
+      text: Dark Current
+run_plot_tables:
+  BrightPixels:
+    header_text: BrightPixels
+    rows:
+    - figure: camera/BrightPixels_camera_pixels_mosaic.png
+      text: Bright pixels per AMP
+    - figure: camera/BrightPixels_camera_column_mosaic.png
+      text: Bright columns per AMP
+    - figure: camera/BrightPixels_camera_pixels_hist.png
+      text: Bright pixels per AMP
+    - figure: camera/BrightPixels_camera_column_hist.png
+      text: Bright columns per AMP
+  BrighterFatter:
+    header_text: BrighterFatter
+    rows:
+    - figure: camera/BrighterFatter_camera_xcorr_mosaic.png
+      text: Brighter-Fatter cov10 Mosaic
+    - figure: camera/BrighterFatter_camera_ycorr_mosaic.png
+      text: Brighter-Fatter cov01 Mosaic
+    - figure: camera/BrighterFatter_camera_xcorr_hist.png
+      text: Brighter-Fatter cov10
+    - figure: camera/BrighterFatter_camera_ycorr_hist.png
+      text: Brighter-Fatter cov01
+  Cti:
+    header_text: Cti
+    rows:
+    - figure: camera/Cti_camera_cti_high_parallel_mosaic.png
+      text: CTI high, parallel
+    - figure: camera/Cti_camera_cti_high_serial_mosaic.png
+      text: CTI high, serial
+    - figure: camera/Cti_camera_cti_low_parallel_mosaic.png
+      text: CTI low, parallel
+    - figure: camera/Cti_camera_cti_low_serial_mosaic.png
+      text: CTI low, serial
+    - figure: camera/Cti_camera_cti_high_parallel_hist.png
+      text: CTI high, parallel
+    - figure: camera/Cti_camera_cti_high_serial_hist.png
+      text: CTI high, serial
+    - figure: camera/Cti_camera_cti_low_parallel_hist.png
+      text: CTI low, parallel
+    - figure: camera/Cti_camera_cti_low_serial_hist.png
+      text: CTI low, serial
+  DarkCurrent:
+    header_text: DarkCurrent
+    rows:
+    - figure: camera/DarkCurrent_camera_95CL.png
+      text: Dark Current
+  DarkPixels:
+    header_text: DarkPixels
+    rows:
+    - figure: camera/DarkPixels_camera_pixels_mosaic.png
+      text: Dark pixels per AMP
+    - figure: camera/DarkPixels_camera_column_mosaic.png
+      text: Dark columns per AMP
+    - figure: camera/DarkPixels_camera_pixels_hist.png
+      text: Dark pixels per AMP
+    - figure: camera/DarkPixels_camera_column_hist.png
+      text: Dark columns per AMP
+  GainStability:
+    header_text: GainStability
+    rows:
+    - figure: camera/GainStability_camera_curves.png
+      text: Flat Gain Stability
+  Ptc:
+    header_text: Ptc
+    rows:
+    - figure: camera/Ptc_camera_gain_mosaic.png
+      text: PTC Gain
+    - figure: camera/Ptc_camera_a00_mosaic.png
+      text: PTC a00
+    - figure: camera/Ptc_camera_full_well_mosaic.png
+      text: PTC Full Well
+    - figure: camera/Ptc_camera_turnoff_mosaic.png
+      text: PTC Turnoff
+    - figure: camera/Ptc_camera_max_frac_dev_mosaic.png
+      text: PTC Max. fractional deviation
+    - figure: camera/Ptc_camera_linearity_turnoff_mosaic.png
+      text: PTC Linearity Turnoff
+    - figure: camera/Ptc_camera_gain_hist.png
+      text: PTC Gain
+    - figure: camera/Ptc_camera_a00_hist.png
+      text: PTC a00
+    - figure: camera/Ptc_camera_full_well_hist.png
+      text: PTC Full Well
+    - figure: camera/Ptc_camera_turnoff_hist.png
+      text: PTC Turnoff
+    - figure: camera/Ptc_camera_max_frac_dev_hist.png
+      text: PTC Max. fractional deviation
+    - figure: camera/Ptc_camera_linearity_turnoff_hist.png
+      text: PTC Linearity Turnoff
+  Tearing:
+    header_text: Tearing
+    rows:
+    - figure: camera/Tearing_camera_mosaic.png
+      text: Tearing detections
+    - figure: camera/Tearing_camera_hist.png
+      text: Tearing detections
+slot_plot_tables:
+  BiasStability:
+    header_text: BiasStability
+    rows:
+    - figure: camera/{raft}/{slot}/BiasStability_{raft}_{slot}_serial_profiles.png
+      text: Bias frame amp-wise mean vs time
+  BrighterFatter:
+    header_text: BrighterFatter
+    rows:
+    - figure: camera/{raft}/{slot}/BrighterFatter_{raft}_{slot}_bf.png
+      text: Brighter Fatter
+  Cti:
+    header_text: Cti
+    rows:
+    - figure: camera/{raft}/{slot}/Cti_{raft}_{slot}__serial_oscan_high.png
+      text: 'Serial overscan: high flux'
+    - figure: camera/{raft}/{slot}/Cti_{raft}_{slot}__serial_oscan_low.png
+      text: 'Serial overscan: low flux'
+    - figure: camera/{raft}/{slot}/Cti_{raft}_{slot}__parallel_oscan_high.png
+      text: 'Parallel overscan: high flux'
+    - figure: camera/{raft}/{slot}/Cti_{raft}_{slot}__parallel_oscan_low.png
+      text: 'Parallel overscan: low flux'
+  DarkCurrent:
+    header_text: DarkCurrent
+    rows:
+    - figure: camera/{raft}/{slot}/DarkCurrent_{raft}_{slot}_noise.png
+      text: Dark Current
+  FlatPair:
+    header_text: FlatPair
+    rows:
+    - figure: camera/{raft}/{slot}/FlatPair_{raft}_{slot}_row_means_variance.png
+      text: Row means v. variance
+  Overscan:
+    header_text: Overscan
+    rows:
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_serial_eper_low.png
+      text: Serial overscan EPER low flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_serial_eper_high.png
+      text: Serial overscan EPER high flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_serial_cti.png
+      text: Serial overscan CTI Estimate
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_serial_overscan_signal.png
+      text: Serial overscan EPER v. flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_serial_overscan_sum.png
+      text: Serial overscan summed signal (pixels 5-25)
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_parallel_eper_low.png
+      text: Parallel overscan EPER low flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_parallel_eper_high.png
+      text: Parallel overscan EPER high flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_parallel_cti.png
+      text: Parallel overscan CTI Estimate
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_parallel_overscan_signal.png
+      text: Parallel overscan EPER v. flux
+    - figure: camera/{raft}/{slot}/Overscan_{raft}_{slot}_parallel_overscan_sum.png
+      text: Parallel overscan summed signal (pixels 5-25)
+  Persistence:
+    header_text: Persistence
+    rows:
+    - figure: camera/{raft}/{slot}/Persistence_{raft}_{slot}_persistence.png
+      text: Persistence analysis
+  Ptc:
+    header_text: Ptc
+    rows:
+    - figure: camera/{raft}/{slot}/Ptc_{raft}_{slot}_curves.png
+      text: Photon Transfer Curves
+  ReadNoise:
+    header_text: ReadNoise
+    rows:
+    - figure: camera/{raft}/{slot}/ReadNoise_{raft}_{slot}_noise.png
+      text: Read noise

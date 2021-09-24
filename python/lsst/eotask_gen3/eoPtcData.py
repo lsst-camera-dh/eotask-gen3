@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoPtcAmpPairData",
            "EoPtcAmpRunData",
@@ -103,6 +104,59 @@ class EoPtcData(EoCalib):
         self.ampExp = self['ampExp']
         self.amps = self['amps']
         self.detExp = self['detExp']
+
+
+@EoSlotPlotMethod(EoPtcData, "curves", "Photon Transfer Curves")
+def plotPTC(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "gain_mosaic", "PTC Gain")
+def plotPTCGainMosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "a00_mosaic", "PTC a00")
+def plotPTCa00Mosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "full_well_mosaic", "PTC Full Well")
+def plotPTCFullWellMosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "turnoff_mosaic", "PTC Turnoff")
+def plotPTCTurnoffMosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "max_frac_dev_mosaic", "PTC Max. fractional deviation")
+def plotPTCFullWellMosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "PTC Linearity Turnoff")
+def plotPTCTurnoffMosaic(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "gain_hist", "PTC Gain")
+def plotPTCGainHist(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "a00_hist", "PTC a00")
+def plotPTCa00Hist(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "full_well_hist", "PTC Full Well")
+def plotPTCFullWellHist(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "turnoff_hist", "PTC Turnoff")
+def plotPTCTurnoffHist(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "max_frac_dev_hist", "PTC Max. fractional deviation")
+def plotPTCFullWellHist(obj):
+    return nullFigure()
+
+@EoCameraPlotMethod(EoPtcData, "linearity_turnoff_hist", "PTC Linearity Turnoff")
+def plotPTCTurnoffHist(obj):
+    return nullFigure()
 
 
 RegisterEoCalibSchema(EoPtcData)

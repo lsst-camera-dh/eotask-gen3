@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoReadNoiseAmpExpData",
            "EoReadNoiseAmpRunData",
@@ -66,6 +67,11 @@ class EoReadNoiseData(EoCalib):
         super(EoReadNoiseData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.amps = self['amps']
+
+
+@EoSlotPlotMethod(EoReadNoiseData, "noise", "Read noise")
+def plotReadNoise(obj):
+    return nullFigure()
 
 
 RegisterEoCalibSchema(EoReadNoiseData)

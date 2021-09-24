@@ -2,6 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
+from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
 
 __all__ = ["EoOverscanAmpExpData",
            "EoOverscanData"]
@@ -53,6 +54,48 @@ class EoOverscanData(EoCalib):
     def __init__(self, **kwargs):
         super(EoOverscanData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
+
+
+
+@EoSlotPlotMethod(EoOverscanData, "serial_eper_low", "Serial overscan EPER low flux")
+def plotSerialEperHigh(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "serial_eper_high", "Serial overscan EPER high flux")
+def plotSerialEperLow(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "serial_cti", "Serial overscan CTI Estimate")
+def plotSerialCTI(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "serial_overscan_signal", "Serial overscan EPER v. flux")
+def plotSerialOverscanSignal(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "serial_overscan_sum", "Serial overscan summed signal (pixels 5-25)")
+def plotSerialOverscanSum(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "parallel_eper_low", "Parallel overscan EPER low flux")
+def plotparallelEperHigh(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "parallel_eper_high", "Parallel overscan EPER high flux")
+def plotparallelEperLow(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "parallel_cti", "Parallel overscan CTI Estimate")
+def plotParallelCTI(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "parallel_overscan_signal", "Parallel overscan EPER v. flux")
+def plotParallelOverscanSignal(obj):
+    return nullFigure()
+
+@EoSlotPlotMethod(EoOverscanData, "parallel_overscan_sum", "Parallel overscan summed signal (pixels 5-25)")
+def plotParallelOverscanSum(obj):
+    return nullFigure()
 
 
 RegisterEoCalibSchema(EoOverscanData)

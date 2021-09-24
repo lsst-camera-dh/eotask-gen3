@@ -6,31 +6,31 @@ tasks:
         config:
             connections.inputData: "eoBrightPixelStats"
             dirName: "."
-            baseName: "brightPixels"
+            baseName: "BrightPixels"
     eoDarkPixelsPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoDarkPixelStats"
             dirName: "."
-            baseName: "darkPixels"
+            baseName: "DarkPixels"
     eoFe55Plots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoFe55"
             dirName: "."
-            baseName: "fe55"
+            baseName: "Fe55"
     eoPtcPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoPtc"
             dirName: "."
-            baseName: "ptc"
+            baseName: "Ptc"
     eoNonlinearityPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoNonlinearity"
             dirName: "."
-            baseName: "nonlinearity"
+            baseName: "Nonlinearity"
     eoReadNoisePlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
@@ -42,49 +42,49 @@ tasks:
         config:
             connections.inputData: "eoBiasStability"
             dirName: "."
-            baseName: "biasStability"
+            baseName: "BiasStability"
     eoDarkCurrentPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoDarkCurrent"
             dirName: "."
-            baseName: "darkCurrent"
+            baseName: "DarkCurrent"
     eoOverscanPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoOverscan"
             dirName: "."
-            baseName: "overscan"
+            baseName: "Overscan"
     eoFlatPairPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoFlatPair"
             dirName: "."
-            baseName: "flatPair"
+            baseName: "FlatPair"
     eoGainStabilityPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoGainStability"
             dirName: "."
-            baseName: "gainStability"
+            baseName: "GainStability"
     eoBrighterFatterPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoBrighterFatter"
             dirName: "."
-            baseName: "brighterFatter"
+            baseName: "BrighterFatter"
     eoPersistencePlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoPeristence"
             dirName: "."
-            baseName: "peristence"
+            baseName: "Persistence"
     eoTearingPlots:
         class: lsst.eotask_gen3.eoPlotTask.EoStaticPlotTask
         config:
             connections.inputData: "eoTearing"
             dirName: "."
-            baseName: "tearing"
+            baseName: "Tearing"
 subsets:
     protocalRunPlots:
         subset:
