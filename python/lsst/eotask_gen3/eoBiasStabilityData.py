@@ -4,7 +4,7 @@ import numpy as np
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 import matplotlib.pyplot as plt
 
@@ -77,7 +77,7 @@ class EoBiasStabilityData(EoCalib):
         self.detExposure = self['detExposure']
         
 
-@EoSlotPlotMethod(EoBiasStabilityData, "serial_profiles", "Bias frame amp-wise mean vs time")
+@EoPlotMethod(EoBiasStabilityData, "serial_profiles", "slot", "BiasStability", "Bias frame amp-wise mean vs time")
 def plotDetBiasStabilty(obj):
     fig = plt.figure(figsize=(10, 10))
     xlabelAmps = (13, 14, 15, 16)
@@ -93,11 +93,11 @@ def plotDetBiasStabilty(obj):
         ax[iamp+1].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
     return fig
 
-@EoRaftPlotMethod(EoBiasStabilityData, "mean", "Bias frame amp-wise mean vs time")
+@EoPlotMethod(EoBiasStabilityData, "mean", "slot", "BiasStability", "Bias frame amp-wise mean vs time")
 def plotDetBiasStabiltyMean(raftDataDict):
     return nullFigure()
 
-@EoRaftPlotMethod(EoBiasStabilityData, "stdev", "Bias frame amp-wise stdev vs time")
+@EoPlotMethod(EoBiasStabilityData, "stdev", "slot", "BiasStability","Bias frame amp-wise stdev vs time")
 def plotDetBiasStabiltyStdev(raftDataDict):
     return nullFigure()
 

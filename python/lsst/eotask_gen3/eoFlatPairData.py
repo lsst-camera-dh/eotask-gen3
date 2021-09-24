@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoFlatPairAmpExpData",
            "EoFlatPairAmpRunData",
@@ -104,7 +104,7 @@ class EoFlatPairData(EoCalib):
         self.detExp = self['detExp']
 
 
-@EoSlotPlotMethod(EoFlatPairData, "row_means_variance", "Row means v. variance")
+@EoPlotMethod(EoFlatPairData, "row_means_variance", "slot", "Flat Pair", "Row means v. variance")
 def plotRowMeanVariance(obj):
     return nullFigure()
 

@@ -677,7 +677,7 @@ def write_run_report(run, inputbase, outbase, **kwargs):
         outdir = None
         html_file = None
     else:
-        outdir = os.path.join(outbase, dataid['run'])
+        outdir = os.path.join(outbase)
         html_file = os.path.join(outdir, 'index.html')
 
     kwcopy['html_file'] = html_file

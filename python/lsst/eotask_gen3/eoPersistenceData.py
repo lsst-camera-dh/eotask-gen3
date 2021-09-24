@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoPersistenceAmpExpData",
            "EoPersistenceData"]
@@ -46,7 +46,7 @@ class EoPersistenceData(EoCalib):
         self.ampExp = self['ampExp']
 
 
-@EoSlotPlotMethod(EoPersistenceData, "persistence", "Persistence analysis")
+@EoPlotMethod(EoPersistenceData, "persistence", "slot", "persistence", "Persistence analysis")
 def plotPersistence(obj):
     return nullFigure()
 

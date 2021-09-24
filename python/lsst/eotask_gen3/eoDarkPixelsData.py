@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoDarkPixelsAmpRunData",
            "EoDarkPixelsData"]
@@ -45,19 +45,19 @@ class EoDarkPixelsData(EoCalib):
         self.amps = self['amps']
 
 
-@EoCameraPlotMethod(EoDarkPixelsData, "pixels_mosaic", "Dark pixels per AMP")
+@EoPlotMethod(EoDarkPixelsData, "pixels_mosaic", "camera", "mosaic", "Dark pixels per AMP")
 def plotDarkPixelMosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoDarkPixelsData, "column_mosaic", "Dark columns per AMP")
+@EoPlotMethod(EoDarkPixelsData, "column_mosaic", "camera", "mosaic", "Dark columns per AMP")
 def plotDarkColumnMosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoDarkPixelsData, "pixels_hist", "Dark pixels per AMP")
+@EoPlotMethod(EoDarkPixelsData, "pixels_hist", "camera", "hist", "Dark pixels per AMP")
 def plotDarkPixelHist(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoDarkPixelsData, "column_hist", "Dark columns per AMP")
+@EoPlotMethod(EoDarkPixelsData, "column_hist", "camera", "hist", "Dark columns per AMP")
 def plotDarkColumnHist(cameraDataDict):
     return nullFigure()
 

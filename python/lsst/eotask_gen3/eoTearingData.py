@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoTearingAmpExpData",
            "EoTearingData"]
@@ -44,11 +44,11 @@ class EoTearingData(EoCalib):
         self.ampExp = self['ampExp']
 
 
-@EoCameraPlotMethod(EoTearingData, "mosaic", "Tearing detections")
+@EoPlotMethod(EoTearingData, "mosaic", "camera", "mosaic", "Tearing detections")
 def plotTearingMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoTearingData, "hist", "Tearing detections")
+@EoPlotMethod(EoTearingData, "hist", "camera", "hist", "Tearing detections")
 def plotTearingHist(obj):
     return nullFigure()
 

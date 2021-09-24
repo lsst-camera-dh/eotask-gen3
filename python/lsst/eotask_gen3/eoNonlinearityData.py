@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoNonlinearityAmpRunData",
            "EoNonlinearityData"]
@@ -47,11 +47,11 @@ class EoNonlinearityData(EoCalib):
         self.amps = self['amps']
 
 
-@EoSlotPlotMethod(EoNonlinearityData, "curve", "Linearity")
+@EoPlotMethod(EoNonlinearityData, "curve", "slot", "nonlinearity", "Linearity")
 def plotLinearity(obj):
     return nullFigure()
 
-@EoSlotPlotMethod(EoNonlinearityData, "resids", "Linearity residual")
+@EoPlotMethod(EoNonlinearityData, "resids", "slot", "nonlinearity", "Linearity residual")
 def plotLinearityResidual(obj):
     return nullFigure()
 

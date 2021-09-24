@@ -14,7 +14,8 @@ def getDataIdRecords(butler, filename):
     seqNum = int(tokens[3])
     records = list(butler.registry.queryDimensionRecords("exposure", 
                                                          where="exposure.day_obs = dayobs and exposure.seq_num = seqnum", 
-                                                         bind={"dayobs": dayObs, "seqnum": seqNum}, dataId={"instrument": "LSSTCam"}))
+                                                         bind={"dayobs": dayObs, "seqnum": seqNum},
+                                                         dataId={"instrument": "LSSTCam"}))
     if records:
         return records[0]        
 
@@ -36,23 +37,18 @@ def setTableMetaData(table, dataIdRecords):
     table.meta['PD_SCEHMA'] = 'Simple'
     table.meta['PD_SCHEMA_VERSION'] = 1
     table.meta['DATE'] = dataIdRecords.timespan.end.isot
-    table.meta['CALIB_CREATION_DATE'] = dataIdRecords.timespan.end.strftime('%Y-%M-%d')
-    table.meta['CALIB_CREATION_TIME'] = dataIdRecords.timespan.end.strftime('%H:%m:%S')
+    table.meta['CALIB_CREATION_DATE'] \
+        = dataIdRecords.timespan.end.strftime('%Y-%M-%d')
+    table.meta['CALIB_CREATION_TIME'] \
+        = dataIdRecords.timespan.end.strftime('%H:%m:%S')
 
 
-
-def main():
-
-    # argument parser
-    parser = argparse.ArgumentParser(prog='eoIngestPd.py')
-    parser.add_argument('-b', '--butler', type=str, help='Butler Repo')
-    parser.add_argument('--output-run', type=str, help="The name of the run datasets should be output to", default="LSSTCam/photodiode/all")
-    parser.add_argument('files', type=str, nargs='+', help='Files to import')
-    # unpack options
-    args = parser.parse_args()
-
-    butler = Butler(args.butler, writeable=True, run=args.output_run)
-    datasetType = DatasetType("photodiode", ("instrument", "exposure"), "AstropyTable", universe=butler.registry.dimensions)
+def ingest_pd_files(repo, pd_files, output_run='LSSTCam/photodiode/all'):
+  
+    butler = Butler(repo, writeable=True, run=output_run)
+    datasetType = DatasetType("photodiode", ("instrument", "exposure"),
+                              "AstropyTable",
+                              universe=butler.registry.dimensions)
     
     try:
         butler.registry.registerDatasetType(datasetType)
@@ -60,7 +56,9 @@ def main():
         pass
 
     print("Found %i photodiode files" % len(args.files))
-    for aFile in args.files:
+    for i, aFile in enumerate(args.files):
+        
+        print(i, len(pd_files), os.path.basename(aFile))\
 
         try:
             dataIdRecords = getDataIdRecords(butler, aFile)
@@ -79,6 +77,22 @@ def main():
             butler.put(table, "photodiode", dataId=dataId)
     print("Done!")
 
+
+def main():
+
+    # argument parser
+    parser = argparse.ArgumentParser(prog='eoIngestPd.py')
+    parser.add_argument('-b', '--butler', type=str, help='Butler Repo')
+    parser.add_argument('--output-run', type=str, 
+                        help="The name of the run datasets should be output to", 
+                        default="LSSTCam/photodiode/all")
+    parser.add_argument('files', type=str, nargs='+', help='Files to import')
+    # unpack options
+    args = parser.parse_args()
+
+    ingest_pd_files(args.butler, args.files, args.output_run)
+
+    
 
 if __name__ == '__main__':
     main()

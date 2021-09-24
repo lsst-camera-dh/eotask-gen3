@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoBrighterFatterAmpPairData",
            "EoBrighterFatterAmpRunData",
@@ -85,23 +85,23 @@ class EoBrighterFatterData(EoCalib):
         self.amps = self['amps']
 
 
-@EoSlotPlotMethod(EoBrighterFatterData, "bf", "Brighter Fatter")
+@EoPlotMethod(EoBrighterFatterData, "bf", "slot", "Brighter Fatter", "Brighter Fatter")
 def plotSlotBrighterFatter(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "Brighter-Fatter cov10 Mosaic")
+@EoPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov10 Mosaic")
 def plotBrighterFatterCov01Mosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "Brighter-Fatter cov01 Mosaic")
+@EoPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov01 Mosaic")
 def plotBrighterFatterCov10Mosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrighterFatterData, "xcorr_hist", "Brighter-Fatter cov10")
+@EoPlotMethod(EoBrighterFatterData, "xcorr_hist", "camera", "hist", "Brighter-Fatter cov10")
 def plotBrighterFatterCov01Hist(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrighterFatterData, "ycorr_hist", "Brighter-Fatter cov01")
+@EoPlotMethod(EoBrighterFatterData, "ycorr_hist", "camera", "hist", "Brighter-Fatter cov01")
 def plotBrighterFatterCov10Hist(cameraDataDict):
     return nullFigure()
 

@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoBrightPixelsAmpRunData",
            "EoBrightPixelsData"]
@@ -45,19 +45,19 @@ class EoBrightPixelsData(EoCalib):
         self.amps = self['amps']
 
 
-@EoCameraPlotMethod(EoBrightPixelsData, "pixels_mosaic", "Bright pixels per AMP")
+@EoPlotMethod(EoBrightPixelsData, "pixels_mosaic", "camera", "mosaic", "Bright pixels per AMP")
 def plotBrightPixelMosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrightPixelsData, "column_mosaic", "Bright columns per AMP")
+@EoPlotMethod(EoBrightPixelsData, "columns_mosaic", "camera", "mosaic", "Bright columns per AMP")
 def plotBrightColumnMosaic(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrightPixelsData, "pixels_hist", "Bright pixels per AMP")
+@EoPlotMethod(EoBrightPixelsData, "pixels_hist", "camera", "hist", "Bright pixels per AMP")
 def plotBrightPixelHist(cameraDataDict):
     return nullFigure()
 
-@EoCameraPlotMethod(EoBrightPixelsData, "column_hist", "Bright columns per AMP")
+@EoPlotMethod(EoBrightPixelsData, "columns_hist", "camera", "hist", "Bright columns per AMP")
 def plotBrightColumnHist(cameraDataDict):
     return nullFigure()
 

@@ -50,4 +50,5 @@ from .eoReadNoise import *
 from .eoTearing import *
 
 # static html reports
+from .eoPlotTask import *
 from .eoReportUtils import *

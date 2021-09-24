@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoSlotPlotMethod, EoRaftPlotMethod, EoCameraPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure
 
 __all__ = ["EoPtcAmpPairData",
            "EoPtcAmpRunData",
@@ -106,55 +106,55 @@ class EoPtcData(EoCalib):
         self.detExp = self['detExp']
 
 
-@EoSlotPlotMethod(EoPtcData, "curves", "Photon Transfer Curves")
+@EoPlotMethod(EoPtcData, "curves", "slot", "ptc", "Photon Transfer Curves")
 def plotPTC(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "gain_mosaic", "PTC Gain")
+@EoPlotMethod(EoPtcData, "gain_mosaic", "camera", "mosaic", "PTC Gain")
 def plotPTCGainMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "a00_mosaic", "PTC a00")
+@EoPlotMethod(EoPtcData, "a00_mosaic", "camera", "mosaic", "PTC a00")
 def plotPTCa00Mosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "full_well_mosaic", "PTC Full Well")
+@EoPlotMethod(EoPtcData, "full_well_mosaic", "camera", "mosaic", "PTC Full Well")
 def plotPTCFullWellMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "turnoff_mosaic", "PTC Turnoff")
+@EoPlotMethod(EoPtcData, "turnoff_mosaic", "camera", "mosaic", "PTC Turnoff")
 def plotPTCTurnoffMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "max_frac_dev_mosaic", "PTC Max. fractional deviation")
+@EoPlotMethod(EoPtcData, "max_frac_dev_mosaic", "camera", "mosaic", "PTC Max. fractional deviation")
 def plotPTCFullWellMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "PTC Linearity Turnoff")
+@EoPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "camera", "mosaic", "PTC Linearity Turnoff")
 def plotPTCTurnoffMosaic(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "gain_hist", "PTC Gain")
+@EoPlotMethod(EoPtcData, "gain_hist", "camera", "hist", "PTC Gain")
 def plotPTCGainHist(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "a00_hist", "PTC a00")
+@EoPlotMethod(EoPtcData, "a00_hist", "camera", "hist", "PTC a00")
 def plotPTCa00Hist(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "full_well_hist", "PTC Full Well")
+@EoPlotMethod(EoPtcData, "full_well_hist", "camera", "hist", "PTC Full Well")
 def plotPTCFullWellHist(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "turnoff_hist", "PTC Turnoff")
+@EoPlotMethod(EoPtcData, "turnoff_hist", "camera", "hist", "PTC Turnoff")
 def plotPTCTurnoffHist(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "max_frac_dev_hist", "PTC Max. fractional deviation")
+@EoPlotMethod(EoPtcData, "max_frac_dev_hist", "camera", "hist", "PTC Max. fractional deviation")
 def plotPTCFullWellHist(obj):
     return nullFigure()
 
-@EoCameraPlotMethod(EoPtcData, "linearity_turnoff_hist", "PTC Linearity Turnoff")
+@EoPlotMethod(EoPtcData, "linearity_turnoff_hist", "camera", "hist", "PTC Linearity Turnoff")
 def plotPTCTurnoffHist(obj):
     return nullFigure()
 

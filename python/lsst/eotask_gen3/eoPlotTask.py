@@ -35,29 +35,39 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
     ConfigClass = EoStaticPlotTaskConfig
     _DefaultName = "eoStaticPlot"
 
-    def runQuantum(self, butlerQC, inputRefs, outputRefs):
-        cameraDict = OrderedDict()
-        inputs = butlerQC.get(inputRefs)
-        refObj = None
-        for inputData, inputRef in zip(inputs['inputData'], inputRefs.inputData):
+    @staticmethod
+    def buildCameraDict(inputData, inputRefs, butler=None):
+        cameraDict = OrderedDict()        
+        refObj = None            
+        for inputData_, inputRef_ in zip(inputData, inputRefs):
             if refObj is None:
-                refObj = inputData
-            det = inputRef.dataId.records["detector"].toDict()
+                refObj = inputData_
+            if not inputRef_.dataId.hasRecords():
+                records = list(butler.registry.queryDimensionRecords("detector", dataId=inputRef_.dataId))[0]
+            else:
+                records = inputRef_.dataId.records["detector"]
+            det = records.toDict()
             raftName = det['raft']
             slotName = det['name_in_raft']
             if raftName in cameraDict:
                 raftDict = cameraDict['raftName']
             else:
                 raftDict = cameraDict.setdefault(raftName, OrderedDict())
-            raftDict[slotName] = inputData
-            
-        outputs = self.run(refObj=refObj, cameraDict=cameraDict)
+            raftDict[slotName] = inputData_
+        return refObj, cameraDict
+
+
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        inputs = butlerQC.get(inputRefs)
+        refObj, cameraDict = self.buildCameraDict(inputs['inputData'], inputRefs.inputData)
+        outputs = self.run(refObj=refObj, cameraDict=cameraDict,
+                           baseName=self.config.baseName, dirName=self.config.dirName)
         butlerQC.put(outputs, outputRefs)
 
 
-    def run(self, refObj, cameraDict):
-        cameraFigs = refObj.makeCameraFigures("%s_camera" % self.config.baseName, cameraDict)
-        cameraDir = os.path.join(self.config.dirName, 'camera')
+    def run(self, refObj, cameraDict, baseName, dirName):
+        cameraFigs = refObj.makeCameraFigures("%s_camera" % baseName, cameraDict)
+        cameraDir = os.path.join(dirName, 'camera')
         try:
             os.makedirs(cameraDir)
         except:
@@ -65,21 +75,21 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         refObj.writeFigures(cameraDir, cameraFigs)
 
         for raftName, raftData in cameraDict.items():
-            raftDir = os.path.join(self.config.dirName, 'camera', raftName)
+            raftDir = os.path.join(dirName, 'camera', raftName)
             try:
                 os.makedirs(raftDir)
             except:
                 pass
-            raftFigs = refObj.makeRaftFigures("%s_%s" % (self.config.baseName, raftName), raftData)
+            raftFigs = refObj.makeRaftFigures("%s_%s" % (baseName, raftName), raftData)
             refObj.writeFigures(raftDir, raftFigs)
 
             for slotName, slotData in raftData.items():
-                slotDir = os.path.join(self.config.dirName, 'camera', raftName, slotName)
+                slotDir = os.path.join(dirName, 'camera', raftName, slotName)
                 try:
                     os.makedirs(slotDir)
                 except:
                     pass
-                slotFigs = slotData.makeFigures("%s_%s_%s" % (self.config.baseName, raftName, slotName))
+                slotFigs = refObj.makeFigures("%s_%s_%s" % (baseName, raftName, slotName), slotData)
                 refObj.writeFigures(slotDir, slotFigs)      
         return pipeBase.Struct()
 

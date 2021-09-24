@@ -345,52 +345,54 @@ class EoCalib(IsrCalib):
     @classmethod
     def fillReportConfigDict(cls, configDict):
         """ Write the yaml config for the html report for this class for the slot level """
-        if hasattr(cls, 'slotFigHandles'):
-            thisSlotDict = dict(header_text=cls.shortName(),
-                                rows=[dict(text=handle.description,
-                                           figure=os.path.join("camera", "{raft}", "{slot}",
-                                                               "%s_{raft}_{slot}_%s.png" % (cls.shortName(), handle.name)))
-                                      for handle in cls.slotFigHandles])
-            configDict.setdefault('slot_plot_tables', {})
-            configDict['slot_plot_tables'][cls.shortName()] = thisSlotDict
+        
+        if not hasattr(cls, 'figHandles'):
+            return
 
-        if hasattr(cls, 'raftFigHandles'):
-            thisRaftDict = dict(header_text=cls.shortName(),
-                                rows=[dict(text=handle.description,
-                                           figure=os.path.join("camera", "{raft}",
-                                                               "%s_{raft}_%s.png" % (cls.shortName(), handle.name)))
-                                      for handle in cls.raftFigHandles])
-            configDict.setdefault('raft_plot_tables', {})
-            configDict['raft_plot_tables'][cls.shortName()] = thisRaftDict
+        templateMap = dict(slot=os.path.join("camera", "{raft}", "{slot}", "%s_{raft}_{slot}_%s.png"),
+                           raft=os.path.join("camera", "{raft}", "%s_{raft}_%s.png"), 
+                           camera=os.path.join("camera", "%s_camera_%s.png"))
+        keyMap = dict(slot='slot_plot_tables',
+                      raft='raft_plot_tables',
+                      camera='run_plot_tables')
 
-        if hasattr(cls, 'cameraFigHandles'):
-            thisCameraDict = dict(header_text=cls.shortName(),
-                                  rows=[dict(text=handle.description,
-                                             figure=os.path.join("camera",
-                                                                 "%s_camera_%s.png" % (cls.shortName(), handle.name)))
-                                        for handle in cls.cameraFigHandles])
-            configDict.setdefault('run_plot_tables', {})
-            configDict['run_plot_tables'][cls.shortName()] = thisCameraDict
+        for figHandle in cls.figHandles:
+            
+            tablesKey = keyMap[figHandle.level]
+            whichTemplate = templateMap[figHandle.level]
+            
+            if tablesKey not in configDict:
+                configDict[tablesKey] = {}
 
+            if figHandle.family not in configDict[tablesKey]:
+                configDict[tablesKey][figHandle.family] = dict(header_text=figHandle.family, rows=[])
+            whichTable = configDict[tablesKey][figHandle.family]
 
-    def makeFigures(self, baseName):
+            whichTable['rows'].append(dict(text=figHandle.description,
+                                           figure=whichTemplate % (cls.shortName(), figHandle.name)))
+
+    @classmethod
+    def makeFigures(cls, baseName, obj):
         """ Make a set of matplotlib figures for this detector """
-        if hasattr(self, 'slotFigHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(self)) for handle in self.slotFigHandles])
+        if hasattr(cls, 'figHandles'):
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(obj)) 
+                                for handle in cls.figHandles if handle.level == 'slot'])
         return OrderedDict()
 
     @classmethod
     def makeRaftFigures(cls, baseName, raftDataDict):
         """ Make a set of matplotlib figures for a raft """
-        if hasattr(cls, 'raftFigHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(raftDataDict)) for handle in cls.raftFigHandles])
+        if hasattr(cls, 'figHandles'):
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(raftDataDict)) 
+                                for handle in cls.figHandles if handle.level == 'raft'])
         return OrderedDict()
 
     @classmethod
     def makeCameraFigures(cls, baseName, cameraDataDict):
         """ Make a set of matplotlib figures for the whole focal plane """
-        if hasattr(cls, 'cameraFigHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(cameraDataDict)) for handle in cls.cameraFigHandles])
+        if hasattr(cls, 'figHandles'):
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(cameraDataDict))
+                                for handle in cls.figHandles if handle.level == 'camera'])
         return OrderedDict()
 
     @staticmethod
@@ -432,7 +434,7 @@ def WriteSchemaMarkdown(fileName):
 
 
 
-def WriteReportConfigYaml(fileName):
+def WriteReportConfigYaml(fileName, dataClasses=None):
     
     theDict = dict(defaults=dict(action='copy',
                                  header_row_class='header_row',
@@ -442,7 +444,9 @@ def WriteReportConfigYaml(fileName):
                                  col_desc_class='plot_col_desc',
                                  col_fig_class='plot_col_fig',
                                  col_img_class='plot'))
-    for key, val in EO_CALIB_CLASS_DICT.items():
+    if dataClasses is None:
+        dataClasses = list(EO_CALIB_CLASS_DICT.values())
+    for val in dataClasses:
         val.fillReportConfigDict(theDict)
     
     with open(fileName, 'w') as fout:
