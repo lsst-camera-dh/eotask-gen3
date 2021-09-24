@@ -3,6 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# emamcs
+*~
+
+# scons
+.sconf_temp
+.sconsign.dblite
+
+
 # C extensions
 *.so
 
