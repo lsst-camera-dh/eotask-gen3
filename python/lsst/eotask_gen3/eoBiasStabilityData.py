@@ -93,11 +93,11 @@ def plotDetBiasStabilty(obj):
         ax[iamp+1].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
     return fig
 
-@EoPlotMethod(EoBiasStabilityData, "mean", "slot", "BiasStability", "Bias frame amp-wise mean vs time")
+@EoPlotMethod(EoBiasStabilityData, "mean", "raft", "BiasStability", "Bias frame amp-wise mean vs time")
 def plotDetBiasStabiltyMean(raftDataDict):
     return nullFigure()
 
-@EoPlotMethod(EoBiasStabilityData, "stdev", "slot", "BiasStability","Bias frame amp-wise stdev vs time")
+@EoPlotMethod(EoBiasStabilityData, "stdev", "raft", "BiasStability","Bias frame amp-wise stdev vs time")
 def plotDetBiasStabiltyStdev(raftDataDict):
     return nullFigure()
 
