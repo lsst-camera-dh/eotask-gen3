@@ -7,7 +7,6 @@ from collections import namedtuple
 __all__ = ["AmpTearingStats"]
 
 
-
 class AmpTearingStats:
     """
     Class to compute Pierre Antilogus' tearing statistics based on
@@ -18,13 +17,10 @@ class AmpTearingStats:
         """
         Parameters
         ----------
-        calibExp: lsst.afw.image.Image
+        calibExp: `lsst.afw.image.Image`
             Image object of the full segment of an amplifier.
-        ampGeom: lsst.eotest.sensor.AmplifierGeometry
+        ampGeom: `lsst.afw.geom.AmplifierGeometry`
             Object containing the amplifier pixel geometry.
-        buf: int [10]
-            Number of pixels to avoid on leading and trailing edge of
-            serial overscan to compute the bias level for each row.
         """
         self.imarr = calibExp[ampGeom.getRawDataBBox()].image.array
         self._ratioProfiles = None

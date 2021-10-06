@@ -1,4 +1,3 @@
-
 import numpy as np
 
 import lsst.pex.config as pexConfig
@@ -9,8 +8,7 @@ import lsst.afw.math as afwMath
 
 from lsst.ip.isr import Defects
 
-from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,\
-                          extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
+from .eoCalibBase import EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask
 from .eoDarkPixelsData import EoDarkPixelsData
 
 __all__ = ["EoDarkPixelTask", "EoDarkPixelTaskConfig"]
@@ -25,7 +23,7 @@ class EoDarkPixelsTaskConnections(EoDetRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
         isCalibration=True,
     )
-    
+
     outputData = cT.Output(
         name="eoDarkPixelsStats",
         doc="Electrial Optical Calibration Output",
@@ -43,18 +41,30 @@ class EoDarkPixelsTaskConnections(EoDetRunCalibTaskConnections):
 
 
 class EoDarkPixelTaskConfig(EoDetRunCalibTaskConfig,
-                              pipelineConnections=EoDarkPixelsTaskConnections):
-   
+                            pipelineConnections=EoDarkPixelsTaskConnections):
+
     thresh = pexConfig.Field("Fractions threshold w.r.t. amp median", float, default=0.8)
     colthresh = pexConfig.Field("Dark column threshold in # bright pixels", int, default=20)
- 
+
     def setDefaults(self):
         self.connections.stackedCalExp = "eoFlatHigh"
         self.connections.outputData = "eoDarkPixelStats"
         self.connections.defects = "eoDarkPixel"
- 
+
 
 class EoDarkPixelTask(EoDetRunCalibTask):
+    """Analysis of stacked flat frames to find dark pixels
+
+    Summary output is stored as `lsst.eotask_gen3.EoDarkPixelsData`
+
+    Defect sets are stored as `lsst.ip.isr.Defects`
+
+    Identifies dark pixels as any that are below
+    the `self.config.thresh` of the median in the median stacked flat frames
+
+    Identifies bad columns as any columns that have more than
+    `self.config.colthresh` bad pixels
+    """
 
     ConfigClass = EoDarkPixelTaskConfig
     _DefaultName = "eoDarkPixel"
@@ -62,29 +72,27 @@ class EoDarkPixelTask(EoDetRunCalibTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
-    
+
     def run(self, stackedCalExp, **kwargs):
         """ Run method
 
         Parameters
         ----------
-        stackedCalExp :
-            Input data
-
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
+        stackedCalExp : `lsst.afw.Exposure`
+            Input data, i.e., a stacked exposure of dark frames
 
         Returns
         -------
-        outputData : `EoCalib`
-            Output data in formatted tables
+        outputData : `lsst.eotask_gen3.EoDarkPixelsData`
+            Summary data
+        defects : `lsst.ip.isr.Defects`
+            Defect set
         """
-        camera = kwargs.get('camera')
+        camera = kwargs.get('camera', None)
         det = stackedCalExp.getDetector()
         amps = det.getAmplifiers()
         nAmp = len(amps)
-        outputData = self.makeOutputData(nAmp=nAmp, camera=camera, detector=det)
+        outputData = self.makeOutputData(nAmp=nAmp, detector=det, camera=camera)
         outputTable = outputData.amps['amps']
         fpMap = {}
         for iamp, amp in enumerate(amps):
@@ -94,12 +102,46 @@ class EoDarkPixelTask(EoDetRunCalibTask):
             outputTable.nDarkColumn[iamp] = nDarkColumn
         fpCcd = self.mergeFootprints(fpMap)
         defects = Defects(defectList=fpCcd)
-        return pipeBase.Struct(outputData=outputData, defects=defects)        
+        return pipeBase.Struct(outputData=outputData, defects=defects)
 
     def makeOutputData(self, nAmp, **kwargs):
-        return EoDarkPixelsData(nAmp=nAmp)
+        """Construct the output data object
+
+        Parameters
+        ----------
+        nAmp : `int`
+            Number of amplifiers
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoDarkPixelsData`
+            Container for output data
+        """
+        return EoDarkPixelsData(nAmp=nAmp, **kwargs)
 
     def findDarkPixels(self, stackedCalExp, amp, gain):
+        """Identify bad pixels and bad columns for a single amp
+
+        Parameters
+        ----------
+        stackedCalExp : `lsst.afw.Exposure`
+            Input data, i.e., a stacked exposure of dark frames
+        amp : `lsst.afw.geom.AmplifierGeometry`
+            The amp to analyze
+        gain : `float`
+            The amplifier gain, used to convery from ADU to e-
+
+        Returns
+        -------
+        nDarkPixs : `int`
+            The number of dark pixels
+        nDarkCols : `int`
+            The number of dark columns
+        fpSet : `lsst.afw.detection.FootprintSet`
+            The footprints of the bad pixels
+        """
         try:
             exptime = stackedCalExp.getMetadata().toDict()['EXPTIME']
         except KeyError:
@@ -108,12 +150,12 @@ class EoDarkPixelTask(EoDetRunCalibTask):
 
         ampImage = stackedCalExp[amp.getBBox()].image
         median = afwMath.makeStatistics(ampImage, afwMath.MEDIAN, self.statCtrl).getValue()
-        threshold = afwDetect.Threshold((1. - self.config.thresh)*median)
+        threshold = afwDetect.Threshold((1. - self.config.thresh)*median*exptime)
         invImage = ampImage.clone()
         invImage *= -1.
         invImage += median
         fpSet = afwDetect.FootprintSet(invImage, threshold)
-        # 
+        #
         # Organize dark pixels by column.
         #
         # FIXME, vectorize this
@@ -140,7 +182,7 @@ class EoDarkPixelTask(EoDetRunCalibTask):
                 darkPixs.extend([(x - x0, y - y0) for y in columns[x]])
 
         return len(darkPixs), len(darkCols), fpSet
-                
+
     @staticmethod
     def badColumn(columnIndices, threshold):
         """
@@ -169,21 +211,21 @@ class EoDarkPixelTask(EoDetRunCalibTask):
         return False
 
     @staticmethod
-    def mergeFootprints(fpMap):        
+    def mergeFootprints(fpMap):
         outList = []
         for amp, fpSet in fpMap.items():
             for fp in fpSet.getFootprints():
                 detBBox = fp.getBBox()
-                #if amp.getFlipX():
+                # if amp.getFlipX():
                 #    minX = amp.getRawBBox().getX1() - bbox.getMaxX()
                 #    maxX = amp.getRawBBox().getX1() - bbox.getMinX()
-                #else:
+                # else:
                 #    minX = bbox.getMinX() + amp.getRawBBox().getX0()
                 #    maxX = bbox.getMaxX() + amp.getRawBBox().getX0()
-                #if amp.getFlipY():
+                # if amp.getFlipY():
                 #    minY = amp.getRawBBox().getY1() - bbox.getMaxY()
                 #    maxY = amp.getRawBBox().getY1() - bbox.getMinY()
-                #else:
+                # else:
                 #    minY = bbox.getMinY() + amp.getRawBBox().getY0()
                 #    maxY = bbox.getMaxY() + amp.getRawBBox().getY0()
                 #    detBBox = lsst.geom.Box2I(lsst.geom.Point2I(minX, minY),

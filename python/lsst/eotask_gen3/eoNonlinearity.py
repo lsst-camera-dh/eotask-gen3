@@ -1,4 +1,3 @@
-
 import numpy as np
 from scipy.optimize import leastsq
 from scipy.interpolate import UnivariateSpline
@@ -6,12 +5,8 @@ from scipy.interpolate import UnivariateSpline
 import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
-import lsst.afw.detection as afwDetect
 
-from lsst.ip.isr import Defects
-
-from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,\
-                          extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
+from .eoCalibBase import EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask
 from .eoNonlinearityData import EoNonlinearityData
 
 __all__ = ["EoNonlinearityTask", "EoNonlinearityTaskConfig"]
@@ -21,9 +16,11 @@ def lin_func(pars, xvals):
     """Return a line whose slope is pars[0]"""
     return pars[0]*xvals
 
+
 def chi2_model(pars, xvals, yvals):
     """Return the chi2 w.r.t. the model"""
     return (yvals - lin_func(pars, xvals))/np.sqrt(yvals)
+
 
 def makeProfileHist(xbin_edges, xdata, ydata, **kwargs):
     """Build a profile historgram
@@ -95,8 +92,8 @@ def correctNullPoint(profile_x, profile_y, profile_yerr, null_point):
     profile_yerr : `array`
         The y-bin errors
     null_point : `float`
-        The x-value where the spline should go through zero       
-    
+        The x-value where the spline should go through zero
+
     Returns
     -------
     y_vals_corr
@@ -106,12 +103,10 @@ def correctNullPoint(profile_x, profile_y, profile_yerr, null_point):
     """
     uni_spline = UnivariateSpline(profile_x, profile_y)
     offset = uni_spline(null_point)
-    
+
     y_vals_corr = ((1 + profile_y) / (1 + offset)) - 1.
     y_errs_corr = profile_yerr
     return y_vals_corr, y_errs_corr
-
-
 
 
 class EoNonlinearityTaskConnections(EoDetRunCalibTaskConnections):
@@ -122,13 +117,14 @@ class EoNonlinearityTaskConnections(EoDetRunCalibTaskConnections):
         storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
     )
-    
+
     outputData = cT.Output(
         name="eoNonlinearity",
         doc="Electrial Optical Calibration Output",
         storageClass="IsrCalib",
         dimensions=("instrument", "detector"),
-    )    
+    )
+
 
 class EoNonlinearityTaskConfig(EoDetRunCalibTaskConfig,
                                pipelineConnections=EoNonlinearityTaskConnections):
@@ -136,33 +132,35 @@ class EoNonlinearityTaskConfig(EoDetRunCalibTaskConfig,
     nProfileBins = pexConfig.Field("Number of bins for Nonlinearity profile", int, default=30)
     fitMin = pexConfig.Field("Mininum of range to fit [ADU]", float, default=0.)
     fitMax = pexConfig.Field("Maximum of range to fit [ADU]", float, default=9.e4)
-    nullPoint = pexConfig.Field("Signal value at which to set correction to zero", float, default=0.)    
-    
+    nullPoint = pexConfig.Field("Signal value at which to set correction to zero", float, default=0.)
+
     def setDefaults(self):
         self.connections.ptcData = "eoPtc"
         self.connections.outputData = "eoNonlinearity"
-    
+
 
 class EoNonlinearityTask(EoDetRunCalibTask):
+    """Analysis of PTC data to construction non-linearity corrections
+
+    Output is stored as `lsst.eotask_gen3.EoNonlinearityData` objects
+    """
 
     ConfigClass = EoNonlinearityTaskConfig
     _DefaultName = "eoNonlinearity"
-    
+
     def run(self, ptcData, **kwargs):
         """ Run method
 
         Parameters
         ----------
-        flatPairData :
-            Input data
+        ptcData : `lsst.eotask_gen3.EoPtcData`
+            Object with data from PTC analysis
 
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
+        See base class for keywords.
 
         Returns
         -------
-        outputData : `EoCalib`
+        outputData : `lsst.eotask_gen3.EoNonlinearityData`
             Output data in formatted tables
         """
         camera = kwargs.get('camera')
@@ -184,10 +182,49 @@ class EoNonlinearityTask(EoDetRunCalibTask):
         return pipeBase.Struct(outputData=outputData)
 
     def makeOutputData(self, nAmp, nProf, **kwargs):
+        """Construct the output data object
+
+        Parameters
+        ----------
+        nAmp : `int`
+            Number of amplifiers
+        nProf : `int`
+            Number profile points
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoNonlinearityData`
+            Container for output data
+        """
         return EoNonlinearityData(nAmp=nAmp, nProf=nProf, **kwargs)
 
     def findNonlinearity(self, xdata, ydata):
+        """ Extract the nonlinearity correction
 
+        This first finds the best-fit line to the x and y data.
+        Then makes a 'profile' plot of the residuals.
+
+        The profile plots can then be used to construct
+        a spline that can be used as a correction
+
+        Parameters
+        ----------
+        xdata : `numpy.array`
+            x-data values, i.e., the mean signals
+        ydata : `numpy.array`
+            y-data values, i.e., the difference image variances
+
+        Returns
+        -------
+        prof_x : `numpy.array`
+            x-axis bin mid-points
+        prof_y : `numpy.array`
+            corresponding y-axis values
+        prof_yerr : `numpy.array`
+            corresponding y-axis errors
+        """
         xbins = np.linspace(self.config.fitMin, self.config.fitMax, self.config.nProfileBins+1)
 
         mask = (self.config.fitMin < xdata) * (self.config.fitMax > xdata)
@@ -200,9 +237,8 @@ class EoNonlinearityTask(EoDetRunCalibTask):
         frac_resid = (ydata - model_yvals)/model_yvals
         frac_resid_err = 1./xdata
 
-        prof_x, prof_y, prof_yerr = makeProfileHist(xbins, xdata, frac_resid, y_errs=frac_resid_err, stderr=True)        
-        prof_y, prof_yerr = correctNullPoint(prof_x, prof_y, prof_yerr, self.config.nullPoint)                
+        prof_x, prof_y, prof_yerr = makeProfileHist(xbins, xdata, frac_resid,
+                                                    y_errs=frac_resid_err, stderr=True)
+        prof_y, prof_yerr = correctNullPoint(prof_x, prof_y, prof_yerr, self.config.nullPoint)
 
         return (prof_x, prof_y, prof_yerr)
-
-        

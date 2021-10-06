@@ -11,6 +11,7 @@ __all__ = ["EoTestAmpExpData",
 
 
 class EoTestAmpExpDataSchemaV0(EoCalibTableSchema):
+    """ Schema for a test class for per-amp, per-exposure tables"""
 
     TABLELENGTH = "nExposure"
 
@@ -18,18 +19,27 @@ class EoTestAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoTestAmpExpDataSchemaV1(EoTestAmpExpDataSchemaV0):
-
+    """ Schema for a test class for per-amp, per-exposure tables"""
     TABLELENGTH = "nExposure"
 
     varExp2 = EoCalibField(name="VAR2", dtype=float, shape=["nSample"])
 
 
 class EoTestAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure-pair table
+    for a test class."""
 
     SCHEMA_CLASS = EoTestAmpExpDataSchemaV1
     PREVIOUS_SCHEMAS = [EoTestAmpExpDataSchemaV0]
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+
+        This is also where we deal with schema evolution to provide
+        a single unified interface
+        """
         super(EoTestAmpExpData, self).__init__(data=data, **kwargs)
         self.varExp1 = self.table[self.SCHEMA_CLASS.varExp1.name]
         try:
@@ -39,6 +49,7 @@ class EoTestAmpExpData(EoCalibTable):
 
 
 class EoTestAmpRunDataSchemaV0(EoCalibTableSchema):
+    """ Schema for a test class for per-amp, per-exposure tables"""
 
     TABLELENGTH = "nAmp"
 
@@ -46,28 +57,41 @@ class EoTestAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoTestAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run table
+    for a test class."""
 
     SCHEMA_CLASS = EoTestAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoTestAmpRunData, self).__init__(data=data, **kwargs)
         self.varAmp1 = self.table[self.SCHEMA_CLASS.varAmp1.name]
 
 
 class EoTestDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for a test class
+
+    This defines correct versions of the sub-tables"""
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoTestAmpRunData)
 
 
 class EoTestDataSchemaV1(EoTestDataSchemaV0):
+    """Schema definitions for output data for a test class
 
-    ampExposure = EoCalibTableHandle(tableName="ampExp_{key}",
-                                     tableClass=EoTestAmpExpData,
-                                     multiKey="amps")
+    This defines correct versions of the sub-tables"""
+
+    ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
+                                tableClass=EoTestAmpExpData,
+                                multiKey="amps")
 
 
 class EoTestData(EoCalib):
+    """Container class and interface for test class outputs."""
 
     SCHEMA_CLASS = EoTestDataSchemaV1
     PREVIOUS_SCHEMAS = [EoTestDataSchemaV0]
@@ -77,11 +101,16 @@ class EoTestData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoTestData, self).__init__(**kwargs)
         try:
-            self.ampExposure = self['ampExposure']
+            self.ampExp = self['ampExp']
         except KeyError:
-            self.ampExposure = None
+            self.ampExp = None
         self.amps = self['amps']
 
 

@@ -2,8 +2,6 @@
 
 import os
 
-import sys
-
 import argparse
 
 from lsst.eotask_gen3 import WriteSchemaMarkdown
@@ -30,5 +28,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
-    

@@ -9,7 +9,11 @@ __all__ = ["EoBrightPixelsAmpRunData",
 
 
 class EoBrightPixelsAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-run tables
+    for EoBrightPixelsTask.
 
+    These are just counts of the number of bad pixels and channels
+    """
     TABLELENGTH = "nAmp"
 
     nBrightPixel = EoCalibField(name="NUM_BRIGHT_PIXELS", dtype=int)
@@ -17,22 +21,32 @@ class EoBrightPixelsAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoBrightPixelsAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run tables
+    for EoBrightPixelsTask."""
 
     SCHEMA_CLASS = EoBrightPixelsAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoBrightPixelsAmpRunData, self).__init__(data=data, **kwargs)
         self.nBrightPixel = self.table[self.SCHEMA_CLASS.nBrightPixel.name]
         self.nBrightColumn = self.table[self.SCHEMA_CLASS.nBrightColumn.name]
 
 
 class EoBrightPixelsDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for for EoBrightPixelsTask
+
+    This defines correct versions of the sub-tables"""
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoBrightPixelsAmpRunData)
 
 
 class EoBrightPixelsData(EoCalib):
+    """Container class and interface for EoBrightPixelsTask outputs."""
 
     SCHEMA_CLASS = EoBrightPixelsDataSchemaV0
 
@@ -41,6 +55,11 @@ class EoBrightPixelsData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoBrightPixelsData, self).__init__(**kwargs)
         self.amps = self['amps']
 
@@ -49,13 +68,16 @@ class EoBrightPixelsData(EoCalib):
 def plotBrightPixelMosaic(cameraDataDict):
     return nullFigure()
 
+
 @EoPlotMethod(EoBrightPixelsData, "columns_mosaic", "camera", "mosaic", "Bright columns per AMP")
 def plotBrightColumnMosaic(cameraDataDict):
     return nullFigure()
 
+
 @EoPlotMethod(EoBrightPixelsData, "pixels_hist", "camera", "hist", "Bright pixels per AMP")
 def plotBrightPixelHist(cameraDataDict):
     return nullFigure()
+
 
 @EoPlotMethod(EoBrightPixelsData, "columns_hist", "camera", "hist", "Bright columns per AMP")
 def plotBrightColumnHist(cameraDataDict):

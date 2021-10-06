@@ -34,7 +34,7 @@ class EoCalibField:
         Define the shape of each element in the Column.
         List elements can be either `int` or `str`
         `str` elements will replaced with `int` at construction using keywords
-    kwds : `dict` , [`str`, `Any`]
+    kwds : `dict` [`str`, `Any`]
         These will be passed to `astropy.table.Column` constructor.
 
     Notes
@@ -54,12 +54,12 @@ class EoCalibField:
         ----------
         shape : `list`
             Define the shape of each element in the Column.
-        kwargs : `dict`,  [`str`, `Any`]
+        kwargs : `dict` [`str`, `Any`]
             Used to replace the str elements in shape
 
         Returns
         -------
-        outShape : `tuple`, [`int`]
+        outShape : `tuple` [`int`]
             The shape of each element in the column
         """
         outShape = []
@@ -206,9 +206,9 @@ class EoCalibTableSchema:
     ----------
     TABLELENGTH : `str`
         Name of the keyword to use to extract table length
-    fieldDict : `OrderedDict`, [`str`, `EoCalibField`]
+    fieldDict : `OrderedDict` [`str`, `EoCalibField`]
         Maps field names (e.g., 'aVariable') to EoCalibField objects
-    columnDict : `OrderedDict`, [`str`, `str`]
+    columnDict : `OrderedDict` [`str`, `str`]
         Maps column names (e.g., 'VARIABLE') to field names
     """
 
@@ -220,7 +220,7 @@ class EoCalibTableSchema:
 
         Returns
         -------
-        fields : `OrderedDict`, [`str`, `EoCalibField`]
+        fields : `OrderedDict` [`str`, `EoCalibField`]
         """
         theClasses = cls.mro()
         fields = OrderedDict()
@@ -412,7 +412,7 @@ class EoCalibTable:
     ----------
     SCHEMA_CLASS : `type`
         Current schema class
-    PREVIOUS_SCHEMAS : `list`, [`type`]
+    PREVIOUS_SCHEMAS : `list` [`type`]
         Previous schema classes
     schema : `EoCalibTableSchema`
         Schema for this data structure
@@ -495,9 +495,9 @@ class EoCalibTableHandle:
         `EoCalibTable` sub-type associated to the table.
     schema : `EoCalibTableSchema`
         Schema associted to the table
-    schemaDict : `OrderedDict`, [`str`, `type`]
+    schemaDict : `OrderedDict` [`str`, `type`]
         Dictionary mapping from class name to `EoCalibTableSchema` sub-class
-    multiKey : `Union`, [`str`, `None`]
+    multiKey : `Union` [`str`, `None`]
         Name of keyword used to replace `{key}` when formating table name
     """
 
@@ -507,7 +507,7 @@ class EoCalibTableHandle:
 
         Parameters
         ----------
-        tableObj : `Union`, [`astropy.table.Table`, `OrderedDict']
+        tableObj : `Union` [`astropy.table.Table`, `OrderedDict']
             The table-like object
         metaKey : `str`
             The key for the meta data field

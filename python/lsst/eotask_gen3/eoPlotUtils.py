@@ -4,6 +4,7 @@
 
 import matplotlib.pyplot as plt
 
+
 def nullFigure(*args):
     """ Make an empty placeholder figure """
     fig = plt.figure()
@@ -11,6 +12,7 @@ def nullFigure(*args):
 
 
 class EoPlotHandle:
+    """ Utility class to wrap a plotting function with context """
 
     def __init__(self, name, level, family, description, func):
 
@@ -28,7 +30,7 @@ class EoPlotHandle:
     @property
     def level(self):
         return self._level
-    
+
     @property
     def family(self):
         return self._family
@@ -36,7 +38,7 @@ class EoPlotHandle:
     @property
     def description(self):
         return self._description
-        
+
     @property
     def func(self):
         return self._func
@@ -44,13 +46,15 @@ class EoPlotHandle:
     @property
     def figure(self):
         return self._figure
-    
+
     def __call__(self, *args):
         self._figure = self._func(*args)
         return self._figure
 
 
-def EoPlotMethod(theClass, name, level, family, description):    
+def EoPlotMethod(theClass, name, level, family, description):
+    """ Decorator function to attach a plotting function to a data class
+    with context """
     class _EoPlot:
         def __init__(self, method):
             self.method = method
@@ -58,7 +62,7 @@ def EoPlotMethod(theClass, name, level, family, description):
                 theClass.figHandles.append(EoPlotHandle(name, level, family, description, method))
             else:
                 theClass.figHandles = [EoPlotHandle(name, level, family, description, method)]
+
         def __get__(self, instance, cls):
             return lambda *args, **kwargs: self.method(cls, *args, *kwargs)
     return _EoPlot
-

@@ -19,7 +19,7 @@ __all__ = ["EoFlatPairTask", "EoFlatPairTaskConfig"]
 class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
 
     photodiodeData = copyConnect(PHOTODIODE_CONNECT)
-    
+
     outputData = cT.Output(
         name="eoFlatPair",
         doc="Electrial Optical Calibration Output",
@@ -28,14 +28,13 @@ class EoFlatPairTaskConnections(EoAmpPairCalibTaskConnections):
     )
 
 
-
 class EoFlatPairTaskConfig(EoAmpPairCalibTaskConfig,
                            pipelineConnections=EoFlatPairTaskConnections):
 
     maxPDFracDev = pexConfig.Field("Maximum photodiode fractional deviation", float, default=0.05)
 
     def setDefaults(self):
-        # pylint: disable=no-member        
+        # pylint: disable=no-member
         self.connections.outputData = "eoFlatPair"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
@@ -52,9 +51,14 @@ class EoFlatPairTaskConfig(EoAmpPairCalibTaskConfig,
         self.isr.doInterpolate = False
         self.isr.doWrite = False
         self.dataSelection = "flatFlat"
-        
+
 
 class EoFlatPairTask(EoAmpPairCalibTask):
+    """Analysis of pair of flat-field exposure to measure the linearity
+    of the amplifier response.
+
+    Output is stored as `lsst.eotask_gen3.EoFlatPairData` objects
+    """
 
     ConfigClass = EoFlatPairTaskConfig
     _DefaultName = "eoFlatPair"
@@ -62,25 +66,20 @@ class EoFlatPairTask(EoAmpPairCalibTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
-    
+
     def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
         ----------
-        inputPairs :
+        inputPairs : `list` [`tuple` [`lsst.daf.Butler.DeferedDatasetRef`] ]
             Used to retrieve the exposures
 
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
-        bias : `ExposureF`
-        defects : `Defects`
-        gains : `Gains`
+        See base class for keywords.
 
         Returns
         -------
-        outputData : `EoCalib`
+        outputData : `lsst.eotask_gen3.EoFlatPairData`
             Output data in formatted tables
         """
         camera = kwargs['camera']
@@ -97,7 +96,7 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         if photodiodePairs is not None:
             self.analyzePdData(photodiodePairs, outputData)
         for iamp, amp in enumerate(amps):
-            ampCalibs = extractAmpCalibs(amp, **kwargs)                        
+            ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
                     print("exposurePair %i has %i items" % (iPair, len(inputPair)))
@@ -108,11 +107,40 @@ class EoFlatPairTask(EoAmpPairCalibTask):
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp2, iPair)
             self.analyzeAmpRunData(outputData, iamp, amp2)
         return pipeBase.Struct(outputData=outputData)
-    
+
     def makeOutputData(self, amps, nAmps, nPair, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        """Construct the output data object
+
+        Parameters
+        ----------
+        amps : `Iterable` [`str`]
+            The amplifier names
+        nAmp : `int`
+            Number of amplifiers
+        nPair : `int`
+            Number of exposure pairs
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoFlatPairData`
+            Container for output data
+        """
         return EoFlatPairData(amps=amps, nAmp=nAmps, nPair=nPair, **kwargs)
 
     def analyzePdData(self, photodiodeDataPairs, outputData):
+        """ Analyze the photodidode data and fill the output table
+
+        Parameters
+        ----------
+        photodiodeDataPairs : `list` [`tuple` [`astropy.Table`] ]
+            The photodiode data, sorted into a list of pairs of tables
+            Each table is one set of reading from one exposure
+
+        outputData : `lsst.eotask_gen3.EoFlatPairData`
+            Container for output data
+        """
         outTable = outputData.detExp['detExp']
 
         for iPair, pdData in enumerate(photodiodeDataPairs):
@@ -126,18 +154,34 @@ class EoFlatPairTask(EoAmpPairCalibTask):
             else:
                 flux = 0.5*(pd1 * pd2)
             outTable.flux[iPair] = flux
-            outTable.seqnum[iPair] = 0 #
-            outTable.dayobs[iPair] = 0 #
-    
-    def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
+            outTable.seqnum[iPair] = 0  #
+            outTable.dayobs[iPair] = 0  #
+
+    def analyzeAmpPairData(self, calibExp1, calibExp2, outputData,
+                           amp, iPair):  # pylint: disable=too-many-arguments
+        """Analyze data from a single amp for a single exposure-pair
+
+        See base class for argument description
+
+        This method just extracts summary statistics from the
+        amplifier imaging region.
+        """
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         signal, sig1, sig2 = self.pairMean(calibExp1, calibExp2, amp, self.statCtrl)
         outTable.signal[iPair] = signal
-        outTable.flat1Signal[iPair] = sig1        
+        outTable.flat1Signal[iPair] = sig1
         outTable.flat1Signal[iPair] = sig2
         outTable.rowMeanVar[iPair] = self.rowMeanVariance(calibExp1, calibExp2, amp, self.statCtrl)
-        
+
     def analyzeAmpRunData(self, outputData, iamp, amp):
+        """Analyze data from a single amp for a run
+
+        See base class for argument description
+
+        This method creates the linearity curve and associated parameters
+        for the amplifier
+        """
+
         inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
         inTableExp = outputData.detExp['detExp']
         outTable = outputData.amps['amps']
@@ -145,14 +189,23 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         results = detResp.linearity(inTableAmp.signal, specRange=(1e3, 9e4))
         outTable.fullWell[iamp] = detResp.fullWell(inTableAmp.signal)[0]
         outTable.maxFracDev[iamp] = results[0]
-        #outTable.maxObservedSignal[iamp] = np.max(inTableAmp.signal) / gains[amp]
+        # outTable.maxObservedSignal[iamp] =
+        # np.max(inTableAmp.signal) / gains[amp]
         outTable.maxObservedSignal[iamp] = np.max(inTableAmp.signal)
-        #outTable.linearityTurnoff[iamp] = results[-1]/gains[iamp]
+        # outTable.linearityTurnoff[iamp] = results[-1]/gains[iamp]
         outTable.linearityTurnoff[iamp] = results[-1]
-        outTable.rowMeanVarSlope[iamp] = detResp.rowMeanVarSlope(inTableAmp.rowMeanVar, nCols=amp.getRawDataBBox().getWidth())
+        outTable.rowMeanVarSlope[iamp] = detResp.rowMeanVarSlope(inTableAmp.rowMeanVar,
+                                                                 nCols=amp.getRawDataBBox().getWidth())
 
     @staticmethod
     def getFlux(pdData, factor=5):
+        """Method to intergrate the flux
+
+        This does top-hat integration after removing an offset level.
+
+        This removes the baseline computed by taking the median of all
+        readings less than 1/'factor' times maximum reading.
+        """
         x = pdData['Time']
         y = pdData['Current']
         ythresh = (max(y) - min(y))/factor + min(y)
@@ -163,16 +216,19 @@ class EoFlatPairTask(EoAmpPairCalibTask):
 
     @staticmethod
     def pairMean(calibExp1, calibExp2, amp, statCtrl):
-        flat1Value = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()
-        flat2Value = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()
+        """Return the mean of the two exposures, and the mean of the means"""
+        flat1Value = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image,
+                                            afwMath.MEAN, statCtrl).getValue()
+        flat2Value = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image,
+                                            afwMath.MEAN, statCtrl).getValue()
         avgMeanValue = (flat1Value + flat2Value)/2.
         return np.array([avgMeanValue, flat1Value, flat2Value], dtype=float)
 
     @staticmethod
     def rowMeanVariance(calibExp1, calibExp2, amp, statCtrl):
+        """Return the variance of the mean of the rows of the
+        difference image"""
         miDiff = afwImage.MaskedImageF(calibExp1[amp.getRawDataBBox()].getMaskedImage(), deep=True)
         miDiff -= calibExp2[amp.getRawDataBBox()].getMaskedImage()
         rowMeans = np.mean(miDiff.getImage().array, axis=1)
         return afwMath.makeStatistics(rowMeans, afwMath.VARIANCECLIP, statCtrl).getValue()
-
-        

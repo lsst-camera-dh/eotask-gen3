@@ -10,6 +10,11 @@ __all__ = ["EoGainStabilityAmpExpData",
 
 
 class EoGainStabilityAmpExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure tables
+    for EoGainStabilityTask.
+
+    These are summary statistics from the amplifier data.
+    """
 
     TABLELENGTH = "nExposure"
 
@@ -17,15 +22,31 @@ class EoGainStabilityAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoGainStabilityAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure tables
+    for EoGainStabilityTask."""
 
     SCHEMA_CLASS = EoGainStabilityAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        This just associates class properties with columns
+        """
         super(EoGainStabilityAmpExpData, self).__init__(data=data, **kwargs)
         self.signal = self.table[self.SCHEMA_CLASS.signal.name]
 
 
 class EoGainStabilityDetExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-detector, per-exposure table
+    for EoGainStabilityTask.
+
+    These are copied from the EO-analysis-jobs code and in part
+    are retained to allow for possible conversion of old data.
+
+    The flux comes from te photodiode reading, and
+    the other data are actually discernable from the dataId, but having
+    them here makes it easier to make plots of trends.
+    """
 
     TABLELENGTH = "nExposure"
 
@@ -35,10 +56,16 @@ class EoGainStabilityDetExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoGainStabilityDetExpData(EoCalibTable):
+    """Container class and interface for per-ccd, per-exposure table
+    for EoGainStabilityTask."""
 
     SCHEMA_CLASS = EoGainStabilityDetExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        This just associates class properties with columns
+        """
         super(EoGainStabilityDetExpData, self).__init__(data=None, **kwargs)
         self.mjd = self.table[self.SCHEMA_CLASS.mjd.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
@@ -46,6 +73,9 @@ class EoGainStabilityDetExpData(EoCalibTable):
 
 
 class EoGainStabilityDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for for EoBiasStabilityTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoGainStabilityAmpExpData,
@@ -56,6 +86,7 @@ class EoGainStabilityDataSchemaV0(EoCalibSchema):
 
 
 class EoGainStabilityData(EoCalib):
+    """Container class and interface for EoGainStabilityTask outputs."""
 
     SCHEMA_CLASS = EoGainStabilityDataSchemaV0
 
@@ -64,6 +95,11 @@ class EoGainStabilityData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoGainStabilityData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.detExp = self['detExp']

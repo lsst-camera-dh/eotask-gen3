@@ -9,6 +9,11 @@ __all__ = ["EoOverscanAmpExpData",
 
 
 class EoOverscanAmpExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure tables
+    for EoOverscanTask.
+
+    These are summary statistics about the signal in the overscan regions
+    """
 
     TABLELENGTH = "nExposure"
 
@@ -22,10 +27,16 @@ class EoOverscanAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoOverscanAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure tables
+    for EoOverscanTask."""
 
     SCHEMA_CLASS = EoOverscanAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoOverscanAmpExpData, self).__init__(data=data, **kwargs)
         self.columnMean = self.table[self.SCHEMA_CLASS.columnMean.name]
         self.columnVariance = self.table[self.SCHEMA_CLASS.columnVariance.name]
@@ -37,6 +48,9 @@ class EoOverscanAmpExpData(EoCalibTable):
 
 
 class EoOverscanDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoOverscanTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoOverscanAmpExpData,
@@ -44,6 +58,7 @@ class EoOverscanDataSchemaV0(EoCalibSchema):
 
 
 class EoOverscanData(EoCalib):
+    """Container class and interface for EoOverscanTask outputs."""
 
     SCHEMA_CLASS = EoOverscanDataSchemaV0
 
@@ -52,48 +67,68 @@ class EoOverscanData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoOverscanData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
-
 
 
 @EoPlotMethod(EoOverscanData, "serial_eper_low", "slot", "overscan", "Serial overscan EPER low flux")
 def plotSerialEperHigh(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoOverscanData, "serial_eper_high", "slot", "overscan", "Serial overscan EPER high flux")
 def plotSerialEperLow(obj):
     return nullFigure()
+
 
 @EoPlotMethod(EoOverscanData, "serial_cti", "slot", "overscan", "Serial overscan CTI Estimate")
 def plotSerialCTI(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "serial_overscan_signal", "slot", "overscan", "Serial overscan EPER v. flux")
+
+@EoPlotMethod(EoOverscanData, "serial_overscan_signal", "slot", "overscan",
+              "Serial overscan EPER v. flux")
 def plotSerialOverscanSignal(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "serial_overscan_sum", "slot", "overscan", "Serial overscan summed signal (pixels 5-25)")
+
+@EoPlotMethod(EoOverscanData, "serial_overscan_sum", "slot", "overscan",
+              "Serial overscan summed signal (pixels 5-25)")
 def plotSerialOverscanSum(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "parallel_eper_low", "slot", "overscan", "Parallel overscan EPER low flux")
+
+@EoPlotMethod(EoOverscanData, "parallel_eper_low", "slot", "overscan",
+              "Parallel overscan EPER low flux")
 def plotparallelEperHigh(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "parallel_eper_high", "slot", "overscan", "Parallel overscan EPER high flux")
+
+@EoPlotMethod(EoOverscanData, "parallel_eper_high", "slot", "overscan",
+              "Parallel overscan EPER high flux")
 def plotparallelEperLow(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "parallel_cti", "slot", "overscan", "Parallel overscan CTI Estimate")
+
+@EoPlotMethod(EoOverscanData, "parallel_cti", "slot", "overscan",
+              "Parallel overscan CTI Estimate")
 def plotParallelCTI(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "parallel_overscan_signal", "slot", "overscan", "Parallel overscan EPER v. flux")
+
+@EoPlotMethod(EoOverscanData, "parallel_overscan_signal", "slot", "overscan",
+              "Parallel overscan EPER v. flux")
 def plotParallelOverscanSignal(obj):
     return nullFigure()
 
-@EoPlotMethod(EoOverscanData, "parallel_overscan_sum", "slot", "overscan", "Parallel overscan summed signal (pixels 5-25)")
+
+@EoPlotMethod(EoOverscanData, "parallel_overscan_sum", "slot", "overscan",
+              "Parallel overscan summed signal (pixels 5-25)")
 def plotParallelOverscanSum(obj):
     return nullFigure()
 

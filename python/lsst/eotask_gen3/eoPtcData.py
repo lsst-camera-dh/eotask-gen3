@@ -11,6 +11,12 @@ __all__ = ["EoPtcAmpPairData",
 
 
 class EoPtcAmpPairDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure-pair tables
+    for EoPtcData.
+
+    These are summary statistics about the signal in the
+    imaging region of the difference image
+    """
 
     TABLELENGTH = "nPair"
 
@@ -20,10 +26,16 @@ class EoPtcAmpPairDataSchemaV0(EoCalibTableSchema):
 
 
 class EoPtcAmpPairData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure tables
+    for EoPtcTask."""
 
     SCHEMA_CLASS = EoPtcAmpPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoPtcAmpPairData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.var = self.table[self.SCHEMA_CLASS.var.name]
@@ -31,6 +43,11 @@ class EoPtcAmpPairData(EoCalibTable):
 
 
 class EoPtcAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-run tables
+    for EoOverscanTask.
+
+    These are results of the PTC fits
+    """
 
     TABLELENGTH = 'nAmp'
 
@@ -44,10 +61,16 @@ class EoPtcAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoPtcAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run tables
+    for EoPtcTask."""
 
     SCHEMA_CLASS = EoPtcAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoPtcAmpRunData, self).__init__(data=data, **kwargs)
         self.ptcGain = self.table[self.SCHEMA_CLASS.ptcGain.name]
         self.ptcGainError = self.table[self.SCHEMA_CLASS.ptcGainError.name]
@@ -68,10 +91,26 @@ class EoPtcDetPairDataSchemaV0(EoCalibTableSchema):
 
 
 class EoPtcDetPairData(EoCalibTable):
+    """Schema definitions for output data for per-ccd, per-exposure-pair tables
+    for EoPtcTask.
+
+    The flux is computed from the photodiode data.
+
+    As for the other quantities, these are copied from the
+    EO-analysis-jobs code and in part
+    are retained to allow for possible conversion of old data.
+
+    Note that these data actually discernable from the dataId, but having
+    them here makes it easier to make plots of trends.
+    """
 
     SCHEMA_CLASS = EoPtcDetPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        This just associates class properties with columns
+        """
         super(EoPtcDetPairData, self).__init__(data=None, **kwargs)
         self.flux = self.table[self.SCHEMA_CLASS.flux.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
@@ -79,19 +118,23 @@ class EoPtcDetPairData(EoCalibTable):
 
 
 class EoPtcDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoPtcTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
-                                    tableClass=EoPtcAmpPairData,
-                                    multiKey="amps")
+                                tableClass=EoPtcAmpPairData,
+                                multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoPtcAmpRunData)
 
     detExp = EoCalibTableHandle(tableName="detExp",
                                 tableClass=EoPtcDetPairData)
-    
+
 
 class EoPtcData(EoCalib):
+    """Container class and interface for EoPtcTask outputs."""
 
     SCHEMA_CLASS = EoPtcDataSchemaV0
 
@@ -100,6 +143,11 @@ class EoPtcData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoPtcData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.amps = self['amps']
@@ -110,52 +158,64 @@ class EoPtcData(EoCalib):
 def plotPTC(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "gain_mosaic", "camera", "mosaic", "PTC Gain")
 def plotPTCGainMosaic(obj):
     return nullFigure()
+
 
 @EoPlotMethod(EoPtcData, "a00_mosaic", "camera", "mosaic", "PTC a00")
 def plotPTCa00Mosaic(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "full_well_mosaic", "camera", "mosaic", "PTC Full Well")
 def plotPTCFullWellMosaic(obj):
     return nullFigure()
+
 
 @EoPlotMethod(EoPtcData, "turnoff_mosaic", "camera", "mosaic", "PTC Turnoff")
 def plotPTCTurnoffMosaic(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "max_frac_dev_mosaic", "camera", "mosaic", "PTC Max. fractional deviation")
-def plotPTCFullWellMosaic(obj):
+def plotPTCMaxFracDevMosaic(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "camera", "mosaic", "PTC Linearity Turnoff")
-def plotPTCTurnoffMosaic(obj):
+def plotPTCLinearityTurnoffMosaic(obj):
     return nullFigure()
+
 
 @EoPlotMethod(EoPtcData, "gain_hist", "camera", "hist", "PTC Gain")
 def plotPTCGainHist(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "a00_hist", "camera", "hist", "PTC a00")
 def plotPTCa00Hist(obj):
     return nullFigure()
+
 
 @EoPlotMethod(EoPtcData, "full_well_hist", "camera", "hist", "PTC Full Well")
 def plotPTCFullWellHist(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "turnoff_hist", "camera", "hist", "PTC Turnoff")
 def plotPTCTurnoffHist(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "max_frac_dev_hist", "camera", "hist", "PTC Max. fractional deviation")
-def plotPTCFullWellHist(obj):
+def plotPTCMaxFracDevHist(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoPtcData, "linearity_turnoff_hist", "camera", "hist", "PTC Linearity Turnoff")
-def plotPTCTurnoffHist(obj):
+def plotPTCLinearityTurnoffHist(obj):
     return nullFigure()
 
 

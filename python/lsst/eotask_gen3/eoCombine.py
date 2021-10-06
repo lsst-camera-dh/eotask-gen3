@@ -1,4 +1,3 @@
-import time
 from collections import OrderedDict
 
 import lsst.pex.config as pexConfig
@@ -7,12 +6,10 @@ import lsst.afw.math as afwMath
 import lsst.afw.image as afwImage
 
 from lsst.ip.isr import IsrTask, AssembleCcdTask
-from astro_metadata_translator import merge_headers, ObservationGroup
-from astro_metadata_translator.serialize import dates_to_fits
 
 from .eoCalibBase import CAMERA_CONNECT, BIAS_CONNECT, DARK_CONNECT, DEFECTS_PREREQ_CONNECT,\
-                          GAINS_CONNECT, INPUT_RAW_AMPS_CONNECT, OUTPUT_IMAGE_CONNECT,\
-                          copyConnect, runIsrOnAmp, extractAmpCalibs
+    INPUT_RAW_AMPS_CONNECT, OUTPUT_IMAGE_CONNECT,\
+    copyConnect, runIsrOnAmp, extractAmpCalibs
 
 from .eoDataSelection import EoDataSelection
 
@@ -84,7 +81,6 @@ class EoCombineCalibTaskConfig(pipeBase.PipelineTaskConfig,
         default="any"
     )
 
-    
 
 class EoCombineCalibTask(pipeBase.PipelineTask):
     """ Class snippet for tasks that loop over amps, then over exposures
@@ -108,7 +104,7 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
     @property
     def getDataQuery(self):
         return self._dataSelection.queryString
-    
+
     def runQuantum(self, butlerQC, inputRefs, outputRefs):
         """ Here we filter the input data selection
 
@@ -124,30 +120,33 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
         inputRefs.inputExps = self.dataSelection.selectData(inputRefs.inputExps)
         inputs = butlerQC.get(inputRefs)
         outputs = self.run(**inputs)
-        butlerQC.put(outputs, outputRefs)        
+        butlerQC.put(outputs, outputRefs)
 
     def run(self, inputExps, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
         ----------
-        inputExps :
+        inputExps : `list` ['lsst.daf.butler.DeferredDatasetRef']
             Used to retrieve the exposures
 
         Keywords
         --------
-        camera : `lsst.obs.lsst.camera`
-        bias : `ExposureF`
-        defects : `Defects`
-        gains : `Gains`
+        camera : `lsst.obs.lsst.camera`, optional
+            The camera object, used to look up detector geometry
+        bias : `lsst.afw.image.ExposureF`, optional
+            The bias frame to subtrace
+        defects : `lsst.ip.isr.Defects`
+            The defect set
+        gains : ??
 
         Returns
         -------
         combined : `ExpsoureF`
             Stacked and assembled output
         """
-        camera = kwargs['camera']
-        #det = camera.get(inputExps[0].dataId['detector'])
+        # camera = kwargs['camera']
+        # det = camera.get(inputExps[0].dataId['detector'])
         ampDict = OrderedDict()
 
         stats = afwMath.StatisticsControl(self.config.clip, self.config.nIter,
@@ -159,7 +158,8 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             stats.setCalcErrorFromInputVariance(True)
         det = inputExps[0].get().getDetector()
 
-        #for iamp, (amp, amp2) in enumerate(zip(det.getAmplifiers(), det2.getAmplifiers())):
+        # for iamp, (amp, amp2) in enumerate(zip(det.getAmplifiers(),
+        #     det2.getAmplifiers())):
         for iamp, amp in enumerate(det.getAmplifiers()):
             toStack = []
             ampCalibs = extractAmpCalibs(amp, **kwargs)
@@ -173,61 +173,21 @@ class EoCombineCalibTask(pipeBase.PipelineTask):
             combinedExp.setDetector(det)
             ampDict[amp.getName()] = combinedExp
         outputImage = self.assembleCcd.assembleCcd(ampDict)  # pylint: disable=no-member
-        self.combineHeaders(inputExps, outputImage, calibType=self.config.calibrationType)
+        # FIXME, this should be a method provided by ip_isr or cp_pipe
+        # self.combineHeaders(inputExps, outputImage,
+        #     calibType=self.config.calibrationType)
         return pipeBase.Struct(outputImage=outputImage)
 
 
-    def combineHeaders(self, expList, calib, calibType="CALIB"):
-        """Combine input headers to determine the set of common headers,
-        supplemented by calibration inputs.
-
-        Parameters
-        ----------
-        expList : `list` of `lsst.afw.image.Exposure`
-            Input list of exposures to combine.
-        calib : `lsst.afw.image.Exposure`
-            Output calibration to construct headers for.
-        calibType: `str`, optional
-            OBSTYPE the output should claim.
-
-        Returns
-        -------
-        header : `lsst.daf.base.PropertyList`
-            Constructed header.
-        """
-        # Header
-        header = calib.getMetadata()
-        header.set("OBSTYPE", calibType)
-
-        # Keywords we care about
-        comments = {"TIMESYS": "Time scale for all dates",
-                    "DATE-OBS": "Start date of earliest input observation",
-                    "MJD-OBS": "[d] Start MJD of earliest input observation",
-                    "DATE-END": "End date of oldest input observation",
-                    "MJD-END": "[d] End MJD of oldest input observation",
-                    "MJD-AVG": "[d] MJD midpoint of all input observations",
-                    "DATE-AVG": "Midpoint date of all input observations"}
-
-        # Creation date
-        now = time.localtime()
-        calibDate = time.strftime("%Y-%m-%d", now)
-        calibTime = time.strftime("%X %Z", now)
-        header.set("CALIB_CREATE_DATE", calibDate)
-        header.set("CALIB_CREATE_TIME", calibTime)
- 
-        return header
-
-
 class EoCombineBiasTaskConnections(EoCombineCalibTaskConnections):
-    """ Class snippet with connections needed to read raw amplifier data and
-    perform minimal Isr on each amplifier """
+    """ Specialization for combining bias frames """
 
 
 class EoCombineBiasTaskConfig(EoCombineCalibTaskConfig,
                               pipelineConnections=EoCombineBiasTaskConnections):
 
     def setDefaults(self):
-        # pylint: disable=no-member        
+        # pylint: disable=no-member
         self.connections.outputImage = "eoBias"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
@@ -248,17 +208,14 @@ class EoCombineBiasTaskConfig(EoCombineCalibTaskConfig,
 
 
 class EoCombineBiasTask(EoCombineCalibTask):
-    """ Class snippet for tasks that loop over amps, then over exposures
-    and produces stacked and assembled output
+    """ Specific class to combine bias frames """
 
-    """
     ConfigClass = EoCombineBiasTaskConfig
     _DefaultName = "combineBias"
 
 
 class EoCombineDarkTaskConnections(EoCombineCalibTaskConnections):
-    """ Class snippet with connections needed to read raw amplifier data and
-    perform minimal Isr on each amplifier """
+    """ Specialization dark frames """
 
     bias = copyConnect(BIAS_CONNECT)
 
@@ -288,29 +245,25 @@ class EoCombineDarkTaskConfig(EoCombineCalibTaskConfig,
 
 
 class EoCombineDarkTask(EoCombineCalibTask):
-    """ Class snippet for tasks that loop over amps, then over exposures
-    and produces stacked and assembled output
-
-    """
+    """ Specific class to combine dark exposures """
     ConfigClass = EoCombineDarkTaskConfig
     _DefaultName = "combineDark"
 
 
 class EoCombineFlatTaskConnections(EoCombineCalibTaskConnections):
-    """ Class snippet with connections needed to read raw amplifier data and
-    perform minimal Isr on each amplifier """
+    """ Specialization for flat frames """
 
     bias = copyConnect(BIAS_CONNECT)
     defects = copyConnect(DEFECTS_PREREQ_CONNECT)
     dark = copyConnect(DARK_CONNECT)
-    #gains = copyConnect(GAINS_CONNECT)
+    # gains = copyConnect(GAINS_CONNECT)
 
 
 class EoCombineFlatTaskConfig(EoCombineCalibTaskConfig,
                               pipelineConnections=EoCombineFlatTaskConnections):
 
     def setDefaults(self):
-        # pylint: disable=no-member        
+        # pylint: disable=no-member
         self.connections.outputImage = "eoFlatLow"
         self.isr.expectWcs = False
         self.isr.doSaturation = True
@@ -331,9 +284,6 @@ class EoCombineFlatTaskConfig(EoCombineCalibTaskConfig,
 
 
 class EoCombineFlatTask(EoCombineCalibTask):
-    """ Class snippet for tasks that loop over amps, then over exposures
-    and produces stacked and assembled output
-
-    """
+    """ Specific class to combine flat exposures """
     ConfigClass = EoCombineFlatTaskConfig
     _DefaultName = "combineFlat"
