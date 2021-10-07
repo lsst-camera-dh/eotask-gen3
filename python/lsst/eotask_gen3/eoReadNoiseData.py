@@ -10,6 +10,11 @@ __all__ = ["EoReadNoiseAmpExpData",
 
 
 class EoReadNoiseAmpExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure tables
+    for EoReadNoiseTask.
+
+    This is just the total noise measured for this amp for this exposure
+    """
 
     TABLELENGTH = "nExposure"
 
@@ -17,15 +22,27 @@ class EoReadNoiseAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoReadNoiseAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure-pair tables
+    for EoReadNoiseTask."""
 
     SCHEMA_CLASS = EoReadNoiseAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoReadNoiseAmpExpData, self).__init__(data=data, **kwargs)
         self.totalNoise = self.table[self.SCHEMA_CLASS.totalNoise.name]
 
 
 class EoReadNoiseAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-run table
+    for EoReadNoiseTask.
+
+    The total noise is just the median noise measured for this amp for
+    the exposures in this run.
+    """
 
     TABLELENGTH = "nAmp"
 
@@ -35,10 +52,16 @@ class EoReadNoiseAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoReadNoiseAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run tables
+    for EoReadNoiseTask."""
 
     SCHEMA_CLASS = EoReadNoiseAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoReadNoiseAmpRunData, self).__init__(data=data, **kwargs)
         self.readNoise = self.table[self.SCHEMA_CLASS.readNoise.name]
         self.totalNoise = self.table[self.SCHEMA_CLASS.totalNoise.name]
@@ -46,6 +69,9 @@ class EoReadNoiseAmpRunData(EoCalibTable):
 
 
 class EoReadNoiseDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoReadNoiseTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoReadNoiseAmpExpData,
@@ -56,6 +82,7 @@ class EoReadNoiseDataSchemaV0(EoCalibSchema):
 
 
 class EoReadNoiseData(EoCalib):
+    """Container class and interface for EoReadNoiseTask outputs."""
 
     SCHEMA_CLASS = EoReadNoiseDataSchemaV0
 
@@ -64,6 +91,11 @@ class EoReadNoiseData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoReadNoiseData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.amps = self['amps']

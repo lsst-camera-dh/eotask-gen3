@@ -23,13 +23,16 @@ class SubRegionSampler:
         self.imaging = imaging
 
     def bbox(self, x, y):
+        """ Create and return a bounding box starting at x, y """
         return lsstGeom.Box2I(lsstGeom.Point2I(int(x), int(y)),
                               lsstGeom.Extent2I(self.dx, self.dy))
 
     def subim(self, im, x, y):
+        """ Create and return a sub-image starting at x, y """
         return im.Factory(im, self.bbox(x, y))
 
     def noiseSamples(self, calibExp, statCtrl=afwMath.StatisticsControl()):
+        """ Compute the noise in a set of samples of the imaging region """
         image = calibExp.Factory(calibExp, self.imaging)
         bbox = image.getBBox()
         samples = []
@@ -42,7 +45,7 @@ class SubRegionSampler:
 
 
 class EoReadNoiseTaskConnections(EoAmpExpCalibTaskConnections):
-    
+
     outputData = cT.Output(
         name="eoReadNoise",
         doc="Electrial Optical Calibration Output",
@@ -50,9 +53,10 @@ class EoReadNoiseTaskConnections(EoAmpExpCalibTaskConnections):
         dimensions=("instrument", "detector"),
     )
 
+
 class EoReadNoiseTaskConfig(EoAmpExpCalibTaskConfig,
                             pipelineConnections=EoReadNoiseTaskConnections):
-    
+
     dx = pexConfig.Field("Size of region to sample", int, default=100)
     dy = pexConfig.Field("Size of region to sample", int, default=100)
     nsamp = pexConfig.Field("Number of samples", int, default=100)
@@ -78,18 +82,47 @@ class EoReadNoiseTaskConfig(EoAmpExpCalibTaskConfig,
 
 
 class EoReadNoiseTask(EoAmpExpCalibTask):
+    """Analysis of bias frames to measure the read noise
+    of the amplifier response.
+
+    Output is stored as `lsst.eotask_gen3.EoReadNoiseData` objects
+    """
 
     ConfigClass = EoReadNoiseTaskConfig
     _DefaultName = "readNoise"
 
     def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
+        """Construct the output data object
+
+        Parameters
+        ----------
+        amps : `Iterable` [`lsst.afw.geom.AmplifierGeometry`]
+            The amplifiers
+        nAmp : `int`
+            Number of amplifiers
+        nExposure : `int`
+            Number of exposure pairs
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoReadNoiseData`
+            Container for output data
+        """
 
         ampNames = [amp.getName() for amp in amps]
-        return EoReadNoiseData(amps=ampNames, nAmp=nAmps, nExposure=nExposure, nSample=self.config.nsamp, **kwargs)
+        return EoReadNoiseData(amps=ampNames, nAmp=nAmps,
+                               nExposure=nExposure, nSample=self.config.nsamp, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
+        """Analyze data from a single amp for a single exposure
 
-        imaging = calibExp.getDetector().getAmplifiers()[0].getRawBBox() # FIXME
+        See base class for argument description
+
+        This method just extracts noise statistics from the imaging region.
+        """
+        imaging = calibExp.getDetector().getAmplifiers()[0].getRawBBox()  # FIXME
         dx = self.config.dx
         dy = self.config.dy
         nsamp = self.config.nsamp
@@ -98,8 +131,15 @@ class EoReadNoiseTask(EoAmpExpCalibTask):
         outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise[iExp] = sampler.noiseSamples(calibExp)
 
     def analyzeAmpRunData(self, outputData, iamp, amp):
+        """Analyze data from a single amp for a run
 
-        totalNoise = afwMath.makeStatistics(outputData.ampExp["ampExp_%s" % amp.getName()].totalNoise.flatten(),
+        See base class for argument description
+
+        This method takes the median of the read noise measured per-exposure
+        """
+
+        totalNoise = afwMath.makeStatistics(outputData.ampExp["ampExp_%s"
+                                                              % amp.getName()].totalNoise.flatten(),
                                             afwMath.MEDIAN).getValue()
         systemNoise = 0.  # FIXME
         if totalNoise >= systemNoise:

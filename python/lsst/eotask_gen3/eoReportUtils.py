@@ -10,7 +10,7 @@ import os
 
 import shutil
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 from xml.dom import minidom
 
@@ -35,6 +35,7 @@ def getSlotList(raftName):
         return CORNER_SLOTS
     return ALL_SLOTS
 
+
 def makedir_safe(filepath):
     """Make a directory needed to write a file
 
@@ -47,6 +48,7 @@ def makedir_safe(filepath):
         os.makedirs(os.path.dirname(filepath))
     except OSError:
         pass
+
 
 def get_report_config_info(table_tag, **kwargs):
     """Get information about how to configure a report
@@ -138,8 +140,6 @@ def handle_file(file_name, outdir, action, overwrite=False):
     return basename
 
 
-
-
 def create_report_header(root, **kwargs):
     """Make the header node for the report
 
@@ -164,7 +164,7 @@ def create_report_header(root, **kwargs):
     title = kwargs.get('title', None)
     stylesheet = kwargs.get('stylesheet', None)
 
-    head = ET.SubElement(root, 'head')
+    head = ElementTree.SubElement(root, 'head')
 
     if title is not None:
         make_child_node(head, 'title', text=title)
@@ -177,8 +177,6 @@ def create_report_header(root, **kwargs):
         link.set('type', "text/css")
 
     return head
-
-
 
 
 def make_child_node(parent_node, child_name, **kwargs):
@@ -205,7 +203,7 @@ def make_child_node(parent_node, child_name, **kwargs):
     child_node : `xml.etree.ElementTree.SubElement`
         The child node
     """
-    child_node = ET.SubElement(parent_node, child_name)
+    child_node = ElementTree.SubElement(parent_node, child_name)
     for key, val in kwargs.items():
         if val is None:
             continue
@@ -424,7 +422,6 @@ def create_raft_table(parent_node, **kwargs):
     return table_node
 
 
-
 def create_plot_table(parent_node, table_desc, inputdir, outdir, **kwargs):
     """Create table with descriptions and a plots
 
@@ -515,8 +512,6 @@ def create_plot_tables(parent_node, table_dict, inputdir, outdir, **kwargs):
     return ntable
 
 
-
-
 def write_tree_to_html(tree, filepath=None):
     """Write a html file from an element tree
 
@@ -532,7 +527,7 @@ def write_tree_to_html(tree, filepath=None):
     else:
         outfile = open(filepath, 'w')
 
-    rough_str = ET.tostring(tree)
+    rough_str = ElementTree.tostring(tree)
     reparsed = minidom.parseString(rough_str)
     pretty_str = reparsed.toprettyxml(indent="  ")
 
@@ -574,7 +569,7 @@ def write_slot_report(dataid, inputbase, outbase, **kwargs):
         outdir = os.path.join(outbase, dataid['run'], dataid['raft'])
         html_file = os.path.join(outdir, '%s.html' % dataid['slot'])
 
-    html_node = ET.Element('html')
+    html_node = ElementTree.Element('html')
     create_report_header(html_node,
                          title="BOT Results for {run}:{raft}:{slot}".format(**dataid),
                          stylesheet=kwcopy.pop('stylesheet', os.path.basename(config_info['cssfile'])))
@@ -588,7 +583,6 @@ def write_slot_report(dataid, inputbase, outbase, **kwargs):
         write_tree_to_html(html_node, html_file)
     else:
         sys.stdout.write("No data, skipping\n")
-
 
 
 def write_raft_report(dataid, inputbase, outbase, **kwargs):
@@ -623,7 +617,7 @@ def write_raft_report(dataid, inputbase, outbase, **kwargs):
         html_file = os.path.join(outdir, 'index.html')
 
     kwcopy['html_file'] = html_file
-    html_node = ET.Element('html')
+    html_node = ElementTree.Element('html')
     create_report_header(html_node,
                          title="Results for {run}:{raft}".format(**dataid),
                          stylesheet=kwcopy.pop('stylesheet', os.path.basename(config_info['cssfile'])))
@@ -683,7 +677,7 @@ def write_run_report(run, inputbase, outbase, **kwargs):
     kwcopy['html_file'] = html_file
     sys.stdout.write("Writing report for {run}\n".format(**dataid))
 
-    html_node = ET.Element('html')
+    html_node = ElementTree.Element('html')
     create_report_header(html_node,
                          title="Results for {run}".format(**dataid),
                          stylesheet=kwcopy.pop('stylesheet', os.path.basename(config_info['cssfile'])))
@@ -707,4 +701,3 @@ def write_run_report(run, inputbase, outbase, **kwargs):
         write_tree_to_html(html_node, html_file)
     else:
         sys.stdout.write("No data, skipping raft\n")
-

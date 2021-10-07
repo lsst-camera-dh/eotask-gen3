@@ -1,15 +1,10 @@
-
 import numpy as np
 
-import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
-import lsst.afw.detection as afwDetect
-
-from lsst.ip.isr import Defects
 
 from .eoCalibBase import (EoDetRunCalibTaskConfig, EoDetRunCalibTaskConnections, EoDetRunCalibTask,
-                          extractAmpImage, copyConnect)
+                          extractAmpImage)
 from .eoDarkCurrentData import EoDarkCurrentData
 
 __all__ = ["EoDarkCurrentTask", "EoDarkCurrentTaskConfig"]
@@ -24,7 +19,7 @@ class EoDarkCurrentTaskConnections(EoDetRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
         isCalibration=True,
     )
-    
+
     outputData = cT.Output(
         name="eoDarkCurrent",
         doc="Electrial Optical Calibration Output",
@@ -32,11 +27,12 @@ class EoDarkCurrentTaskConnections(EoDetRunCalibTaskConnections):
         dimensions=("instrument", "detector"),
     )
 
+
 class EoDarkCurrentTaskConfig(EoDetRunCalibTaskConfig,
                               pipelineConnections=EoDarkCurrentTaskConnections):
-   
+
     def setDefaults(self):
-        # pylint: disable=no-member        
+        # pylint: disable=no-member
         self.connections.stackedCalExp = "eoDark"
         self.connections.outputData = "eoDarkCurrent"
 
@@ -51,34 +47,49 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
 
         Parameters
         ----------
-        stackedCalExp :
-            Input data
-
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
+        stackedCalExp :: `lsst.afw.Exposure`
+            Input data, i.e., a stacked exposure of dark frames
 
         Returns
         -------
-        outputData : `EoCalib`
+        outputData : `lsst.eotask_gen3.EoDarkCurrentData`
             Output data in formatted tables
         """
-        camera = kwargs.get('camera')
+        camera = kwargs.get('camera', None)
         det = stackedCalExp.getDetector()
         amps = det.getAmplifiers()
         nAmp = len(amps)
-        ampNames = [amp.getName() for amp in amps]
-        outputData = self.makeOutputData(amps=ampNames, nAmp=nAmp, camera=camera, detector=det)
+        outputData = self.makeOutputData(nAmp=nAmp, detector=det, camera=camera)
         for iAmp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
             self.analyzeAmpRunData(ampExposure, outputData, iAmp, amp)
         return pipeBase.Struct(outputData=outputData)
-            
-    def makeOutputData(self, amps, nAmp, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+
+    def makeOutputData(self, nAmp, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        """Construct the output data object
+
+        Parameters
+        ----------
+        nAmp : `int`
+            Number of amplifiers
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoDarkCurrentData`
+            Container for output data
+        """
         return EoDarkCurrentData(nAmp=nAmp, **kwargs)
 
-    
     def analyzeAmpRunData(self, ampExposure, outputData, iAmp, amp, **kwargs):
+        """Analyze data from a single amplifier for the run.
+
+        See base class for argument description
+
+        This just extract the median and 95% quantile of the signal per pixel
+        from the stacked dark exposure
+        """
 
         try:
             exptime = ampExposure.getMetadata().toDict()['DARKTIME']

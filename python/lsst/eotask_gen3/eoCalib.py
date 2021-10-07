@@ -3,26 +3,18 @@
 
 import os
 import sys
-import warnings
-import inspect
 import yaml
 
 from typing import Mapping
 
 from collections import OrderedDict
 
-import matplotlib
-import matplotlib.pyplot as plt
-
 from astropy.table import Table
-from astropy.io import fits
 from astropy.utils.diff import report_diff_values
-from lsst.utils import doImport
 from lsst.daf.butler.core.utils import getFullTypeName
 from lsst.ip.isr import IsrCalib
 
 from .eoCalibTable import EoCalibTableHandle
-from .eoPlotUtils import EoPlotHandle
 
 
 __all__ = ["EoCalibSchema", "EoCalib",
@@ -232,7 +224,7 @@ class EoCalib(IsrCalib):
             raise TypeError("EoCalib input data must be None, Table or dict, not %s" % (type(data)))
         if self._tableList:
             self._tableList[0].meta['CALIBCLS'] = getFullTypeName(self)
-            self._tableList[0].meta['CALIBSCH'] = self._schema.fullName
+            self._tableList[0].meta['CALIBSCH'] = self._schema.fullName()
 
     @classmethod
     def shortName(cls):
@@ -276,7 +268,7 @@ class EoCalib(IsrCalib):
             Detector to use to set parameters from.
 
         """
-        pass        
+        pass
 
     @classmethod
     def fromDict(cls, dictionary, **kwargs):
@@ -292,7 +284,7 @@ class EoCalib(IsrCalib):
         """ Construct from a list of `astropy.io.table` """
         schemaName = tableList[0].meta.get('CALIBSCH', None)
         if schemaName is not None:
-            kwargs['schema'] = storedClass.schemaDict()[schemaName]()
+            kwargs['schema'] = cls.schemaDict()[schemaName]()
         return cls(data=tableList, **kwargs)
 
     def toTable(self):
@@ -344,23 +336,24 @@ class EoCalib(IsrCalib):
 
     @classmethod
     def fillReportConfigDict(cls, configDict):
-        """ Write the yaml config for the html report for this class for the slot level """
-        
+        """ Write the yaml config for the html report for this class for the
+        slot level """
+
         if not hasattr(cls, 'figHandles'):
             return
 
         templateMap = dict(slot=os.path.join("camera", "{raft}", "{slot}", "%s_{raft}_{slot}_%s.png"),
-                           raft=os.path.join("camera", "{raft}", "%s_{raft}_%s.png"), 
+                           raft=os.path.join("camera", "{raft}", "%s_{raft}_%s.png"),
                            camera=os.path.join("camera", "%s_camera_%s.png"))
         keyMap = dict(slot='slot_plot_tables',
                       raft='raft_plot_tables',
                       camera='run_plot_tables')
 
         for figHandle in cls.figHandles:
-            
+
             tablesKey = keyMap[figHandle.level]
             whichTemplate = templateMap[figHandle.level]
-            
+
             if tablesKey not in configDict:
                 configDict[tablesKey] = {}
 
@@ -375,7 +368,7 @@ class EoCalib(IsrCalib):
     def makeFigures(cls, baseName, obj):
         """ Make a set of matplotlib figures for this detector """
         if hasattr(cls, 'figHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(obj)) 
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(obj))
                                 for handle in cls.figHandles if handle.level == 'slot'])
         return OrderedDict()
 
@@ -383,7 +376,7 @@ class EoCalib(IsrCalib):
     def makeRaftFigures(cls, baseName, raftDataDict):
         """ Make a set of matplotlib figures for a raft """
         if hasattr(cls, 'figHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(raftDataDict)) 
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(raftDataDict))
                                 for handle in cls.figHandles if handle.level == 'raft'])
         return OrderedDict()
 
@@ -402,7 +395,6 @@ class EoCalib(IsrCalib):
             fullPath = os.path.join(basePath, "%s.%s" % (key, fileType))
             print("Writing %s" % fullPath)
             val.savefig(fullPath)
-
 
 
 EO_CALIB_CLASS_DICT = OrderedDict()
@@ -433,9 +425,18 @@ def WriteSchemaMarkdown(fileName):
             fout.write("\n\n")
 
 
-
 def WriteReportConfigYaml(fileName, dataClasses=None):
-    
+    """ Iterate on some `EoCalib` sub-classes
+    and for each one iterate on the defined figures and
+    generate the correspond yaml need to configure the static report.
+
+    Parameters
+    ----------
+    fileName : `str`
+        The name of the output file
+    dataClasses : `Iterable` [`type`]
+        The data classes.  If None, will use `EO_CALIB_CLASS_DICT.values()`
+    """
     theDict = dict(defaults=dict(action='copy',
                                  header_row_class='header_row',
                                  table_row_class='table_row',
@@ -448,6 +449,6 @@ def WriteReportConfigYaml(fileName, dataClasses=None):
         dataClasses = list(EO_CALIB_CLASS_DICT.values())
     for val in dataClasses:
         val.fillReportConfigDict(theDict)
-    
+
     with open(fileName, 'w') as fout:
         yaml.dump(theDict, fout)

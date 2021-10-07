@@ -22,10 +22,10 @@ class EoFe55TaskConnections(EoAmpExpCalibTaskConnections):
 
 
 class EoFe55TaskConfig(EoAmpExpCalibTaskConfig,
-                                pipelineConnections=EoFe55TaskConnections):
+                       pipelineConnections=EoFe55TaskConnections):
 
     def setDefaults(self):
-        # pylint: disable=no-member                
+        # pylint: disable=no-member
         self.connections.outputData = "eoFe55"
         self.isr.expectWcs = False
         self.isr.doSaturation = False
@@ -82,12 +82,12 @@ class EoFe55Task(EoAmpExpCalibTask):
                                          camera=camera, detector=det)
 
         for iamp, amp in enumerate(amps):
-            ampCalibs = extractAmpCalibs(amp, **kwargs)                                    
+            ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iExp, inputExp in enumerate(inputExps):
                 calibExp = runIsrOnAmp(self, inputExp.get(parameters={'amp': iamp}), **ampCalibs)
                 self.analyzeAmpExpData(calibExp, outputData, amp, iExp)
         return pipeBase.Struct(outputData=outputData)
-            
+
     def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ
         return EoFe55Data(amps=amps, nAmps=nAmps, nExposure=nExposure, **kwargs)
 

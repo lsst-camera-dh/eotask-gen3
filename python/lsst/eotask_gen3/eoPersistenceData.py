@@ -9,6 +9,11 @@ __all__ = ["EoPersistenceAmpExpData",
 
 
 class EoPersistenceAmpExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure tables
+    for EoPersistenceTask.
+
+    These are summary statistics about the signal in the imaging region
+    """
 
     TABLELENGTH = "nExposure"
 
@@ -17,16 +22,25 @@ class EoPersistenceAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoPersistenceAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure tables
+    for EoPersistenceTask."""
 
     SCHEMA_CLASS = EoPersistenceAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoPersistenceAmpExpData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.stdev = self.table[self.SCHEMA_CLASS.stdev.name]
 
 
 class EoPersistenceDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoPersistenceTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoPersistenceAmpExpData,
@@ -34,6 +48,7 @@ class EoPersistenceDataSchemaV0(EoCalibSchema):
 
 
 class EoPersistenceData(EoCalib):
+    """Container class and interface for EoPersistenceTask outputs."""
 
     SCHEMA_CLASS = EoPersistenceDataSchemaV0
 
@@ -42,6 +57,11 @@ class EoPersistenceData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoPersistenceData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
 

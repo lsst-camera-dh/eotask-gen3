@@ -11,6 +11,13 @@ __all__ = ["EoFlatPairAmpExpData",
 
 
 class EoFlatPairAmpExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure-pair tables
+    for EoFlatPairTask.
+
+    These are the means signals from the two exposure,
+    the mean of the two means, and the variance of the
+    per-row means
+    """
 
     TABLELENGTH = "nPair"
 
@@ -21,10 +28,16 @@ class EoFlatPairAmpExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoFlatPairAmpExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure-pair tables
+    for EoFlatPairTask."""
 
     SCHEMA_CLASS = EoFlatPairAmpExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoFlatPairAmpExpData, self).__init__(data=data, **kwargs)
         self.signal = self.table[self.SCHEMA_CLASS.signal.name]
         self.flat1Signal = self.table[self.SCHEMA_CLASS.flat1Signal.name]
@@ -33,6 +46,12 @@ class EoFlatPairAmpExpData(EoCalibTable):
 
 
 class EoFlatPairAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-run table
+    for EoFlatPairTask.
+
+    These are the quantities derived from fitting the signal v. photodiode
+    curves
+    """
 
     TABLELENGTH = 'nAmp'
 
@@ -44,6 +63,8 @@ class EoFlatPairAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoFlatPairAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run tables
+    for EoFlatPairTask."""
 
     SCHEMA_CLASS = EoFlatPairAmpRunDataSchemaV0
 
@@ -57,6 +78,18 @@ class EoFlatPairAmpRunData(EoCalibTable):
 
 
 class EoFlatPairDetExpDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-ccd, per-exposure-pair table
+    for EoFlatPairTask.
+
+    The flux is computed from the photodiode data.
+
+    As for the other quantities, these are copied from the
+    EO-analysis-jobs code and in part
+    are retained to allow for possible conversion of old data.
+
+    Note that these data actually discernable from the dataId, but having
+    them here makes it easier to make plots of trends.
+    """
 
     TABLELENGTH = "nPair"
 
@@ -66,10 +99,16 @@ class EoFlatPairDetExpDataSchemaV0(EoCalibTableSchema):
 
 
 class EoFlatPairDetExpData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure-pair table
+    for EoFlatPairTask."""
 
     SCHEMA_CLASS = EoFlatPairDetExpDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates class properties with columns
+        """
         super(EoFlatPairDetExpData, self).__init__(data=data, **kwargs)
         self.flux = self.table[self.SCHEMA_CLASS.flux.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
@@ -77,6 +116,9 @@ class EoFlatPairDetExpData(EoCalibTable):
 
 
 class EoFlatPairDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoFlatPairTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoFlatPairAmpExpData,
@@ -87,9 +129,10 @@ class EoFlatPairDataSchemaV0(EoCalibSchema):
 
     detExp = EoCalibTableHandle(tableName="detExp",
                                 tableClass=EoFlatPairDetExpData)
-    
+
 
 class EoFlatPairData(EoCalib):
+    """Container class and interface for EoFlatPairTask outputs."""
 
     SCHEMA_CLASS = EoFlatPairDataSchemaV0
 
@@ -98,6 +141,11 @@ class EoFlatPairData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties with
+        sub-tables
+        """
         super(EoFlatPairData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.amps = self['amps']

@@ -50,9 +50,10 @@ class EoPtcTaskConfig(EoAmpPairCalibTaskConfig,
                       pipelineConnections=EoPtcTaskConnections):
 
     maxPDFracDev = pexConfig.Field("Maximum photodiode fractional deviation", float, default=0.05)
-    maxFracOffset = pexConfig.Field("maximum fraction offset from median gain curve to omit points from PTC fit.", float, default=0.2)
+    maxFracOffset = pexConfig.Field("maximum fraction offset from median gain curve to omit points from PTC fit.",  # noqa
+                                    float, default=0.2)
     sigCut = pexConfig.Field("Cut on outliers in sigma", float, default=5.0)
-    
+
     def setDefaults(self):
         # pylint: disable=no-member
         self.connections.outputData = "eoPtc"
@@ -73,6 +74,11 @@ class EoPtcTaskConfig(EoAmpPairCalibTaskConfig,
 
 
 class EoPtcTask(EoAmpPairCalibTask):
+    """Analysis of pair of flat-field exposure to extract the
+    photon-tranfer-curve (PTC) of the amplifier response.
+
+    Output is stored as `lsst.eotask_gen3.EoPtcData` objects
+    """
 
     ConfigClass = EoPtcTaskConfig
     _DefaultName = "eoPtc"
@@ -80,29 +86,24 @@ class EoPtcTask(EoAmpPairCalibTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
-    
+
     def run(self, inputPairs, **kwargs):  # pylint: disable=arguments-differ
         """ Run method
 
         Parameters
         ----------
-        inputPairs :
+        inputPairs : `list` [`tuple` [`lsst.daf.Butler.DeferedDatasetRef`] ]
             Used to retrieve the exposures
 
-        Keywords
-        --------
-        camera : `lsst.obs.lsst.camera`
-        bias : `ExposureF`
-        defects : `Defects`
-        gains : `Gains`
+        See base class for keywords.
 
         Returns
         -------
-        outputData : `EoCalib`
+        outputData : `lsst.eotask_gen3.EoPtcData`
             Output data in formatted tables
         """
         camera = kwargs['camera']
-        #det = camera.get(inputPairs[0][0][0].dataId['detector'])
+        # det = camera.get(inputPairs[0][0][0].dataId['detector'])
         nPair = len(inputPairs)
         if nPair < 1:
             raise RuntimeError("No valid input data")
@@ -117,22 +118,51 @@ class EoPtcTask(EoAmpPairCalibTask):
         if photodiodePairs is not None:
             self.analyzePdData(photodiodePairs, outputData)
         for iamp, amp in enumerate(amps):
-            ampCalibs = extractAmpCalibs(amp, **kwargs)            
+            ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
                     print("exposurePair %i has %i items" % (iPair, len(inputPair)))
                     continue
                 calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
-                calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)                
+                calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
                 amp2 = calibExp1.getDetector().getAmplifiers()[0]
                 self.analyzeAmpPairData(calibExp1, calibExp2, outputData, amp2, iPair)
             self.analyzeAmpRunData(outputData, iamp, amp2)
         return pipeBase.Struct(outputData=outputData)
-    
+
     def makeOutputData(self, amps, nAmps, nPair, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        """Construct the output data object
+
+        Parameters
+        ----------
+        amps : `Iterable` [`str`]
+            The amplifier names
+        nAmp : `int`
+            Number of amplifiers
+        nPair : `int`
+            Number of exposure pairs
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoPtcData`
+            Container for output data
+        """
         return EoPtcData(amps=amps, nAmp=nAmps, nPair=nPair, **kwargs)
 
     def analyzePdData(self, photodiodeDataPairs, outputData):
+        """ Analyze the photodidode data and fill the output table
+
+        Parameters
+        ----------
+        photodiodeDataPairs : `list` [`tuple` [`astropy.Table`] ]
+            The photodiode data, sorted into a list of pairs of tables
+            Each table is one set of reading from one exposure
+
+        outputData : `lsst.eotask_gen3.EoFlatPairData`
+            Container for output data
+        """
         outTable = outputData.detExp['detExp']
         for iPair, pdData in enumerate(photodiodeDataPairs):
             pd1 = self.getFlux(pdData[0].get())
@@ -142,19 +172,34 @@ class EoPtcTask(EoAmpPairCalibTask):
             else:
                 flux = 0.5*(pd1 * pd2)
             outTable.flux[iPair] = flux
-            outTable.seqnum[iPair] = 0 #
-            outTable.dayobs[iPair] = 0 #
+            outTable.seqnum[iPair] = 0  #
+            outTable.dayobs[iPair] = 0  #
 
-    def analyzeAmpPairData(self, calibExp1, calibExp2, outputData, amp, iPair):  # pylint: disable=too-many-arguments
+    def analyzeAmpPairData(self, calibExp1, calibExp2,
+                           outputData, amp, iPair):  # pylint: disable=too-many-arguments
+        """Analyze data from a single amp for a single exposure-pair
+
+        See base class for argument description
+
+        This method just extracts summary statistics from the
+        amplifier imaging region.
+        """
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         results = self.pairMean(calibExp1, calibExp2, amp, self.statCtrl)
         outTable.mean[iPair] = results[0]
         outTable.var[iPair] = results[1]
         outTable.discard[iPair] = results[2]
-        
+
     def analyzeAmpRunData(self, outputData, iamp, amp):
+        """Analyze data from a single amp for a run
+
+        See base class for argument description
+
+        This method fits the PTC curve and stores the result in
+        the output data container
+        """
         inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
-        inTableExp = outputData.detExp['detExp']
+        # inTableExp = outputData.detExp['detExp']
         outTable = outputData.amps['amps']
         results = self.fitPtcCurve(inTableAmp.mean, inTableAmp.var, self.config.sigCut)
         outTable.ptcGain[iamp] = results[0]
@@ -164,11 +209,14 @@ class EoPtcTask(EoAmpPairCalibTask):
         outTable.ptcNoise[iamp] = results[4]
         outTable.ptcNoiseError[iamp] = results[5]
         outTable.ptcTurnoff[iamp] = results[6]
-        
+
     @staticmethod
     def pairMean(calibExp1, calibExp2, amp, statCtrl):
-        mean1 = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()
-        mean2 = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image, afwMath.MEAN, statCtrl).getValue()        
+        """Return the mean of the two exposures, and the mean of the means"""
+        mean1 = afwMath.makeStatistics(calibExp1[amp.getRawDataBBox()].image,
+                                       afwMath.MEAN, statCtrl).getValue()
+        mean2 = afwMath.makeStatistics(calibExp2[amp.getRawDataBBox()].image,
+                                       afwMath.MEAN, statCtrl).getValue()
         fmean = (mean1 + mean2)/2.
         # Pierre Astier's symmetric weights to make the difference
         # image have zero mean
@@ -179,9 +227,9 @@ class EoPtcTask(EoAmpPairCalibTask):
 
         # Make a robust estimate of variance by filtering outliers
         image1 = np.ravel(calibExp1.image.array)
-        image2 = np.ravel(calibExp2.image.array)                    
+        image2 = np.ravel(calibExp2.image.array)
         fdiff = image1 - image2
-        mad = astats.mad_std(fdiff)  #/2.
+        mad = astats.mad_std(fdiff)  # /2.
         # The factor 14.826 below makes the filter the equivalent of a 10-sigma
         # cut for a normal distribution
         keep = np.where((np.abs(fdiff) < (mad*14.826)))[0]
@@ -245,6 +293,13 @@ class EoPtcTask(EoAmpPairCalibTask):
 
     @staticmethod
     def getFlux(pdData, factor=5):
+        """Method to intergrate the flux
+
+        This does top-hat integration after removing an offset level.
+
+        This removes the baseline computed by taking the median of all
+        readings less than 1/'factor' times maximum reading.
+        """
         x = pdData['Time']
         y = pdData['Current']
         ythresh = (max(y) - min(y))/factor + min(y)

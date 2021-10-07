@@ -14,9 +14,10 @@ def main():
     parser = argparse.ArgumentParser(prog='eoStaticReport.py')
     parser.add_argument('-b', '--butler', type=str, help='Butler Repo')
     parser.add_argument('-c', '--collection', type=str, help="Input collection")
-    parser.add_argument('-d', '--dataset_types', action='append', type=str, default=None, help="Dataset types")
+    parser.add_argument('-d', '--dataset_types', action='append', type=str,
+                        default=None, help="Dataset types")
     parser.add_argument('-o', '--outdir', type=str, help='Path to output area')
-    parser.add_argument('-w', '--where', type=str, help='selection functino')
+    parser.add_argument('-w', '--where', type=str, help='selection function')
 
     # unpack options
     args = parser.parse_args()
@@ -25,7 +26,7 @@ def main():
     task = EoStaticPlotTask()
 
     kwargs = {}
-    
+
     def filterDatasetType(dt):
         return dt.storageClass.pytype.__name__ == 'IsrCalib'
 
@@ -41,7 +42,8 @@ def main():
 
     for dataset_type in dataset_types:
         inputRefs = list(butler.registry.queryDatasets(dataset_type, collections=[args.collection], **kwargs))
-        inputData = [butler.get(dataset_type, inputRef.dataId, collections=[args.collection]) for inputRef in inputRefs]
+        inputData = [butler.get(dataset_type, inputRef.dataId,
+                                collections=[args.collection]) for inputRef in inputRefs]
         if not inputData:
             continue
         refObj, cameraDict = task.buildCameraDict(inputData, inputRefs, butler)

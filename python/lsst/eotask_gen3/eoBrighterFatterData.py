@@ -10,6 +10,11 @@ __all__ = ["EoBrighterFatterAmpPairData",
 
 
 class EoBrighterFatterAmpPairDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-exposure-pair tables
+    for EoBrighterFatterTask
+
+    These are the covariances (and their errors) from the imaging region data
+    """
 
     TABLELENGTH = "nPair"
 
@@ -19,10 +24,16 @@ class EoBrighterFatterAmpPairDataSchemaV0(EoCalibTableSchema):
 
 
 class EoBrighterFatterAmpPairData(EoCalibTable):
+    """Container class and interface for per-amp, per-exposure-pair tables
+    for EoBrighterFatterTask."""
 
     SCHEMA_CLASS = EoBrighterFatterAmpPairDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        This just associates class properties with columns
+        """
         super(EoBrighterFatterAmpPairData, self).__init__(data=data, **kwargs)
         self.mean = self.table[self.SCHEMA_CLASS.mean.name]
         self.covarience = self.table[self.SCHEMA_CLASS.covarience.name]
@@ -30,6 +41,12 @@ class EoBrighterFatterAmpPairData(EoCalibTable):
 
 
 class EoBrighterFatterAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amplifier, per-run table
+    for EoBrighterFatterTask.
+
+    These are the correlations, the trends on those correlations
+    with increasing signal level and the uncertainties.
+    """
 
     TABLELENGTH = "nAmp"
 
@@ -45,10 +62,16 @@ class EoBrighterFatterAmpRunDataSchemaV0(EoCalibTableSchema):
 
 
 class EoBrighterFatterAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run table
+    for EoBrighterFatterTask."""
 
     SCHEMA_CLASS = EoBrighterFatterAmpRunDataSchemaV0
 
     def __init__(self, data=None, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        This just associates class properties with columns
+        """
         super(EoBrighterFatterAmpRunData, self).__init__(data=data, **kwargs)
         self.bfMean = self.table[self.SCHEMA_CLASS.bfMean.name]
         self.bfXCorr = self.table[self.SCHEMA_CLASS.bfXCorr.name]
@@ -62,16 +85,20 @@ class EoBrighterFatterAmpRunData(EoCalibTable):
 
 
 class EoBrighterFatterDataSchemaV0(EoCalibSchema):
+    """Schema definitions for output data for EoBrighterFatterTask
+
+    This defines correct versions of the sub-tables"""
 
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
-                                    tableClass=EoBrighterFatterAmpPairData,
-                                    multiKey="amps")
+                                tableClass=EoBrighterFatterAmpPairData,
+                                multiKey="amps")
 
     amps = EoCalibTableHandle(tableName="amps",
                               tableClass=EoBrighterFatterAmpRunData)
 
 
 class EoBrighterFatterData(EoCalib):
+    """Container class and interface for EoBrighterFatterTask outputs."""
 
     SCHEMA_CLASS = EoBrighterFatterDataSchemaV0
 
@@ -80,6 +107,11 @@ class EoBrighterFatterData(EoCalib):
     _VERSION = SCHEMA_CLASS.version()
 
     def __init__(self, **kwargs):
+        """C'tor, arguments are passed to base class.
+
+        Class specialization just associates instance properties
+        with sub-tables
+        """
         super(EoBrighterFatterData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
         self.amps = self['amps']
@@ -89,22 +121,25 @@ class EoBrighterFatterData(EoCalib):
 def plotSlotBrighterFatter(obj):
     return nullFigure()
 
+
 @EoPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov10 Mosaic")
 def plotBrighterFatterCov01Mosaic(cameraDataDict):
     return nullFigure()
+
 
 @EoPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov01 Mosaic")
 def plotBrighterFatterCov10Mosaic(cameraDataDict):
     return nullFigure()
 
+
 @EoPlotMethod(EoBrighterFatterData, "xcorr_hist", "camera", "hist", "Brighter-Fatter cov10")
 def plotBrighterFatterCov01Hist(cameraDataDict):
     return nullFigure()
 
+
 @EoPlotMethod(EoBrighterFatterData, "ycorr_hist", "camera", "hist", "Brighter-Fatter cov01")
 def plotBrighterFatterCov10Hist(cameraDataDict):
     return nullFigure()
-
 
 
 RegisterEoCalibSchema(EoBrighterFatterData)

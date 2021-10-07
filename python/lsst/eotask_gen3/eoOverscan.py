@@ -4,8 +4,7 @@ import lsst.afw.math as afwMath
 
 import lsst.pipe.base.connectionTypes as cT
 
-from .eoCalibBase import (EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask,\
-                          extractAmpImage, OUTPUT_DEFECTS_CONNECT, copyConnect)
+from .eoCalibBase import EoAmpExpCalibTaskConfig, EoAmpExpCalibTaskConnections, EoAmpExpCalibTask
 from .eoOverscanData import EoOverscanData
 
 __all__ = ["EoOverscanTask", "EoOverscanTaskConfig"]
@@ -45,6 +44,12 @@ class EoOverscanTaskConfig(EoAmpExpCalibTaskConfig,
 
 
 class EoOverscanTask(EoAmpExpCalibTask):
+    """Analysis of overscan region in flat exposures
+
+    Primarily this just makes summary statisitcs of the overscan regions
+
+    Output is stored as `lsst.eotask_gen3.EoOverscanData` objects
+    """
 
     ConfigClass = EoOverscanTaskConfig
     _DefaultName = "eoOverscan"
@@ -52,15 +57,42 @@ class EoOverscanTask(EoAmpExpCalibTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.statCtrl = afwMath.StatisticsControl()
-    
-    def makeOutputData(self, amps, nAmps, nExposure, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+
+    def makeOutputData(self, amps, nAmps,
+                       nExposure, **kwargs):  # pylint: disable=arguments-differ,no-self-use
+        """Construct the output data object
+
+        Parameters
+        ----------
+        amps : `Iterable` [`lsst.afw.geom.AmplifierGeometry`]
+            The amplifiers
+        nAmps : `int`
+            Number of amplifiers
+        nExposure : `int`
+            Number of exposure pairs
+
+        kwargs are passed to `lsst.eotask_gen3.EoCalib` base class constructor
+
+        Returns
+        -------
+        outputData : `lsst.eotask_gen3.EoOverscanData`
+            Container for output data
+        """
         ampNames = [amp.getName() for amp in amps]
         amp = amps[0]
         nCol = amp.getRawSerialOverscanBBox().getWidth() + 2
         nRow = amp.getRawParallelOverscanBBox().getHeight() + 2
-        return EoOverscanData(amps=ampNames, nAmp=nAmps, nExposure=nExposure, nRow=nRow, nCol=nCol)
+        return EoOverscanData(amps=ampNames, nAmp=nAmps,
+                              nExposure=nExposure, nRow=nRow, nCol=nCol, **kwargs)
 
     def analyzeAmpExpData(self, calibExp, outputData, iamp, amp, iExp):
+        """Analyze data from a single amp for a single exposure
+
+        See base class for argument description
+
+        This method just extracts summary statistics from the
+        amplifier overscan regions.
+        """
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
 
         xmin = amp.getRawDataBBox().getMinX()

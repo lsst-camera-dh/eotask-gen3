@@ -98,8 +98,8 @@ class Estimator:
         if isinstance(other, Estimator):
             result.value = self.value*other.value
             result.error = (np.abs(result.value)
-                            * np.sqrt((self.error/self.value)**2 +
-                                      (other.error/other.value)**2))
+                            * np.sqrt((self.error/self.value)**2
+                                      + (other.error/other.value)**2))
         else:
             result.value = self.value*other
             result.error = self.error*other
@@ -116,8 +116,8 @@ class Estimator:
         if isinstance(other, Estimator):
             result.value = self.value/other.value
             result.error = (np.abs(result.value)
-                            * np.sqrt((self.error/self.value)**2 +
-                                      (other.error/other.value)**2))
+                            * np.sqrt((self.error/self.value)**2
+                                      + (other.error/other.value)**2))
         else:
             result.value = self.value/other
             result.error = self.error/other
@@ -134,7 +134,6 @@ class Estimator:
             return "%s +/- %s" % (self.value, self.error)
         return ' +/- '.join((self._format_str.format(self.value),
                              self._format_str.format(self.error)))
-
 
 
 class SubImage:
@@ -174,7 +173,8 @@ class SubImage:
         biasEstimate = Estimator()
         biasEstimate.value = afwMath.makeStatistics(subim.image, statistic).getValue()
         num_pix = len(subim.getImage().getArray().flatten())
-        biasEstimate.error = afwMath.makeStatistics(subim.image, afwMath.STDEV).getValue()/np.sqrt(float(num_pix))  # pylint: disable=no-member
+        biasEstimate.error = afwMath.makeStatistics(subim.image, afwMath.STDEV).getValue()\
+            / np.sqrt(float(num_pix))  # pylint: disable=no-member
         return biasEstimate
 
     def __call__(self, start, end=None):
@@ -196,7 +196,7 @@ class SubImage:
 
 
 def estimateCti(calibExp, amp, direction, overscans, statCtrl):
-    nFrames = 10 # alibExp.meta['nFrames']
+    nFrames = 10  # alibExp.meta['nFrames']
     subimage = SubImage(calibExp, amp, overscans, direction)
     lastpix = subimage.lastpix
 
@@ -224,5 +224,3 @@ def estimateCti(calibExp, amp, direction, overscans, statCtrl):
     chargelosspt = (trailed/sig)/(lastpix + 1.)
 
     return chargelosspt
-
-        
