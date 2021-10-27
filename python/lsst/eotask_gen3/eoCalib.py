@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 from astropy.table import Table
 from astropy.utils.diff import report_diff_values
-from lsst.daf.butler.core.utils import getFullTypeName
+from lsst.utils.introspection import get_full_type_name
 from lsst.ip.isr import IsrCalib
 
 from .eoCalibTable import EoCalibTableHandle
@@ -223,7 +223,7 @@ class EoCalib(IsrCalib):
         else:  # pragma: no cover
             raise TypeError("EoCalib input data must be None, Table or dict, not %s" % (type(data)))
         if self._tableList:
-            self._tableList[0].meta['CALIBCLS'] = getFullTypeName(self)
+            self._tableList[0].meta['CALIBCLS'] = get_full_type_name(self)
             self._tableList[0].meta['CALIBSCH'] = self._schema.fullName()
 
     @classmethod
