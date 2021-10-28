@@ -260,14 +260,14 @@ class EoPtcTask(EoAmpPairCalibTask):
             while index != indexOld and count < 10:
                 try:
                     results = leastsq(residuals, pars, full_output=1,
-                                      args=(mean[index], var[index]))
+                                      args=(mean[index].data.flatten(), var[index].data.flatten()))
                 except TypeError as err:
                     if self.logger is not None:
                         self.logger.info(err)
                         self.logger.info('Too few remaining mean-variance points:  %s' % len(index))
 
                 pars, cov = results[:2]
-                sigResids = residuals(pars, mean, var)
+                sigResids = residuals(pars, mean.data.flatten(), var.data.flatten())
                 indexOld = copy.deepcopy(index)
                 index = list(np.where(np.abs(sigResids) < sigCut)[0])
                 count += 1

@@ -66,7 +66,7 @@ class EoGainStabilityDetExpData(EoCalibTable):
 
         This just associates class properties with columns
         """
-        super(EoGainStabilityDetExpData, self).__init__(data=None, **kwargs)
+        super(EoGainStabilityDetExpData, self).__init__(data=data, **kwargs)
         self.mjd = self.table[self.SCHEMA_CLASS.mjd.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
         self.flux = self.table[self.SCHEMA_CLASS.flux.name]

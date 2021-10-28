@@ -111,7 +111,7 @@ class EoPtcDetPairData(EoCalibTable):
 
         This just associates class properties with columns
         """
-        super(EoPtcDetPairData, self).__init__(data=None, **kwargs)
+        super(EoPtcDetPairData, self).__init__(data=data, **kwargs)
         self.flux = self.table[self.SCHEMA_CLASS.flux.name]
         self.seqnum = self.table[self.SCHEMA_CLASS.seqnum.name]
         self.dayobs = self.table[self.SCHEMA_CLASS.dayobs.name]

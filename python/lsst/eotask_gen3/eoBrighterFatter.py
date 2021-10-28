@@ -120,16 +120,20 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
 
         meanidx = self.config.meanindex
 
-        outTable.bfMean = inTable.mean[meanidx]
-        outTable.bfXCorr[iamp] = inTable.covarience[meanidx, 0, 1]
-        outTable.bfXCorrErr[iamp] = inTable.covarienceError[meanidx, 0, 1]
-        outTable.bfYCorr[iamp] = inTable.covarience[meanidx, 1, 0]
-        outTable.bfYCorrErr[iamp] = inTable.covarienceError[meanidx, 1, 0]
+        means = inTable.mean.data.flatten()
+        covs = inTable.covarience.data
+        covErrors = inTable.covarienceError.data
+
+        outTable.bfMean[iamp] = means[meanidx]
+        outTable.bfXCorr[iamp] = covs[meanidx, 0, 1]
+        outTable.bfXCorrErr[iamp] = covErrors[meanidx, 0, 1]
+        outTable.bfYCorr[iamp] = covs[meanidx, 1, 0]
+        outTable.bfYCorrErr[iamp] = covErrors[meanidx, 1, 0]
 
         outTable.bfXSlope[iamp], outTable.bfXSlopeErr[iamp] =\
-            self.fitSlopes(inTable.mean, inTable.covarience[:, 0, 1])
+            self.fitSlopes(means, covs[:, 0, 1])
         outTable.bfYSlope[iamp], outTable.bfYSlopeErr[iamp] =\
-            self.fitSlopes(inTable.mean, inTable.covarience[:, 1, 0])
+            self.fitSlopes(means, covs[:, 1, 0])
 
     def prepImage(self, calibExp):
         """
@@ -224,7 +228,7 @@ class EoBrighterFatterTask(EoAmpPairCalibTask):
                                                            afwMath.MEDIAN, self.statCtrl).getValue()
                 dim_xy_array = dim_xy.getImage().getArray().flatten()/xcorr[0][0]
                 N = len(dim_xy_array.flatten())
-                if xlag != 0 and ylag != 0:
+                if xlag != 0 or ylag != 0:
                     f = (1+xcorr[xlag, ylag]/xcorr[0][0]) / \
                         (1-xcorr[xlag, ylag]/xcorr[0][0])
                     xcorr_err[xlag, ylag] = (

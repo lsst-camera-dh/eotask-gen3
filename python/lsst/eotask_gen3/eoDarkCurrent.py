@@ -60,6 +60,8 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
         amps = det.getAmplifiers()
         nAmp = len(amps)
         outputData = self.makeOutputData(nAmp=nAmp, detector=det, camera=camera)
+        import pdb
+        pdb.set_trace()
         for iAmp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
             self.analyzeAmpRunData(ampExposure, outputData, iAmp, amp)
@@ -99,6 +101,8 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
             except KeyError:
                 exptime = 1.
 
+        import pdb
+        pdb.set_trace()
         q50, q95 = np.quantile(ampExposure.image.array, [0.50, 0.95])
         outputData.amps['amps'].darkCurrentMedian[iAmp] = q50/exptime
         outputData.amps['amps'].darkCurrent95[iAmp] = q95/exptime

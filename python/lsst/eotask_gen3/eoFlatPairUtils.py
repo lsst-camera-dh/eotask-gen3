@@ -135,7 +135,7 @@ class DetectorResponse:
         # signal levels assuming Poisson statistics in the chi-square
         # and fixing the y-intercept to zero.  Package the slope as
         # part of a tuple to be passed to np.poly1d.
-        slope = len(Ne[index])/np.sum(flux[index]/Ne[index])
+        slope = len(Ne[index[0]])/np.sum(flux[index[0]]/Ne[index[0]])
         f1Pars = slope, 0
         f1 = np.poly1d(f1Pars)
         # Further select points that are within the specification range
@@ -143,13 +143,13 @@ class DetectorResponse:
         specIndex = np.where((Ne > specRange[0]) & (Ne < specRange[1])
                              & (flux <= flux[maxNeIndex]))
 
-        fluxSpec = flux[specIndex]
-        NeSpec = Ne[specIndex]
+        fluxSpec = flux[specIndex[0]]
+        NeSpec = Ne[specIndex[0]]
         if len(NeSpec) < 1:
             return defaultResults
 
         dNfrac = 1 - NeSpec/f1(fluxSpec)
-        return (max(abs(dNfrac)), f1Pars, Ne, flux, Ne[index], flux[index],
+        return (max(abs(dNfrac)), f1Pars, Ne, flux, Ne[index[0]], flux[index[0]],
                 self.linearityTurnoff(f1, flux, Ne, maxFracDev=maxFracDev))
 
     @staticmethod
@@ -177,13 +177,15 @@ class DetectorResponse:
         index = np.where(fracDev < maxFracDev)
         return np.max(Ne[index])
 
-    def rowMeanVarSlope(self, rowMeanVar, nCols, minFlux=3000, maxFlux=1e5):
+    def rowMeanVarSlope(self, rowMeanVar, signal, nCols, minFlux=3000, maxFlux=1e5):
         """ Fit the slope of the variance of the row-wise means v. flux
 
         Parameters
         ----------
         rowMeanVar : `numpy.array`
             variance of the mean of the rows of the difference image
+        signal : `numpy.array`
+            mean signal
         nCols : `int`
             Number of columns, used to correctly scale the output
         minFlux : `float`
@@ -204,7 +206,7 @@ class DetectorResponse:
         """
         # Restrict to higher flux values below full well and
         # avoid nans in row_mean_var.
-        index = np.where((minFlux < self._flux) & (self._flux < maxFlux) & (np.isfinite(rowMeanVar)))
+        index = np.where((minFlux < signal) & (signal < maxFlux) & (np.isfinite(rowMeanVar)))
         if len(index[0]) == 0:
             return 0
-        return sum(rowMeanVar[index])/sum(2.*self._flux[index]/nCols)
+        return sum(rowMeanVar[index[0]])/sum(2.*signal[index[0]]/nCols)

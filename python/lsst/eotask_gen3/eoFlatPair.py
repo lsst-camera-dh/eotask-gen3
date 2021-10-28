@@ -170,7 +170,7 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         signal, sig1, sig2 = self.pairMean(calibExp1, calibExp2, amp, self.statCtrl)
         outTable.signal[iPair] = signal
         outTable.flat1Signal[iPair] = sig1
-        outTable.flat1Signal[iPair] = sig2
+        outTable.flat2Signal[iPair] = sig2
         outTable.rowMeanVar[iPair] = self.rowMeanVariance(calibExp1, calibExp2, amp, self.statCtrl)
 
     def analyzeAmpRunData(self, outputData, iamp, amp):
@@ -185,16 +185,19 @@ class EoFlatPairTask(EoAmpPairCalibTask):
         inTableAmp = outputData.ampExp["ampExp_%s" % amp.getName()]
         inTableExp = outputData.detExp['detExp']
         outTable = outputData.amps['amps']
-        detResp = DetectorResponse(inTableExp.flux)
-        results = detResp.linearity(inTableAmp.signal, specRange=(1e3, 9e4))
-        outTable.fullWell[iamp] = detResp.fullWell(inTableAmp.signal)[0]
+        signals = inTableAmp.signal.data.flatten()
+
+        detResp = DetectorResponse(inTableExp.flux.data.flatten())
+        results = detResp.linearity(signals, specRange=(1e3, 9e4))
+        outTable.fullWell[iamp] = detResp.fullWell(signals)[0]
         outTable.maxFracDev[iamp] = results[0]
         # outTable.maxObservedSignal[iamp] =
         # np.max(inTableAmp.signal) / gains[amp]
-        outTable.maxObservedSignal[iamp] = np.max(inTableAmp.signal)
+        outTable.maxObservedSignal[iamp] = np.max(signals)
         # outTable.linearityTurnoff[iamp] = results[-1]/gains[iamp]
         outTable.linearityTurnoff[iamp] = results[-1]
-        outTable.rowMeanVarSlope[iamp] = detResp.rowMeanVarSlope(inTableAmp.rowMeanVar,
+        outTable.rowMeanVarSlope[iamp] = detResp.rowMeanVarSlope(inTableAmp.rowMeanVar.data.flatten(),
+                                                                 signals,
                                                                  nCols=amp.getRawDataBBox().getWidth())
 
     @staticmethod

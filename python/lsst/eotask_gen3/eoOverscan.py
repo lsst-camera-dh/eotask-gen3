@@ -101,10 +101,10 @@ class EoOverscanTask(EoAmpExpCalibTask):
         ymax = amp.getRawDataBBox().getMaxY()
 
         imarr = calibExp.image.array
-        outTable.columnMean[iExp] = np.mean(imarr[ymin-1:ymax, xmax-1:], axis=0)
-        outTable.columnVariance[iExp] = np.var(imarr[ymin-1:ymax, xmax-1:], axis=0)
-        outTable.rowMean[iExp] = np.mean(imarr[ymax-1:, xmin-1:xmax], axis=1)
-        outTable.rowVariance[iExp] = np.var(imarr[ymax-1:, xmin-1:xmax], axis=1)
-        outTable.serialOverscanNoise[iExp] = np.mean(np.std(imarr[ymin-1:ymax, xmax+2:], axis=1))
-        outTable.parallenOverscanNoise[iExp] = np.mean(np.std(imarr[ymax+2:, xmin-1:xmax], axis=1))
-        outTable.flatFieldSignal[iExp] = np.mean(imarr[ymin-1:ymax, xmin-1:xmax])
+        outTable.columnMean[iExp] = np.mean(imarr[max(ymin-1, 0):ymax, xmax-1:], axis=0)
+        outTable.columnVariance[iExp] = np.var(imarr[max(ymin-1, 0):ymax, xmax-1:], axis=0)
+        outTable.rowMean[iExp] = np.mean(imarr[ymax-1:, max(xmin-1, 0):xmax], axis=1)
+        outTable.rowVariance[iExp] = np.var(imarr[ymax-1:, max(xmin-1, 0):xmax], axis=1)
+        outTable.serialOverscanNoise[iExp] = np.mean(np.std(imarr[max(ymin-1, 0):ymax, xmax+2:], axis=1))
+        outTable.parallenOverscanNoise[iExp] = np.mean(np.std(imarr[ymax+2:, max(xmin-1, 0):xmax], axis=1))
+        outTable.flatFieldSignal[iExp] = np.mean(imarr[max(ymin-1, 0):ymax, max(xmin-1, 0):xmax])

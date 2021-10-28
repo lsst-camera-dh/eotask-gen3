@@ -32,7 +32,7 @@ class EoDarkCurrentAmpRunData(EoCalibTable):
 
         This just associates class properties with columns
         """
-        super(EoDarkCurrentAmpRunData, self).__init__(data=None, **kwargs)
+        super(EoDarkCurrentAmpRunData, self).__init__(data=data, **kwargs)
         self.darkCurrent95 = self.table[self.SCHEMA_CLASS.darkCurrent95.name]
         self.darkCurrentMedian = self.table[self.SCHEMA_CLASS.darkCurrentMedian.name]
 
