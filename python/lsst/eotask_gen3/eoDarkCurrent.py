@@ -60,8 +60,6 @@ class EoDarkCurrentTask(EoDetRunCalibTask):
         amps = det.getAmplifiers()
         nAmp = len(amps)
         outputData = self.makeOutputData(nAmp=nAmp, detector=det, camera=camera)
-        import pdb
-        pdb.set_trace()
         for iAmp, amp in enumerate(amps):
             ampExposure = extractAmpImage(stackedCalExp, amp)
             self.analyzeAmpRunData(ampExposure, outputData, iAmp, amp)
