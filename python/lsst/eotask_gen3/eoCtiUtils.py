@@ -155,8 +155,6 @@ class SubImage:
             self._bbox = self._serialBox
             llc = lsstGeom.Point2I(amp.getRawSerialOverscanBBox().getMinX() + overscans,
                                    amp.getRawSerialOverscanBBox().getMinY())
-            import pdb
-            pdb.set_trace()
             urc = amp.getRawSerialOverscanBBox().getCorners()[2]
             #
             # Omit the last 4 columns to avoid the bright column in the
