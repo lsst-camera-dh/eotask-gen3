@@ -121,7 +121,7 @@ class EoPtcTask(EoAmpPairCalibTask):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
-                    print("exposurePair %i has %i items" % (iPair, len(inputPair)))
+                    self.log.warn("exposurePair %i has %i items" % (iPair, len(inputPair)))
                     continue
                 calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
                 calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)

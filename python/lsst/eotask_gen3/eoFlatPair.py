@@ -99,7 +99,7 @@ class EoFlatPairTask(EoAmpPairCalibTask):
             ampCalibs = extractAmpCalibs(amp, **kwargs)
             for iPair, inputPair in enumerate(inputPairs):
                 if len(inputPair) != 2:
-                    print("exposurePair %i has %i items" % (iPair, len(inputPair)))
+                    self.log.warn("exposurePair %i has %i items" % (iPair, len(inputPair)))
                     continue
                 calibExp1 = runIsrOnAmp(self, inputPair[0][0].get(parameters={"amp": iamp}), **ampCalibs)
                 calibExp2 = runIsrOnAmp(self, inputPair[1][0].get(parameters={"amp": iamp}), **ampCalibs)
@@ -145,7 +145,7 @@ class EoFlatPairTask(EoAmpPairCalibTask):
 
         for iPair, pdData in enumerate(photodiodeDataPairs):
             if len(pdData) != 2:
-                print("photodiodePair %i has %i items" % (iPair, len(pdData)))
+                self.log.warn("photodiodePair %i has %i items" % (iPair, len(pdData)))
                 continue
             pd1 = self.getFlux(pdData[0].get())
             pd2 = self.getFlux(pdData[1].get())

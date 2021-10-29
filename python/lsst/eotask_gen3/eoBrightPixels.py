@@ -141,7 +141,7 @@ class EoBrightPixelTask(EoDetRunCalibTask):
         try:
             exptime = stackedCalExp.getMetadata().toDict()['EXPTIME']
         except KeyError:
-            print("Warning no EXPTIME: using 1.")
+            self.log.warn("Warning no EXPTIME: using 1.")
             exptime = 1.
         threshold = afwDetect.Threshold(self.config.ethresh * exptime)
         fpSet = afwDetect.FootprintSet(stackedCalExp[amp.getBBox()].image, threshold)

@@ -389,11 +389,11 @@ class EoCalib(IsrCalib):
         return OrderedDict()
 
     @staticmethod
-    def writeFigures(basePath, figureDict, fileType="png"):
+    def writeFigures(basePath, figureDict, fileType="png", logStream=sys.stdout):
         """ Write all the figures to disk """
         for key, val in figureDict.items():
             fullPath = os.path.join(basePath, "%s.%s" % (key, fileType))
-            print("Writing %s" % fullPath)
+            logStream.write("Writing %s" % fullPath)
             val.savefig(fullPath)
 
 

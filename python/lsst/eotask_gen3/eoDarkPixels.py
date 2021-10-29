@@ -145,7 +145,7 @@ class EoDarkPixelTask(EoDetRunCalibTask):
         try:
             exptime = stackedCalExp.getMetadata().toDict()['EXPTIME']
         except KeyError:
-            print("Warning no EXPTIME: using 1.")
+            self.log.warn("Warning no EXPTIME: using 1.")
             exptime = 1.
 
         ampImage = stackedCalExp[amp.getBBox()].image

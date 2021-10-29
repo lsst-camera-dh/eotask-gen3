@@ -92,7 +92,7 @@ def get_report_config_info(table_tag, **kwargs):
                 defaults=template_dict['defaults'])
 
 
-def handle_file(file_name, outdir, action, overwrite=False):
+def handle_file(file_name, outdir, action, overwrite=False, logStream=sys.stdout):
     """Move, copy or link a file to an output directory
 
     Parameters
@@ -125,7 +125,7 @@ def handle_file(file_name, outdir, action, overwrite=False):
             pass
     else:
         if os.path.exists(outname):
-            print("File %s exists, skipping" % outname)
+            logStream.write("File %s exists, skipping" % outname)
             return basename
 
     makedir_safe(outname)
@@ -303,6 +303,7 @@ def create_slot_table(parent_node, raft_name, **kwargs):
     """
     kwcopy = kwargs.copy()
     prefix = kwcopy.get('prefix', '')
+    logStream = kwargs.get('log', sys.stdout)
 
     html_file = kwargs.get('html_file', None)
     if html_file is not None:
@@ -341,7 +342,7 @@ def create_slot_table(parent_node, raft_name, **kwargs):
                         href="%s%s.html" % (prefix, slot))
 
     if not nslot:
-        print("No slot data in %s, skipping" % basedir)
+        logStream.write("No slot data in %s, skipping" % basedir)
         parent_node.remove(h3_node)
         parent_node.remove(table_node)
         return None
@@ -512,7 +513,7 @@ def create_plot_tables(parent_node, table_dict, inputdir, outdir, **kwargs):
     return ntable
 
 
-def write_tree_to_html(tree, filepath=None):
+def write_tree_to_html(tree, filepath=None, logStream=sys.stdout):
     """Write a html file from an element tree
 
     Parameters
@@ -534,7 +535,7 @@ def write_tree_to_html(tree, filepath=None):
     outfile.write(pretty_str)
 
     if filepath is not None:
-        print("wrote %s" % filepath)
+        logStream.write("wrote %s" % filepath)
         outfile.close()
 
 
