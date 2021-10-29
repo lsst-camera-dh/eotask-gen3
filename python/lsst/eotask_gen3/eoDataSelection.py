@@ -143,7 +143,7 @@ def eoSelectSuperFlatHigh(deferredDatasetRef):
     exposure = getRef(deferredDatasetRef).dataId.records["exposure"]
     return exposure.observation_type == 'flat'\
         and exposure.observation_reason == 'sflat'\
-        and exposure.exposure_time < 30.
+        and exposure.exposure_time > 30.
 
 
 def eoSelectFe55Flat(deferredDatasetRef):
