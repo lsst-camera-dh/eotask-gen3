@@ -106,6 +106,16 @@ def plotReadNoise(obj):
     return nullFigure()
 
 
+@EoPlotMethod(EoReadNoiseData, "noise_mosaic", "camera", "mosaic", "Read noise")
+def plotReadNoiseMosaic(obj):
+    return nullFigure()
+
+
+@EoPlotMethod(EoReadNoiseData, "noise_hist", "camera", "hist", "Read noise")
+def plotReadNoiseHist(obj):
+    return nullFigure()
+
+
 RegisterEoCalibSchema(EoReadNoiseData)
 
 AMPS = ["%02i" % i for i in range(16)]

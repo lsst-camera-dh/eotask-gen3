@@ -115,7 +115,7 @@ class EoBiasStabilityData(EoCalib):
 
 @EoPlotMethod(EoBiasStabilityData, "serial_profiles", "slot",
               "BiasStability", "Bias frame amp-wise mean vs time")
-def plotDetBiasStabilty(obj):
+def plotDetBiasStability(obj):
     """Make and return a figure with the bias stability
     curves for all the amps on one CCD
 
@@ -129,28 +129,26 @@ def plotDetBiasStabilty(obj):
     fig : `matplotlib.Figure`
         The generated figure
     """
-    fig = plt.figure(figsize=(10, 10))
-    # xlabelAmps = (13, 14, 15, 16)
-    # ylabelAmps = (1, 5, 9, 13)
+    fig = plt.figure(figsize=(16, 16))
     ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
     title = 'median signal (ADU) vs column'
     plt.suptitle(title)
     plt.tight_layout(rect=(0, 0, 1, 0.95))
-    ampExpData = obj.ampExposure
+    ampExpData = obj.ampExp
     for iamp, ampData in enumerate(ampExpData.values()):
         imarr = ampData.rowMedian
-        ax[iamp+1].plot(range(imarr.shape[1]), np.median(imarr, axis=0))
-        ax[iamp+1].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
+        ax[iamp+1].plot(np.array([range(imarr.shape[1])]*imarr.shape[0]).T, imarr.T)
+        ax[iamp+1].annotate(f'amp {iamp+1}', (0.5, 0.95), xycoords='axes fraction', ha='center')
     return fig
 
 
 @EoPlotMethod(EoBiasStabilityData, "mean", "raft", "BiasStability", "Bias frame amp-wise mean vs time")
-def plotDetBiasStabiltyMean(raftDataDict):
+def plotDetBiasStabilityMean(raftDataDict):
     return nullFigure()
 
 
 @EoPlotMethod(EoBiasStabilityData, "stdev", "raft", "BiasStability", "Bias frame amp-wise stdev vs time")
-def plotDetBiasStabiltyStdev(raftDataDict):
+def plotDetBiasStabilityStdev(raftDataDict):
     return nullFigure()
 
 

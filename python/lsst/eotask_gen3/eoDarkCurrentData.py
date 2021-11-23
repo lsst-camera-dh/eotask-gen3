@@ -65,6 +65,16 @@ class EoDarkCurrentData(EoCalib):
         self.amps = self['amps']
 
 
+@EoPlotMethod(EoDarkCurrentData, "noise", "camera", "mosaic", "Dark Current 95% Containment")
+def plotDarkCurrentMosaic(obj):
+    return nullFigure()
+
+
+@EoPlotMethod(EoDarkCurrentData, "noise", "camera", "hist", "Dark Current 95% Containment")
+def plotDarkCurrentHist(obj):
+    return nullFigure()
+
+
 @EoPlotMethod(EoDarkCurrentData, "noise", "slot", "Dark Current", "Dark Current")
 def plotSlotNoise(obj):
     return nullFigure()
