@@ -74,6 +74,21 @@ def plotTearingHist(obj):
     return nullFigure()
 
 
+@EoPlotMethod(EoTearingData, "divisadero_mosaic", "camera", "mosaic", "Divisadero max")
+def plotDivisaderoMosaic(obj):
+    return nullFigure()
+
+
+@EoPlotMethod(EoTearingData, "divisadero_hist", "camera", "hist", "Divisadero max")
+def plotDivisaderoHist(obj):
+    return nullFigure()
+
+
+@EoPlotMethod(EoTearingData, "divisadero", "raft", "divisadero", "Divisadero Tearing")
+def plotDivisadero(obj):
+    return nullFigure()
+
+
 RegisterEoCalibSchema(EoTearingData)
 
 AMPS = ["%02i" % i for i in range(16)]

@@ -66,3 +66,42 @@ def EoPlotMethod(theClass, name, level, family, description):
         def __get__(self, instance, cls):
             return lambda *args, **kwargs: self.method(cls, *args, *kwargs)
     return _EoPlot
+
+
+def plot3x3(title='', xlabel='', ylabel=''):
+    '''
+    Function to create 9 subplots, one for each CCD in a raft.
+    Returns a matplotlib Figure and a dictionary of Axes, labeled S20 - S02.
+    '''
+    fig = plt.figure(figsize=(16, 16))
+    ccdNames = ['S20', 'S21', 'S22', 'S10', 'S11', 'S12', 'S00', 'S01', 'S02']
+    ax = {ccd: fig.add_subplot(3, 3, i+1) for i,ccd in enumerate(ccdNames)}
+    for ccd in ax:
+        ax[ccd].set_title(ccd)
+    plt.suptitle(title, fontsize=14)
+    fig.add_subplot(111, frameon=False)
+    plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+    plt.xlabel(xlabel, fontsize=14)
+    plt.ylabel(ylabel, fontsize=14)
+    plt.tight_layout(rect=(0, 0, 1, 0.95))
+    return fig, ax
+
+
+def plot4x4(title='', xlabel='', ylabel=''):
+    '''
+    Function to create 16 subplots, one for each amp in CCD.
+    Returns a matplotlib Figure and a dictionary of Axes, labeled 1-16.
+    
+    At some point labelling amps numerically will be replaced by whatever becomes standardized...
+    '''
+    fig = plt.figure(figsize=(16, 16))
+    ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
+    for amp in ax:
+        ax[amp].set_title(f'amp {amp}')
+    plt.suptitle(title, fontsize=14)
+    fig.add_subplot(111, frameon=False)
+    plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+    plt.xlabel(xlabel, fontsize=14)
+    plt.ylabel(ylabel, fontsize=14)
+    plt.tight_layout(rect=(0, 0, 1, 0.95))
+    return fig, ax

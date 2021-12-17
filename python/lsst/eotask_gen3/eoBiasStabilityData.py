@@ -4,7 +4,7 @@ import numpy as np
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure, plot4x4, plot3x3
 
 import matplotlib.pyplot as plt
 
@@ -115,7 +115,7 @@ class EoBiasStabilityData(EoCalib):
 
 @EoPlotMethod(EoBiasStabilityData, "serial_profiles", "slot",
               "BiasStability", "Bias frame amp-wise mean vs time")
-def plotDetBiasStabilty(obj):
+def plotDetBiasStability(obj):
     """Make and return a figure with the bias stability
     curves for all the amps on one CCD
 
@@ -129,28 +129,50 @@ def plotDetBiasStabilty(obj):
     fig : `matplotlib.Figure`
         The generated figure
     """
-    fig = plt.figure(figsize=(10, 10))
-    # xlabelAmps = (13, 14, 15, 16)
-    # ylabelAmps = (1, 5, 9, 13)
-    ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
-    title = 'median signal (ADU) vs column'
-    plt.suptitle(title)
-    plt.tight_layout(rect=(0, 0, 1, 0.95))
-    ampExpData = obj.ampExposure
+    fig, ax = plot4x4('(Sensor, Run)', 'column', 'median signal (ADU)')
+    ampExpData = obj.ampExp
     for iamp, ampData in enumerate(ampExpData.values()):
         imarr = ampData.rowMedian
-        ax[iamp+1].plot(range(imarr.shape[1]), np.median(imarr, axis=0))
-        ax[iamp+1].annotate(f'amp {iamp}', (0.5, 0.95), xycoords='axes fraction', ha='center')
+        ax[iamp+1].plot(np.array([range(imarr.shape[1])]*imarr.shape[0]).T, imarr.T)
     return fig
 
 
 @EoPlotMethod(EoBiasStabilityData, "mean", "raft", "BiasStability", "Bias frame amp-wise mean vs time")
-def plotDetBiasStabiltyMean(raftDataDict):
-    return nullFigure()
+def plotDetBiasStabilityMean(raftDataDict):
+    """Make and return a figure with the bias mean
+    curves over time for all the amps on each CCD
+
+    Parameters
+    ----------
+    raftDataDict : `OrderedDict`
+        Dictionary of the data being plotted,
+        one entry for each CCD, each pointing to
+        a `BiasStabilityData` object
+
+    Returns
+    -------
+    fig : `matplotlib.Figure`
+        The generated figure
+    """
+    date = int(raftDataDict[next(iter(raftDataDict))].detExp.mjd[0]) #hacky, don't like
+    fig, ax = plot3x3('(Raft_Run), bias stability, mean signal', f'MJD - {date}', 'Mean signal (ADU)')
+    
+    for ccd in raftDataDict:
+        obj = raftDataDict[ccd]
+        ampExpData = obj.ampExp
+        detExpData = obj.detExp
+        date = int(detExpData.mjd[0]) #date in MJD
+        times = detExpData.mjd - date
+        
+        for iamp, ampData in enumerate(ampExpData.values()):
+            means = ampData.stdev
+            ax[ccd].scatter(times, means, label=iamp+1)
+        ax[ccd].legend()
+    return fig
 
 
 @EoPlotMethod(EoBiasStabilityData, "stdev", "raft", "BiasStability", "Bias frame amp-wise stdev vs time")
-def plotDetBiasStabiltyStdev(raftDataDict):
+def plotDetBiasStabilityStdev(raftDataDict):
     return nullFigure()
 
 
