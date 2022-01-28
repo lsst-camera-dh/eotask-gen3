@@ -107,12 +107,12 @@ def plotReadNoise(obj):
 
 
 @EoPlotMethod(EoReadNoiseData, "noise_mosaic", "camera", "mosaic", "Read noise")
-def plotReadNoiseMosaic(obj):
+def plotReadNoiseMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoReadNoiseData, "noise_hist", "camera", "hist", "Read noise")
-def plotReadNoiseHist(obj):
+def plotReadNoiseHist(obj, cameraObj):
     return nullFigure()
 
 

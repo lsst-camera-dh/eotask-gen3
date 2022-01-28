@@ -3,6 +3,7 @@
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def nullFigure(*args):
@@ -83,7 +84,7 @@ def plot3x3(title='', xlabel='', ylabel=''):
     plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
     plt.xlabel(xlabel, fontsize=14)
     plt.ylabel(ylabel, fontsize=14)
-    plt.tight_layout(rect=(0, 0, 1, 0.95))
+    plt.tight_layout(rect=(0, 0, 1, 0.98))
     return fig, ax
 
 
@@ -103,5 +104,16 @@ def plot4x4(title='', xlabel='', ylabel=''):
     plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
     plt.xlabel(xlabel, fontsize=14)
     plt.ylabel(ylabel, fontsize=14)
-    plt.tight_layout(rect=(0, 0, 1, 0.95))
+    plt.tight_layout(rect=(0, 0, 1, 0.98))
     return fig, ax
+
+
+def moreColors(ax):
+    '''
+    Function to extend the matplotlib color cycle to 20 colors, so that figures
+    can have distinct colors for each amplifier.
+    Uses the default color cycle (plt.cm.tab10) followed by the additional colors
+    in plt.cm.tab20.
+    '''
+    colors = np.vstack((plt.cm.tab10(np.arange(10)), plt.cm.tab20(np.arange(1,20,2))))
+    ax.set_prop_cycle('color', colors)

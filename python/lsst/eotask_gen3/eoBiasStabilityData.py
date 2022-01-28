@@ -4,7 +4,7 @@ import numpy as np
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure, plot4x4, plot3x3
+from .eoPlotUtils import EoPlotMethod, nullFigure, plot4x4, plot3x3, moreColors
 
 import matplotlib.pyplot as plt
 
@@ -154,8 +154,7 @@ def plotDetBiasStabilityMean(raftDataDict):
     fig : `matplotlib.Figure`
         The generated figure
     """
-    date = int(raftDataDict[next(iter(raftDataDict))].detExp.mjd[0]) #hacky, don't like
-    fig, ax = plot3x3('(Raft_Run), bias stability, mean signal', f'MJD - {date}', 'Mean signal (ADU)')
+    fig, ax = plot3x3('(Raft_Run), bias stability, mean signal', f'MJD - ', 'Mean signal (ADU)')
     
     for ccd in raftDataDict:
         obj = raftDataDict[ccd]
@@ -165,15 +164,49 @@ def plotDetBiasStabilityMean(raftDataDict):
         times = detExpData.mjd - date
         
         for iamp, ampData in enumerate(ampExpData.values()):
-            means = ampData.stdev
+            means = ampData.mean
             ax[ccd].scatter(times, means, label=iamp+1)
         ax[ccd].legend()
+    tempAx = fig.axes[-1]
+    tempAx.set_xlabel(tempAx.get_xlabel() + str(date))
     return fig
 
 
 @EoPlotMethod(EoBiasStabilityData, "stdev", "raft", "BiasStability", "Bias frame amp-wise stdev vs time")
 def plotDetBiasStabilityStdev(raftDataDict):
-    return nullFigure()
+    """Make and return a figure with the bias stdev
+    curves over time for all the amps on each CCD
+
+    Parameters
+    ----------
+    raftDataDict : `OrderedDict`
+        Dictionary of the data being plotted,
+        one entry for each CCD, each pointing to
+        a `BiasStabilityData` object
+
+    Returns
+    -------
+    fig : `matplotlib.Figure`
+        The generated figure
+    """
+    fig, ax = plot3x3('(Raft_Run), bias stability, signal standard deviation', f'MJD - ', 'Signal stdev (ADU)')
+    
+    for ccd in raftDataDict:
+        obj = raftDataDict[ccd]
+        ampExpData = obj.ampExp
+        detExpData = obj.detExp
+        date = int(detExpData.mjd[0]) #date in MJD
+        times = detExpData.mjd - date
+        
+        moreColors(ax[ccd])
+        
+        for iamp, ampData in enumerate(ampExpData.values()):
+            stdevs = ampData.stdev
+            ax[ccd].scatter(times, stdevs, label=iamp+1)
+        ax[ccd].legend()
+    tempAx = fig.axes[-1]
+    tempAx.set_xlabel(tempAx.get_xlabel() + str(date))
+    return fig
 
 
 RegisterEoCalibSchema(EoBiasStabilityData)

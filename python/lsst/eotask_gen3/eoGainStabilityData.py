@@ -106,7 +106,7 @@ class EoGainStabilityData(EoCalib):
 
 
 @EoPlotMethod(EoGainStabilityData, "mosaic", "camera", "mosaic", "Flat Gain Stability")
-def plotGainStability(cameraDataDict):
+def plotGainStability(cameraDataDict, cameraObj):
     return nullFigure()
 
 
