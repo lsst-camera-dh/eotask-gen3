@@ -42,13 +42,15 @@ def main():
 
     for dataset_type in dataset_types:
         inputRefs = list(butler.registry.queryDatasets(dataset_type, collections=[args.collection], **kwargs))
+        inst = inputRefs[0].dataId['instrument']
+        cameraObj = butler.get('camera', instrument=inst) # get camera object for full focal plane plots
         inputData = [butler.get(dataset_type, inputRef.dataId,
                                 collections=[args.collection]) for inputRef in inputRefs]
         if not inputData:
             continue
         refObj, cameraDict = task.buildCameraDict(inputData, inputRefs, butler)
         dataClasses.append(type(refObj))
-        task.run(refObj, cameraDict, refObj.shortName(), args.outdir)
+        task.run(refObj, cameraDict, cameraObj, refObj.shortName(), args.outdir)
 
     WriteReportConfigYaml(os.path.join(args.outdir, "manifest.yaml"), dataClasses)
 

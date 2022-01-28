@@ -7,6 +7,7 @@ from collections import OrderedDict
 import lsst.pex.config as pexConfig
 import lsst.pipe.base as pipeBase
 import lsst.pipe.base.connectionTypes as cT
+from lsst.eotask_gen3.eoCalibBase import CAMERA_CONNECT, copyConnect
 
 __all__ = ['EoStaticPlotTaskConfig', 'EoStaticPlotTask']
 
@@ -20,6 +21,8 @@ class EoStaticPlotTaskConnections(pipeBase.PipelineTaskConnections,
         dimensions=("instrument", "detector"),
         multiple=True,
     )
+    
+    camera = copyConnect(CAMERA_CONNECT)
 
 
 class EoStaticPlotTaskConfig(pipeBase.PipelineTaskConfig,
@@ -104,11 +107,11 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         """
         inputs = butlerQC.get(inputRefs)
         refObj, cameraDict = self.buildCameraDict(inputs['inputData'], inputRefs.inputData)
-        outputs = self.run(refObj=refObj, cameraDict=cameraDict,
+        outputs = self.run(refObj=refObj, cameraDict=cameraDict, cameraObj=inputs['camera']
                            baseName=self.config.baseName, dirName=self.config.dirName)
         butlerQC.put(outputs, outputRefs)
 
-    def run(self, refObj, cameraDict, baseName, dirName):
+    def run(self, refObj, cameraDict, cameraObj, baseName, dirName):
         """ Run method
 
         This invokes
@@ -126,12 +129,15 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         cameraDict : `OrderdedDict` [`str`,
                      `OrderdedDict` [`str`, `lsst.eotask_gen3.EoCalib`] ]
             Sorted data
+        cameraObj : `lsst.afw.cameraGeom.Camera`
+            Camera object, used for making per-amplifier plots
+            of the full focal plane
         baseName : `str`
             Base name used to construct output file names
         dirName : `str`
             Path to top-level directory to write figures to
         """
-        cameraFigs = refObj.makeCameraFigures("%s_camera" % baseName, cameraDict)
+        cameraFigs = refObj.makeCameraFigures("%s_camera" % baseName, cameraDict, cameraObj)
         cameraDir = os.path.join(dirName, 'camera')
         try:
             os.makedirs(cameraDir)
