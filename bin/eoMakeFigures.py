@@ -41,16 +41,13 @@ def main():
     dataClasses = []
 
     for dataset_type in dataset_types:
-        print(dataset_type, args.collection, kwargs)
         inputRefs = list(butler.registry.queryDatasets(dataset_type, collections=args.collection, **kwargs))
-        #print('inputRefs:', inputRefs)
         if len(inputRefs)>0:
             inst = inputRefs[0].dataId['instrument']
             cameraObj = butler.get('camera', instrument=inst, collections=args.collection) # get camera object for full focal plane plots
         inputData = [butler.get(dataset_type, inputRef.dataId,
                                 collections=args.collection) for inputRef in inputRefs]
         if not inputData:
-            print('No data for', dataset_type)
             continue
         refObj, cameraDict = task.buildCameraDict(inputData, inputRefs, butler)
         dataClasses.append(type(refObj))
