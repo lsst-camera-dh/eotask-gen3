@@ -160,62 +160,62 @@ def plotPTC(obj):
 
 
 @EoPlotMethod(EoPtcData, "gain_mosaic", "camera", "mosaic", "PTC Gain")
-def plotPTCGainMosaic(obj):
+def plotPTCGainMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "a00_mosaic", "camera", "mosaic", "PTC a00")
-def plotPTCa00Mosaic(obj):
+def plotPTCa00Mosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "full_well_mosaic", "camera", "mosaic", "PTC Full Well")
-def plotPTCFullWellMosaic(obj):
+def plotPTCFullWellMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "turnoff_mosaic", "camera", "mosaic", "PTC Turnoff")
-def plotPTCTurnoffMosaic(obj):
+def plotPTCTurnoffMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "max_frac_dev_mosaic", "camera", "mosaic", "PTC Max. fractional deviation")
-def plotPTCMaxFracDevMosaic(obj):
+def plotPTCMaxFracDevMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "camera", "mosaic", "PTC Linearity Turnoff")
-def plotPTCLinearityTurnoffMosaic(obj):
+def plotPTCLinearityTurnoffMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "gain_hist", "camera", "hist", "PTC Gain")
-def plotPTCGainHist(obj):
+def plotPTCGainHist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "a00_hist", "camera", "hist", "PTC a00")
-def plotPTCa00Hist(obj):
+def plotPTCa00Hist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "full_well_hist", "camera", "hist", "PTC Full Well")
-def plotPTCFullWellHist(obj):
+def plotPTCFullWellHist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "turnoff_hist", "camera", "hist", "PTC Turnoff")
-def plotPTCTurnoffHist(obj):
+def plotPTCTurnoffHist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "max_frac_dev_hist", "camera", "hist", "PTC Max. fractional deviation")
-def plotPTCMaxFracDevHist(obj):
+def plotPTCMaxFracDevHist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoPtcData, "linearity_turnoff_hist", "camera", "hist", "PTC Linearity Turnoff")
-def plotPTCLinearityTurnoffHist(obj):
+def plotPTCLinearityTurnoffHist(obj, cameraObj):
     return nullFigure()
 
 

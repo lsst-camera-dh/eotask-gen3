@@ -381,10 +381,10 @@ class EoCalib(IsrCalib):
         return OrderedDict()
 
     @classmethod
-    def makeCameraFigures(cls, baseName, cameraDataDict):
+    def makeCameraFigures(cls, baseName, cameraDataDict, cameraObj):
         """ Make a set of matplotlib figures for the whole focal plane """
         if hasattr(cls, 'figHandles'):
-            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(cameraDataDict))
+            return OrderedDict([('%s_%s' % (baseName, handle.name), handle(cameraDataDict, cameraObj))
                                 for handle in cls.figHandles if handle.level == 'camera'])
         return OrderedDict()
 

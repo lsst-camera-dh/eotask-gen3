@@ -65,22 +65,22 @@ class EoBrightPixelsData(EoCalib):
 
 
 @EoPlotMethod(EoBrightPixelsData, "pixels_mosaic", "camera", "mosaic", "Bright pixels per AMP")
-def plotBrightPixelMosaic(cameraDataDict):
+def plotBrightPixelMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrightPixelsData, "columns_mosaic", "camera", "mosaic", "Bright columns per AMP")
-def plotBrightColumnMosaic(cameraDataDict):
+def plotBrightColumnMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrightPixelsData, "pixels_hist", "camera", "hist", "Bright pixels per AMP")
-def plotBrightPixelHist(cameraDataDict):
+def plotBrightPixelHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrightPixelsData, "columns_hist", "camera", "hist", "Bright columns per AMP")
-def plotBrightColumnHist(cameraDataDict):
+def plotBrightColumnHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 

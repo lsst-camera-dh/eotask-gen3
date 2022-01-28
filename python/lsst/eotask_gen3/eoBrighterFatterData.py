@@ -2,7 +2,9 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import EoPlotMethod, nullFigure, moreColors
+
+import matplotlib.pyplot as plt
 
 __all__ = ["EoBrighterFatterAmpPairData",
            "EoBrighterFatterAmpRunData",
@@ -119,26 +121,60 @@ class EoBrighterFatterData(EoCalib):
 
 @EoPlotMethod(EoBrighterFatterData, "bf", "slot", "Brighter Fatter", "Brighter Fatter")
 def plotSlotBrighterFatter(obj):
-    return nullFigure()
+    """Make and return a figure showing brighter-fatter
+    covariances against mean signal for all the amps
+    on the CCD. Five different covariances are shown.
+
+    Parameters
+    ----------
+    obj : `EoBrighterFatterData`
+        The data being plotted
+
+    Returns
+    -------
+    fig : `matplotlib.Figure`
+        The generated figure
+    """
+    fig = plt.figure(figsize=(16,12))
+    iInds = [1,2,0,0,1]
+    jInds = [0,0,1,2,1]
+    for k in range(5):
+        i = iInds[k]
+        j = jInds[k]
+        ax = fig.add_subplot(3, 2, k+1)
+        moreColors(ax)
+        
+        ampExpData = obj.ampExp
+        for iamp, ampData in enumerate(ampExpData.values()):
+            mean = ampData.mean[:,0]
+            cov = ampData.covarience[:,i,j]/mean
+            ax.plot(mean, cov, label=iamp+1)
+            
+        ax.legend(loc='upper left', fontsize='small', ncol=2)
+        ax.set_xlabel('mean signal (ADU)')
+        ax.set_ylabel(f'cov({i}, {j})/mean')
+        ax.set_title(f'Brighter-Fatter cov({i}, {j}) {"raft"}_{"det"}_{"run"}')
+    plt.tight_layout()
+    return fig
 
 
 @EoPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov10 Mosaic")
-def plotBrighterFatterCov01Mosaic(cameraDataDict):
+def plotBrighterFatterCov01Mosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov01 Mosaic")
-def plotBrighterFatterCov10Mosaic(cameraDataDict):
+def plotBrighterFatterCov10Mosaic(cameraDataDic, cameraObjt):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrighterFatterData, "xcorr_hist", "camera", "hist", "Brighter-Fatter cov10")
-def plotBrighterFatterCov01Hist(cameraDataDict):
+def plotBrighterFatterCov01Hist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoBrighterFatterData, "ycorr_hist", "camera", "hist", "Brighter-Fatter cov01")
-def plotBrighterFatterCov10Hist(cameraDataDict):
+def plotBrighterFatterCov10Hist(cameraDataDict, cameraObj):
     return nullFigure()
 
 

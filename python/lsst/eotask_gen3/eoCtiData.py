@@ -100,42 +100,42 @@ def plotCTIParallelRaft(obj):
 
 
 @EoPlotMethod(EoCtiData, "high_parallel_mosaic", "camera", "mosaic", "CTI high, parallel")
-def plotCTIParallelHighMosaic(cameraDataDict):
+def plotCTIParallelHighMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "high_serial_mosaic", "camera", "mosaic", "CTI high, serial")
-def plotCTISerialHighMosaic(cameraDataDict):
+def plotCTISerialHighMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "low_parallel_mosaic", "camera", "mosaic", "CTI low, parallel")
-def plotCTIParallelLowMosaic(cameraDataDict):
+def plotCTIParallelLowMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "low_serial_mosaic", "camera", "mosaic", "CTI low, serial")
-def plotCTISerialLowMosaic(cameraDataDict):
+def plotCTISerialLowMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "high_parallel_hist", "camera", "hist", "CTI high, parallel")
-def plotCTIParallelHighHist(cameraDataDict):
+def plotCTIParallelHighHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "high_serial_hist", "camera", "hist", "CTI high, serial")
-def plotCTISerialHighHist(cameraDataDict):
+def plotCTISerialHighHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "low_parallel_hist", "camera", "hist", "CTI low, parallel")
-def plotCTIParallelLowHist(cameraDataDict):
+def plotCTIParallelLowHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoCtiData, "low_serial_hist", "camera", "hist", "CTI low, serial")
-def plotCTISerialLowHist(cameraDataDict):
+def plotCTISerialLowHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 

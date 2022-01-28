@@ -66,22 +66,22 @@ class EoDarkPixelsData(EoCalib):
 
 
 @EoPlotMethod(EoDarkPixelsData, "pixels_mosaic", "camera", "mosaic", "Dark pixels per AMP")
-def plotDarkPixelMosaic(cameraDataDict):
+def plotDarkPixelMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoDarkPixelsData, "column_mosaic", "camera", "mosaic", "Dark columns per AMP")
-def plotDarkColumnMosaic(cameraDataDict):
+def plotDarkColumnMosaic(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoDarkPixelsData, "pixels_hist", "camera", "hist", "Dark pixels per AMP")
-def plotDarkPixelHist(cameraDataDict):
+def plotDarkPixelHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoDarkPixelsData, "column_hist", "camera", "hist", "Dark columns per AMP")
-def plotDarkColumnHist(cameraDataDict):
+def plotDarkColumnHist(cameraDataDict, cameraObj):
     return nullFigure()
 
 

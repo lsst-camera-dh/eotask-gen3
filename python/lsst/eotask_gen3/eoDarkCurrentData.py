@@ -66,12 +66,12 @@ class EoDarkCurrentData(EoCalib):
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "camera", "mosaic", "Dark Current 95% Containment")
-def plotDarkCurrentMosaic(obj):
+def plotDarkCurrentMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "camera", "hist", "Dark Current 95% Containment")
-def plotDarkCurrentHist(obj):
+def plotDarkCurrentHist(obj, cameraObj):
     return nullFigure()
 
 

@@ -65,22 +65,22 @@ class EoTearingData(EoCalib):
 
 
 @EoPlotMethod(EoTearingData, "mosaic", "camera", "mosaic", "Tearing detections")
-def plotTearingMosaic(obj):
+def plotTearingMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoTearingData, "hist", "camera", "hist", "Tearing detections")
-def plotTearingHist(obj):
+def plotTearingHist(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoTearingData, "divisadero_mosaic", "camera", "mosaic", "Divisadero max")
-def plotDivisaderoMosaic(obj):
+def plotDivisaderoMosaic(obj, cameraObj):
     return nullFigure()
 
 
 @EoPlotMethod(EoTearingData, "divisadero_hist", "camera", "hist", "Divisadero max")
-def plotDivisaderoHist(obj):
+def plotDivisaderoHist(obj, cameraObj):
     return nullFigure()
 
 
