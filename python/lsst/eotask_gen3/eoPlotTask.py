@@ -107,7 +107,7 @@ class EoStaticPlotTask(pipeBase.PipelineTask):
         """
         inputs = butlerQC.get(inputRefs)
         refObj, cameraDict = self.buildCameraDict(inputs['inputData'], inputRefs.inputData)
-        outputs = self.run(refObj=refObj, cameraDict=cameraDict, cameraObj=inputs['camera']
+        outputs = self.run(refObj=refObj, cameraDict=cameraDict, cameraObj=inputs['camera'],
                            baseName=self.config.baseName, dirName=self.config.dirName)
         butlerQC.put(outputs, outputRefs)
 
