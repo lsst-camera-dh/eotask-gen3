@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure, moreColors
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from TEMPafwutils import plotAmpFocalPlane
 
 import matplotlib.pyplot as plt
 
@@ -159,23 +162,39 @@ def plotSlotBrighterFatter(obj):
 
 
 @EoPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov10 Mosaic")
-def plotBrighterFatterCov01Mosaic(cameraDataDict, cameraObj):
-    return nullFigure()
+def plotBrighterFatterCov10Mosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'bfXCorr')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) bf_xcorr')
+    return fig
 
 
 @EoPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov01 Mosaic")
-def plotBrighterFatterCov10Mosaic(cameraDataDic, cameraObjt):
-    return nullFigure()
+def plotBrighterFatterCov01Mosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'bfYCorr')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) bf_ycorr')
+    return fig
 
 
 @EoPlotMethod(EoBrighterFatterData, "xcorr_hist", "camera", "hist", "Brighter-Fatter cov10")
-def plotBrighterFatterCov01Hist(cameraDataDict, cameraObj):
-    return nullFigure()
+def plotBrighterFatterCov10Hist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'bfXCorr')
+    fig, ax = plotHist(values, logx=False, title='(Run), bf_xcorr', xlabel='bf_xcorr')
+    return fig
 
 
 @EoPlotMethod(EoBrighterFatterData, "ycorr_hist", "camera", "hist", "Brighter-Fatter cov01")
-def plotBrighterFatterCov10Hist(cameraDataDict, cameraObj):
-    return nullFigure()
+def plotBrighterFatterCov01Hist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'bfYCorr')
+    fig, ax = plotHist(values, logx=False, title='(Run), bf_ycorr', xlabel='bf_ycorr')
+    return fig
 
 
 RegisterEoCalibSchema(EoBrighterFatterData)

@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoBrightPixelsAmpRunData",
            "EoBrightPixelsData"]
@@ -66,22 +69,38 @@ class EoBrightPixelsData(EoCalib):
 
 @EoPlotMethod(EoBrightPixelsData, "pixels_mosaic", "camera", "mosaic", "Bright pixels per AMP")
 def plotBrightPixelMosaic(cameraDataDict, cameraObj):
-    return nullFigure()
+    dataValues = extractVals(cameraDataDict, 'nBrightPixel')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) bright_pixels')
+    return fig
 
 
 @EoPlotMethod(EoBrightPixelsData, "columns_mosaic", "camera", "mosaic", "Bright columns per AMP")
 def plotBrightColumnMosaic(cameraDataDict, cameraObj):
-    return nullFigure()
+    dataValues = extractVals(cameraDataDict, 'nBrightColumn')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) bright_columns')
+    return fig
 
 
 @EoPlotMethod(EoBrightPixelsData, "pixels_hist", "camera", "hist", "Bright pixels per AMP")
 def plotBrightPixelHist(cameraDataDict, cameraObj):
-    return nullFigure()
+    values = extractVals(cameraDataDict, 'nBrightPixel')
+    fig, ax = plotHist(values, logx=True, title='(Run), bright_pixels', xlabel='bright_pixels')
+    return fig
 
 
 @EoPlotMethod(EoBrightPixelsData, "columns_hist", "camera", "hist", "Bright columns per AMP")
 def plotBrightColumnHist(cameraDataDict, cameraObj):
-    return nullFigure()
+    values = extractVals(cameraDataDict, 'nBrightColumn')
+    fig, ax = plotHist(values, logx=True, title='(Run), bright_columns', xlabel='bright_columns')
+    return fig
 
 
 RegisterEoCalibSchema(EoBrightPixelsData)
