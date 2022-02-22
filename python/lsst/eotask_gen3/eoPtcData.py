@@ -2,7 +2,11 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+from lsst.cp.pipe.utils import funcAstier
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoPtcAmpPairData",
            "EoPtcAmpRunData",
@@ -156,67 +160,87 @@ class EoPtcData(EoCalib):
 
 @EoPlotMethod(EoPtcData, "curves", "slot", "ptc", "Photon Transfer Curves")
 def plotPTC(obj):
-    return nullFigure()
+    fig, ax = plot4x4('(Sensor, Run) Photon Transfer Curves', 'mean (ADU)', r'variance (ADU$^2$)')
+    ampExpData = obj.ampExp
+    ptcData = obj.amps
+    for iamp, ampData in enumerate(ampExpData.values()):
+        means = ampData.mean
+        variances = ampData.var
+        gain = ptcData.ptcGain[iamp][0]
+        gainErr = ptcData.ptcGainError[iamp][0]
+        a00 = ptcData.ptcA00[iamp][0]
+        a00Err = ptcData.ptcA00Error[iamp][0]
+        noise = ptcData.ptcNoise[iamp][0]
+        turnoff = int(ptcData.ptcTurnoff[iamp][0])
+        
+        ax[iamp+1].scatter(means, variances)
+        xx = np.logspace(np.log10(min(means)),np.log10(max(means)))
+        ax[iamp+1].plot(xx, funcAstier([a00, gain, noise], xx), '--k')
+        ax[iamp+1].set_xscale('log')
+        ax[iamp+1].set_yscale('log')
+        
+        annot = 'Gain = %.2f +/- %.2f\n'%(gain, gainErr) +\
+                'a00 = %.1e +/- %.1e\n'%(a00, a00Err) +\
+                'Turnoff = %i'%turnoff
+        ax[iamp+1].annotate(annot, xy=(0.05, 0.95), xycoords='axes fraction', va='top')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "gain_mosaic", "camera", "mosaic", "PTC Gain")
-def plotPTCGainMosaic(obj, cameraObj):
-    return nullFigure()
+def plotPTCGainMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'ptcGain')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) ptc_gain (e-/ADU)')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "a00_mosaic", "camera", "mosaic", "PTC a00")
-def plotPTCa00Mosaic(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "full_well_mosaic", "camera", "mosaic", "PTC Full Well")
-def plotPTCFullWellMosaic(obj, cameraObj):
-    return nullFigure()
+def plotPTCa00Mosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'ptcA00')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) ptc_a00')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "turnoff_mosaic", "camera", "mosaic", "PTC Turnoff")
-def plotPTCTurnoffMosaic(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "max_frac_dev_mosaic", "camera", "mosaic", "PTC Max. fractional deviation")
-def plotPTCMaxFracDevMosaic(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "linearity_turnoff_mosaic", "camera", "mosaic", "PTC Linearity Turnoff")
-def plotPTCLinearityTurnoffMosaic(obj, cameraObj):
-    return nullFigure()
+def plotPTCTurnoffMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'ptcTurnoff')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) ptc_turnoff (ADU)')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "gain_hist", "camera", "hist", "PTC Gain")
-def plotPTCGainHist(obj, cameraObj):
-    return nullFigure()
+def plotPTCGainHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'ptcGain')
+    fig, ax = plotHist(values, logx=False, title='(Run), ptc_gain (e-/ADU)', xlabel='ptc_gain')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "a00_hist", "camera", "hist", "PTC a00")
-def plotPTCa00Hist(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "full_well_hist", "camera", "hist", "PTC Full Well")
-def plotPTCFullWellHist(obj, cameraObj):
-    return nullFigure()
+def plotPTCa00Hist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'ptcA00')
+    fig, ax = plotHist(values, logx=False, title='(Run), ptc_a00', xlabel='ptc_a00')
+    return fig
 
 
 @EoPlotMethod(EoPtcData, "turnoff_hist", "camera", "hist", "PTC Turnoff")
-def plotPTCTurnoffHist(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "max_frac_dev_hist", "camera", "hist", "PTC Max. fractional deviation")
-def plotPTCMaxFracDevHist(obj, cameraObj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoPtcData, "linearity_turnoff_hist", "camera", "hist", "PTC Linearity Turnoff")
-def plotPTCLinearityTurnoffHist(obj, cameraObj):
-    return nullFigure()
+def plotPTCTurnoffHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'ptcTurnoff')
+    fig, ax = plotHist(values, logx=False, title='(Run), ptc_turnoff (ADU)', xlabel='ptc_turnoff')
+    return fig
 
 
 RegisterEoCalibSchema(EoPtcData)

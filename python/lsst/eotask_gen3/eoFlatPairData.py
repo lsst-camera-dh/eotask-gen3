@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoFlatPairAmpExpData",
            "EoFlatPairAmpRunData",
@@ -155,6 +158,108 @@ class EoFlatPairData(EoCalib):
 @EoPlotMethod(EoFlatPairData, "row_means_variance", "slot", "Flat Pair", "Row means v. variance")
 def plotRowMeanVariance(obj):
     return nullFigure()
+
+
+@EoPlotMethod(EoFlatPairData, "full_well", "camera", "mosaic", "Full well")
+def plotFullWellMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'fullWell')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) full_well (ADU)')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "max_frac_dev", "camera", "mosaic", "Max fractional deviation")
+def plotMaxFracDevMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'maxFracDev')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) max_frac_dev')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "row_mean_var_slope", "camera", "mosaic", "Slope of rowwise-mean variance")
+def plotRowMeanVarSlopeMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'rowMeanVarSlope')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) row_mean_var_slope')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "max_observed_signal", "camera", "mosaic", "Max observed signal")
+def plotMaxObservedSignalMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'maxObservedSignal')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) max_observed_signal (ADU)')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "linearity_turnoff", "camera", "mosaic", "Linearity turnoff")
+def plotLinearityTurnoffMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'linearityTurnoff')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) linearity_turnoff (ADU)')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "full_well_hist", "camera", "hist", "Full well")
+def plotFullWellHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'fullWell')
+    fig, ax = plotHist(values, logx=False, title='(Run), full_well (ADU)', xlabel='full_well')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "max_frac_dev_hist", "camera", "hist", "Max fractional deviation")
+def plotMaxFracDevHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'maxFracDev')
+    fig, ax = plotHist(values, logx=False, title='(Run), max_frac_dev', xlabel='max_frac_dev')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "row_mean_var_slope_hist", "camera", "hist", "Slope of rowwise-mean variance")
+def plotRowMeanVarSlopeHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'rowMeanVarSlope')
+    fig, ax = plotHist(values, logx=False, title='(Run), row_mean_var_slope', xlabel='row_mean_var_slope')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "max_observed_signal_hist", "camera", "hist", "Max observed signal")
+def plotMaxObservedSignalHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'maxObservedSignal')
+    fig, ax = plotHist(values, logx=False, title='(Run), max_observed_signal (ADU)', xlabel='max_observed_signal')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "linearity_turnoff_hist", "camera", "hist", "Linearity turnoff")
+def plotLinearityTurnoffHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'linearityTurnoff')
+    fig, ax = plotHist(values, logx=False, title='(Run), linearity_turnoff (ADU)', xlabel='linearity_turnoff')
+    return fig
+
+
+@EoPlotMethod(EoFlatPairData, "linearity", "raft", "linearity", "Maximum fractional deviation")
+def plotMaxFracDev(raftDataDict):
+    raftValues = extractVals(raftDataDict, 'maxFracDev', extractFrom='raft')
+    fig, ax = plotRaftPerAmp(raftValues, '(Run, Raft)', 'non-linearity (max. fractional deviation)')
+    return fig
 
 
 RegisterEoCalibSchema(EoFlatPairData)

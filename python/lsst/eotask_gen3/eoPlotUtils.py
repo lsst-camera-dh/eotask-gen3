@@ -108,6 +108,36 @@ def plot4x4(title='', xlabel='', ylabel='', figsize=(16,16)):
     return fig, ax
 
 
+def plotRaftPerAmp(raftDataDict, title='', ylabel='', figsize=(10,8)):
+    '''
+    Function to plot all amplifier values in a raft, split into vertical
+    divisions for each CCD. raftDataDict should be a nested dict of values,
+    the result of e.g. extractVals(..., extractFrom='raft')
+    '''
+    fig = plt.figure(figsize=figsize)
+    ccdShifts = {'S00': 0,
+                'S01': 20,
+                'S02': 40,
+                'S10': 60,
+                'S11': 80,
+                'S12': 100,
+                'S20': 120,
+                'S21': 140,
+                'S22': 160}
+    for ccd in raftDataDict:
+        plt.scatter(np.arange(16)+ccdShifts[ccd]+2, raftDataDict[ccd].values(), c='C0')
+    
+    for ccd, sh in ccdShifts.items():
+        plt.axvline(sh, ls='--', c='k')
+    plt.axvline(180, ls='--', c='k')
+    
+    plt.xticks(np.array(list(ccdShifts.values())) + 10, ccdShifts.keys())
+    plt.ylabel(ylabel)
+    plt.title(title)
+    
+    return fig, plt.gca()
+
+
 def plotHist(data, logx, bins=50, title='', xlabel='', ylabel='entries / bin', figsize=(12,9)):
     '''
     Function to plot a histogram of values.
@@ -148,30 +178,44 @@ def moreColors(ax):
     ax.set_prop_cycle('color', colors)
     
     
-def extractVals(cDict, value):
+def extractVals(cDict, value, extractFrom='camera'):
     '''
     Extract amplifier float values from cDict, a nested OrderedDict of
     raft > detector > eo(data_type)Data object to the dict format used for
     per-amp mosaic plotting. 'value' is the string name of the data object
     attribute to be plotted.
     
+    Specifying extractFrom='raft' requires removing the outermost layer of
+    this type of dict, i.e., cDict should be a dict of detectors > eoData objects.
+    
     E.g. for cDict containing eoBrightPixelsData objects, to get the number
     of bright pixels in each amp:
         dataValues = extractVals(cDict, 'nBrightPixel')
     '''
-    cameraVals = {}
     amps = ['C1%s'%i for i in range(8)] + ['C0%s'%i for i in range(7,-1,-1)]
-    for raftName in cDict:
-        raft = cDict[raftName]
-        for detName in raft:
-            det = raft[detName]
+    if extractFrom=='camera':
+        cameraVals = {}
+        for raftName in cDict:
+            raft = cDict[raftName]
+            for detName in raft:
+                det = raft[detName]
+                ampTable = getattr(det.amps, value)
+                ampVals = {}
+                for i in range(len(ampTable)):
+                    ampVals[amps[i]] = ampTable[i][0]
+                cameraVals['%s_%s'%(raftName,detName)] = ampVals
+        return cameraVals
+    if extractFrom=='raft':
+        raftVals = {}
+        for detName in cDict:
+            det = cDict[detName]
             ampTable = getattr(det.amps, value)
             ampVals = {}
             for i in range(len(ampTable)):
                 ampVals[amps[i]] = ampTable[i][0]
-            cameraVals['%s_%s'%(raftName,detName)] = ampVals
-            
-    return cameraVals
+            raftVals[detName] = ampVals
+        return raftVals
+    raise ValueError('Extract values from either "camera" or "raft"')
 
 
 def NestedDictValues(d):

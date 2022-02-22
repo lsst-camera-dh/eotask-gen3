@@ -1,23 +1,6 @@
-# This file is part of afw.
-#
-# Developed for the LSST Data Management System.
-# This product includes software developed by the LSST Project
-# (https://www.lsst.org).
-# See the COPYRIGHT file at the top-level directory of this distribution
-# for details of code ownership.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# This file is a copy of an unmerged version of lsst.afw.utils.py.
+# It is intended for use only until the needed functions are merged
+# to the main branch.
 
 """
 Support for displaying cameraGeom objects.
@@ -292,7 +275,7 @@ def NestedDictValues(d):
             yield v
 
 
-def plotAmpFocalPlane(camera, level='DETECTOR', dataValues=None, colorMapName='viridis',
+def plotAmpFocalPlane(camera, level='DETECTOR', dataValues=None, colorMapName='viridis', colorScale='sigma',
                       fieldSizeDeg_x=0, fieldSizeDeg_y=None, dx=0.1, dy=0.1, figsize=(10., 10.),
                       useIds=False, showFig=True, savePath=None):
     """Plot camera focal plane, optionally coloring the regions by value.
@@ -337,7 +320,7 @@ def plotAmpFocalPlane(camera, level='DETECTOR', dataValues=None, colorMapName='v
 
     if dataValues:
         values = list(NestedDictValues(dataValues))
-        colorMap = determinePlotScales(values, colorMapName=colorMapName)
+        colorMap = determinePlotScales(values, colorMapName=colorMapName, scale=colorScale)
     else:
         colorMap = {DetectorType.SCIENCE: 'b', DetectorType.FOCUS: 'y',
                     DetectorType.GUIDER: 'g', DetectorType.WAVEFRONT: 'r'}

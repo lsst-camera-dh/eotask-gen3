@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoDarkPixelsAmpRunData",
            "EoDarkPixelsData"]
@@ -67,22 +70,40 @@ class EoDarkPixelsData(EoCalib):
 
 @EoPlotMethod(EoDarkPixelsData, "pixels_mosaic", "camera", "mosaic", "Dark pixels per AMP")
 def plotDarkPixelMosaic(cameraDataDict, cameraObj):
-    return nullFigure()
+    dataValues = extractVals(cameraDataDict, 'nDarkPixel')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear') # log colorScale?
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) dark_pixels')
+    return fig
 
 
 @EoPlotMethod(EoDarkPixelsData, "column_mosaic", "camera", "mosaic", "Dark columns per AMP")
 def plotDarkColumnMosaic(cameraDataDict, cameraObj):
-    return nullFigure()
+    dataValues = extractVals(cameraDataDict, 'nDarkColumn')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear') # log colorScale?
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) dark_pixels')
+    return fig
 
 
 @EoPlotMethod(EoDarkPixelsData, "pixels_hist", "camera", "hist", "Dark pixels per AMP")
 def plotDarkPixelHist(cameraDataDict, cameraObj):
-    return nullFigure()
+    values = extractVals(cameraDataDict, 'nDarkPixel')
+    fig, ax = plotHist(values, logx=True, title='(Run), dark_pixels', xlabel='dark_pixels')
+    return fig
 
 
 @EoPlotMethod(EoDarkPixelsData, "column_hist", "camera", "hist", "Dark columns per AMP")
 def plotDarkColumnHist(cameraDataDict, cameraObj):
-    return nullFigure()
+    values = extractVals(cameraDataDict, 'nDarkColumn')
+    fig, ax = plotHist(values, logx=True, title='(Run), dark_columns', xlabel='dark_columns')
+    return fig
 
 
 RegisterEoCalibSchema(EoDarkPixelsData)

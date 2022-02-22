@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoDarkCurrentAmpRunData",
            "EoDarkCurrentData"]
@@ -66,22 +69,31 @@ class EoDarkCurrentData(EoCalib):
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "camera", "mosaic", "Dark Current 95% Containment")
-def plotDarkCurrentMosaic(obj, cameraObj):
-    return nullFigure()
+def plotDarkCurrentMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'darkCurrent95')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) dark_current_95CL (e-/pix/s)')
+    return fig
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "camera", "hist", "Dark Current 95% Containment")
-def plotDarkCurrentHist(obj, cameraObj):
+def plotDarkCurrentHist(cameraDataDict, cameraObj):
+    values = extractVals(cameraDataDict, 'darkCurrent95')
+    fig, ax = plotHist(values, logx=True, title='(Run), dark_current_95CL (e-/pix/s)', xlabel='dark_current_95CL')
+    return fig
+
+
+@EoPlotMethod(EoDarkCurrentData, "noise", "raft", "Dark Current", "Dark Current")
+def plotRaftNoise(raftDataDict):
     return nullFigure()
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "slot", "Dark Current", "Dark Current")
 def plotSlotNoise(obj):
-    return nullFigure()
-
-
-@EoPlotMethod(EoDarkCurrentData, "noise", "slot", "Dark Current", "Dark Current")
-def plotRaftNoise(raftDataDict):
     return nullFigure()
 
 

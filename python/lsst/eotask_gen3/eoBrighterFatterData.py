@@ -5,7 +5,7 @@ from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 from .eoPlotUtils import *
 
 # TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
-from TEMPafwutils import plotAmpFocalPlane
+from .TEMPafwutils import plotAmpFocalPlane
 
 import matplotlib.pyplot as plt
 
@@ -164,7 +164,8 @@ def plotSlotBrighterFatter(obj):
 @EoPlotMethod(EoBrighterFatterData, "xcorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov10 Mosaic")
 def plotBrighterFatterCov10Mosaic(cameraDataDict, cameraObj):
     dataValues = extractVals(cameraDataDict, 'bfXCorr')
-    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
     fig = plt.gcf()
     ax = plt.gca()
     ax.set_aspect('equal')
@@ -175,7 +176,8 @@ def plotBrighterFatterCov10Mosaic(cameraDataDict, cameraObj):
 @EoPlotMethod(EoBrighterFatterData, "ycorr_mosaic", "camera", "mosaic", "Brighter-Fatter cov01 Mosaic")
 def plotBrighterFatterCov01Mosaic(cameraDataDict, cameraObj):
     dataValues = extractVals(cameraDataDict, 'bfYCorr')
-    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
     fig = plt.gcf()
     ax = plt.gca()
     ax.set_aspect('equal')

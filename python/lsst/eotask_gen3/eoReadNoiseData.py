@@ -2,7 +2,10 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
+
+# TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoReadNoiseAmpExpData",
            "EoReadNoiseAmpRunData",
@@ -107,13 +110,22 @@ def plotReadNoise(obj):
 
 
 @EoPlotMethod(EoReadNoiseData, "noise_mosaic", "camera", "mosaic", "Read noise")
-def plotReadNoiseMosaic(obj, cameraObj):
-    return nullFigure()
+def plotReadNoiseMosaic(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'readNoise')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear')
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    ax.set_title('(Run) read_noise (e-)')
+    return fig
 
 
 @EoPlotMethod(EoReadNoiseData, "noise_hist", "camera", "hist", "Read noise")
-def plotReadNoiseHist(obj, cameraObj):
-    return nullFigure()
+def plotReadNoiseHist(cameraDataDict, cameraObj):
+    dataValues = extractVals(cameraDataDict, 'readNoise')
+    fig, ax = plotHist(dataValues, logx=False, title='(Run), read_noise (e-)', xlabel='read_noise')
+    return fig
 
 
 RegisterEoCalibSchema(EoReadNoiseData)

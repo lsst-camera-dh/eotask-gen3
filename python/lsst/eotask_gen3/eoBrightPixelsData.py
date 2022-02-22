@@ -5,7 +5,7 @@ from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
 from .eoPlotUtils import *
 
 # TEMPORARY, UNTIL THE FUNCTION IS MERGED TO THE MAIN BRANCH
-from TEMPafwutils import plotAmpFocalPlane
+from .TEMPafwutils import plotAmpFocalPlane
 
 __all__ = ["EoBrightPixelsAmpRunData",
            "EoBrightPixelsData"]
@@ -70,7 +70,8 @@ class EoBrightPixelsData(EoCalib):
 @EoPlotMethod(EoBrightPixelsData, "pixels_mosaic", "camera", "mosaic", "Bright pixels per AMP")
 def plotBrightPixelMosaic(cameraDataDict, cameraObj):
     dataValues = extractVals(cameraDataDict, 'nBrightPixel')
-    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear') # log colorScale?
     fig = plt.gcf()
     ax = plt.gca()
     ax.set_aspect('equal')
@@ -81,7 +82,8 @@ def plotBrightPixelMosaic(cameraDataDict, cameraObj):
 @EoPlotMethod(EoBrightPixelsData, "columns_mosaic", "camera", "mosaic", "Bright columns per AMP")
 def plotBrightColumnMosaic(cameraDataDict, cameraObj):
     dataValues = extractVals(cameraDataDict, 'nBrightColumn')
-    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False, figsize=(16,16), colorMapName='hot')
+    plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
+                      figsize=(16,16), colorMapName='hot', colorScale='linear') # log colorScale?
     fig = plt.gcf()
     ax = plt.gca()
     ax.set_aspect('equal')
