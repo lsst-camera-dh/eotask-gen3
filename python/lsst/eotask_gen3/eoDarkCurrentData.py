@@ -68,7 +68,7 @@ class EoDarkCurrentData(EoCalib):
         self.amps = self['amps']
 
 
-@EoPlotMethod(EoDarkCurrentData, "noise", "camera", "mosaic", "Dark Current 95% Containment")
+@EoPlotMethod(EoDarkCurrentData, "noise_mosaic", "camera", "mosaic", "Dark Current 95% Containment")
 def plotDarkCurrentMosaic(cameraDataDict, cameraObj):
     dataValues = extractVals(cameraDataDict, 'darkCurrent95')
     plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
@@ -80,7 +80,7 @@ def plotDarkCurrentMosaic(cameraDataDict, cameraObj):
     return fig
 
 
-@EoPlotMethod(EoDarkCurrentData, "noise", "camera", "hist", "Dark Current 95% Containment")
+@EoPlotMethod(EoDarkCurrentData, "noise_hist", "camera", "hist", "Dark Current 95% Containment")
 def plotDarkCurrentHist(cameraDataDict, cameraObj):
     values = extractVals(cameraDataDict, 'darkCurrent95')
     fig, ax = plotHist(values, logx=True, title='(Run), dark_current_95CL (e-/pix/s)', xlabel='dark_current_95CL')
@@ -89,7 +89,11 @@ def plotDarkCurrentHist(cameraDataDict, cameraObj):
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "raft", "Dark Current", "Dark Current")
 def plotRaftNoise(raftDataDict):
-    return nullFigure()
+    raftValues = extractVals(raftDataDict, 'darkCurrent95', extractFrom='raft')
+    fig, ax = plotRaftPerAmp(raftValues, '(Run, Raft)', '95th percentile dark current (e-/pixel/s)')
+    spec = 0.2
+    ax.axhline(spec, c='r', ls='--')
+    return fig
 
 
 @EoPlotMethod(EoDarkCurrentData, "noise", "slot", "Dark Current", "Dark Current")

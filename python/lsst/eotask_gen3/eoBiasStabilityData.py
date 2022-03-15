@@ -4,7 +4,7 @@ import numpy as np
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure, plot4x4, plot3x3, moreColors
+from .eoPlotUtils import *
 
 import matplotlib.pyplot as plt
 
@@ -163,9 +163,10 @@ def plotDetBiasStabilityMean(raftDataDict):
         date = int(detExpData.mjd[0]) #date in MJD
         times = detExpData.mjd - date
         
-        for iamp, ampData in enumerate(ampExpData.values()):
+        moreColors(ax[ccd])
+        for amp, ampData in ampExpData.items():
             means = ampData.mean
-            ax[ccd].scatter(times, means, label=iamp+1)
+            ax[ccd].scatter(times, means, label=amp[-3:])
         ax[ccd].legend()
     tempAx = fig.axes[-1]
     tempAx.set_xlabel(tempAx.get_xlabel() + str(date))
@@ -200,9 +201,9 @@ def plotDetBiasStabilityStdev(raftDataDict):
         
         moreColors(ax[ccd])
         
-        for iamp, ampData in enumerate(ampExpData.values()):
+        for amp, ampData in ampExpData.items():
             stdevs = ampData.stdev
-            ax[ccd].scatter(times, stdevs, label=iamp+1)
+            ax[ccd].scatter(times, stdevs, label=amp[-3:])
         ax[ccd].legend()
     tempAx = fig.axes[-1]
     tempAx.set_xlabel(tempAx.get_xlabel() + str(date))

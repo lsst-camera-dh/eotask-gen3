@@ -169,7 +169,7 @@ tasks:
             connections.bias: "eoPersistenceBias"
             connections.dark: "eoDark"
             connections.defects: "eoDefects"
-            connections.outputData: "eoPeristence"
+            connections.outputData: "eoPersistence"
     eoTearing:
         class: lsst.eotask_gen3.eoTearing.EoTearingTask
         config:

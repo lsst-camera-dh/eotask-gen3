@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
 
 __all__ = ["EoGainStabilityAmpExpData",
            "EoGainStabilityDetExpData",
@@ -105,9 +105,26 @@ class EoGainStabilityData(EoCalib):
         self.detExp = self['detExp']
 
 
-@EoPlotMethod(EoGainStabilityData, "mosaic", "camera", "mosaic", "Flat Gain Stability")
-def plotGainStability(cameraDataDict, cameraObj):
-    return nullFigure()
+@EoPlotMethod(EoGainStabilityData, "gain", "raft", "GainStability", "Flat Gain Stability")
+def plotGainStability(raftDataDict):
+    fig, ax = plot3x3('(Raft_Run), gain stability', f'MJD - ', 'Signal (e-)/photodiode flux')
+    
+    for ccd in raftDataDict:
+        obj = raftDataDict[ccd]
+        ampExpData = obj.ampExp
+        detExpData = obj.detExp
+        date = int(detExpData.mjd[0]) #date in MJD
+        times = detExpData.mjd - date
+        flux = detExpData.flux
+        
+        moreColors(ax[ccd])
+        for amp, ampData in ampExpData.items():
+            signals = ampData.signal
+            ax[ccd].scatter(times, signals/flux, label=amp[-3:])
+        ax[ccd].legend()
+    tempAx = fig.axes[-1]
+    tempAx.set_xlabel(tempAx.get_xlabel() + str(date))
+    return fig
 
 
 RegisterEoCalibSchema(EoGainStabilityData)

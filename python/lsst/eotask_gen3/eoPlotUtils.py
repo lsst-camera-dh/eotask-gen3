@@ -97,8 +97,10 @@ def plot4x4(title='', xlabel='', ylabel='', figsize=(16,16)):
     '''
     fig = plt.figure(figsize=figsize)
     ax = {amp: fig.add_subplot(4, 4, amp) for amp in range(1, 17)}
+    ampNames = {1:'C00', 2:'C01', 3:'C02', 4:'C03', 5:'C04', 6:'C05', 7:'C06', 8:'C07',
+               9:'C17', 10:'C16', 11:'C15', 12:'C14', 13:'C13', 14:'C12', 15:'C11', 16:'C10'}
     for amp in ax:
-        ax[amp].set_title(f'amp {amp}')
+        ax[amp].set_title(ampNames[amp])
     plt.suptitle(title, fontsize=14)
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
@@ -192,6 +194,7 @@ def extractVals(cDict, value, extractFrom='camera'):
     of bright pixels in each amp:
         dataValues = extractVals(cDict, 'nBrightPixel')
     '''
+    if isinstance(value, str): value = [value]
     amps = ['C1%s'%i for i in range(8)] + ['C0%s'%i for i in range(7,-1,-1)]
     if extractFrom=='camera':
         cameraVals = {}
@@ -199,20 +202,20 @@ def extractVals(cDict, value, extractFrom='camera'):
             raft = cDict[raftName]
             for detName in raft:
                 det = raft[detName]
-                ampTable = getattr(det.amps, value)
+                ampTable = [getattr(det.amps, v) for v in value]
                 ampVals = {}
                 for i in range(len(ampTable)):
-                    ampVals[amps[i]] = ampTable[i][0]
+                    ampVals[amps[i]] = [a[i][0] for a in ampTable]
                 cameraVals['%s_%s'%(raftName,detName)] = ampVals
         return cameraVals
     if extractFrom=='raft':
         raftVals = {}
         for detName in cDict:
             det = cDict[detName]
-            ampTable = getattr(det.amps, value)
+            ampTable = [getattr(det.amps, v) for v in value]
             ampVals = {}
             for i in range(len(ampTable)):
-                ampVals[amps[i]] = ampTable[i][0]
+                ampVals[amps[i]] = [a[i][0] for a in ampTable]
             raftVals[detName] = ampVals
         return raftVals
     raise ValueError('Extract values from either "camera" or "raft"')

@@ -2,7 +2,7 @@
 
 from .eoCalibTable import EoCalibField, EoCalibTableSchema, EoCalibTable, EoCalibTableHandle
 from .eoCalib import EoCalibSchema, EoCalib, RegisterEoCalibSchema
-from .eoPlotUtils import EoPlotMethod, nullFigure
+from .eoPlotUtils import *
 
 __all__ = ["EoPersistenceAmpExpData",
            "EoPersistenceData"]
@@ -68,7 +68,20 @@ class EoPersistenceData(EoCalib):
 
 @EoPlotMethod(EoPersistenceData, "persistence", "slot", "persistence", "Persistence analysis")
 def plotPersistence(obj):
-    return nullFigure()
+    fig = plt.figure(figsize=(10,8))
+    moreColors(plt.gca())
+    
+    ampExpData = obj.ampExp
+    seqnums = range(len(ampExpData['ampExp_C10'].mean)) # temporary, until this is built into the class
+    for amp,ampData in ampExpData.items():
+        plt.scatter(seqnums, ampData.mean, label=amp[-3:])
+    
+    plt.legend(ncol=2)
+    plt.xticks(seqnums)
+    plt.xlabel('Sequence number')
+    plt.ylabel('Mean residual signal (ADU)')
+    plt.title('(Raft, slot, run) persistence test')
+    return fig
 
 
 RegisterEoCalibSchema(EoPersistenceData)

@@ -128,6 +128,11 @@ def plotReadNoiseHist(cameraDataDict, cameraObj):
     return fig
 
 
+@EoPlotMethod(EoReadNoiseData, "total_noise", "raft", "Total Noise", "Total Noise")
+def plotTotalNoise(raftDataDict):
+    return nullFigure()
+
+
 RegisterEoCalibSchema(EoReadNoiseData)
 
 AMPS = ["%02i" % i for i in range(16)]
