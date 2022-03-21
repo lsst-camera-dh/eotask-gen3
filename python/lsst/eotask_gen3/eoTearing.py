@@ -81,6 +81,18 @@ class EoTearingTask(EoAmpExpCalibTask):
         """
         outTable = outputData.ampExp["ampExp_%s" % amp.getName()]
         outTable.nDetection[iExp] = self.ampTearingCount(calibExp, amp)
+        
+    def analyzeAmpRunData(self, outputData, iamp, amp):
+        """Analyze data from a single amp for all exposures in run
+        
+        This method sums the tearing detections across the run for
+        each amp.
+        """
+        inTable = outputData.ampExp["ampExp_%s" % amp.getName()]
+        outTable = outputData.amps['amps']
+        
+        runDetect = sum(inTable.nDetection.data.flatten())
+        outTable.nDetection[iamp] = runDetect
 
     @staticmethod
     def ampTearingCount(calibExp, amp, cut1=0.05, cut2=-0.01, nsig=1):

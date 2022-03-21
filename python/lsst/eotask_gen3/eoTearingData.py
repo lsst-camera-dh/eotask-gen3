@@ -36,6 +36,27 @@ class EoTearingAmpExpData(EoCalibTable):
         """
         super(EoTearingAmpExpData, self).__init__(data=data, **kwargs)
         self.nDetection = self.table[self.SCHEMA_CLASS.nDetection.name]
+        
+        
+class EoTearingAmpRunDataSchemaV0(EoCalibTableSchema):
+    """Schema definitions for output data for per-amp, per-run tables
+    for EoTearingTask.
+    This is counts of the number of tearing detections in the run
+    """
+    TABLELENGTH = "nAmp"
+    
+    nDetection = EoCalibField(name="NDETECT", dtype=int)
+    
+    
+class EoTearingAmpRunData(EoCalibTable):
+    """Container class and interface for per-amp, per-run tables
+    for EoTearingTask."""
+
+    SCHEMA_CLASS = EoTearingAmpRunDataSchemaV0
+
+    def __init__(self, data=None, **kwargs):
+        super(EoTearingAmpRunData, self).__init__(data=data, **kwargs)
+        self.nDetection = self.table[self.SCHEMA_CLASS.nDetection.name]
 
 
 class EoTearingDataSchemaV0(EoCalibSchema):
@@ -46,6 +67,9 @@ class EoTearingDataSchemaV0(EoCalibSchema):
     ampExp = EoCalibTableHandle(tableName="ampExp_{key}",
                                 tableClass=EoTearingAmpExpData,
                                 multiKey="amps")
+    
+    amps = EoCalibTableHandle(tableName="amps",
+                              tableClass=EoTearingAmpRunData)
 
 
 class EoTearingData(EoCalib):
@@ -65,24 +89,12 @@ class EoTearingData(EoCalib):
         """
         super(EoTearingData, self).__init__(**kwargs)
         self.ampExp = self['ampExp']
+        self.amps = self['amps']
 
 
 @EoPlotMethod(EoTearingData, "mosaic", "camera", "mosaic", "Tearing detections")
 def plotTearingMosaic(cameraDataDict, cameraObj):
-    dataValues = {}
-    amps = ['C1%s'%i for i in range(8)] + ['C0%s'%i for i in range(7,-1,-1)]
-    for raftName in cameraDataDict:
-        raft = cameraDataDict[raftName]
-        for detName in raft:
-            det = raft[detName]
-            # ampTable = getattr(det.amps, value)
-            ampExpData = det.ampExp
-            ampVals = {}
-            for i in range(len(ampExpData)):
-                ampVals[amps[i]] = np.sum(ampExpData['ampExp_'+amps[i]].nDetection)
-            dataValues['%s_%s'%(raftName,detName)] = ampVals
-    # above code should be replaced by:
-    # dataValues = extractVals(cameraDataDict, 'nDetection')
+    dataValues = extractVals(cameraDataDict, 'nDetection')
     plotAmpFocalPlane(cameraObj, level='AMPLIFIER', dataValues=dataValues, showFig=False,
                       figsize=(16,16), colorMapName='hot', colorScale='linear')
     fig = plt.gcf()
@@ -94,20 +106,7 @@ def plotTearingMosaic(cameraDataDict, cameraObj):
 
 @EoPlotMethod(EoTearingData, "hist", "camera", "hist", "Tearing detections")
 def plotTearingHist(cameraDataDict, cameraObj):
-    dataValues = {}
-    amps = ['C1%s'%i for i in range(8)] + ['C0%s'%i for i in range(7,-1,-1)]
-    for raftName in cameraDataDict:
-        raft = cameraDataDict[raftName]
-        for detName in raft:
-            det = raft[detName]
-            # ampTable = getattr(det.amps, value)
-            ampExpData = det.ampExp
-            ampVals = {}
-            for i in range(len(ampExpData)):
-                ampVals[amps[i]] = np.sum(ampExpData['ampExp_'+amps[i]].nDetection)
-            dataValues['%s_%s'%(raftName,detName)] = ampVals
-    # above code should be replaced by:
-    # dataValues = extractVals(cameraDataDict, 'nDetection')
+    dataValues = extractVals(cameraDataDict, 'nDetection')
     fig, ax = plotHist(dataValues, logx=False, title='(Run), tearing_detections', xlabel='tearing_detections')
     return fig
 
