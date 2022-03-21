@@ -110,16 +110,15 @@ def plot4x4(title='', xlabel='', ylabel='', figsize=(16,16)):
     return fig, ax
 
 
-def plotRaftPerAmp(raftDataDict, fig=None, title='', ylabel='', figsize=(10,8)):
+def plotRaftPerAmp(raftDataDict, plotMultipleValues=False, title='', ylabel='', labels=None, figsize=(10,8)):
     '''
     Function to plot all amplifier values in a raft, split into vertical
     divisions for each CCD. raftDataDict should be a nested dict of values,
     the result of e.g. extractVals(..., extractFrom='raft')
     
-    fig is a plt.Figure object
+    If plotMultipleValues is true, raftDataDict should be a list of these dicts
     '''
-    if fig is None:
-        fig = plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize)
     ccdShifts = {'S00': 0,
                 'S01': 20,
                 'S02': 40,
@@ -129,8 +128,13 @@ def plotRaftPerAmp(raftDataDict, fig=None, title='', ylabel='', figsize=(10,8)):
                 'S20': 120,
                 'S21': 140,
                 'S22': 160}
-    for ccd in raftDataDict:
-        plt.scatter(np.arange(16)+ccdShifts[ccd]+2, raftDataDict[ccd].values(), c='C0')
+    
+    if not plotMultipleValues:
+        raftDataDict = [raftDataDict]
+    for i,rdd in enumerate(raftDataDict):
+        for ccd in rdd:
+            plt.scatter(np.arange(16)+ccdShifts[ccd]+2, rdd[ccd].values(), c='C%i'%i,
+                        label=labels[i] if labels is not None else None)
     
     for ccd, sh in ccdShifts.items():
         plt.axvline(sh, ls='--', c='k')
@@ -139,6 +143,8 @@ def plotRaftPerAmp(raftDataDict, fig=None, title='', ylabel='', figsize=(10,8)):
     plt.xticks(np.array(list(ccdShifts.values())) + 10, ccdShifts.keys())
     plt.ylabel(ylabel)
     plt.title(title)
+    if labels is not None:
+        plt.legend(loc='upper center')
     
     return fig, plt.gca()
 

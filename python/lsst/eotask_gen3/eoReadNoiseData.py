@@ -129,8 +129,14 @@ def plotReadNoiseHist(cameraDataDict, cameraObj):
 
 
 @EoPlotMethod(EoReadNoiseData, "total_noise", "raft", "Total Noise", "Total Noise")
-def plotTotalNoise(raftDataDict):
-    return nullFigure()
+def plotTotalNoise(raftDataDict, spec=9):
+    raftRNVals = extractVals(raftDataDict, 'readNoise', extractFrom='raft')
+    raftTNVals = extractVals(raftDataDict, 'totalNoise', extractFrom='raft')
+    fig, ax = plotRaftPerAmp([raftRNVals,raftTNVals], plotMultipleValues=True, 
+                             title='(Run, Raft)', ylabel='Noise per pixel (e- rms)',
+                             labels=['Read Noise','Total Noise'])
+    plt.axhline(spec, ls='--', c='r')
+    return fig
 
 
 RegisterEoCalibSchema(EoReadNoiseData)
