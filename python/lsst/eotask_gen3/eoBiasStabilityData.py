@@ -162,7 +162,7 @@ def plotDetBiasStabilityMean(raftDataDict):
         detExpData = obj.detExp
         date = int(detExpData.mjd[0]) #date in MJD
         times = detExpData.mjd - date
-        
+
         moreColors(ax[ccd])
         for amp, ampData in ampExpData.items():
             means = ampData.mean
@@ -200,7 +200,7 @@ def plotDetBiasStabilityStdev(raftDataDict):
         times = detExpData.mjd - date
         
         moreColors(ax[ccd])
-        
+
         for amp, ampData in ampExpData.items():
             stdevs = ampData.stdev
             ax[ccd].scatter(times, stdevs, label=amp[-3:])

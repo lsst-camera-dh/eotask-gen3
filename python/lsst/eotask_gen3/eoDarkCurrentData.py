@@ -87,6 +87,7 @@ def plotDarkCurrentHist(cameraDataDict, cameraObj):
     return fig
 
 
+
 @EoPlotMethod(EoDarkCurrentData, "noise", "raft", "Dark Current", "Dark Current")
 def plotRaftNoise(raftDataDict):
     raftValues = extractVals(raftDataDict, 'darkCurrent95', extractFrom='raft')
